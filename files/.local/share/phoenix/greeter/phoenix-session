@@ -11,6 +11,10 @@ rm -f /var/lib/phoenix-greeter/theme/next-session 2>/dev/null   # switch-desktop
 case "${1:-}" in
     hyprland|plasma) mkdir -p "$HOME/.config" && echo "$1" > "$HOME/.config/desktop-session" ;;
 esac
+# Hyprland and Plasma print their start-up log as text; on the login screen's console that flashed on screen for a
+# second after signing in (2026-10-12). It goes to a file instead (Hyprland keeps its own log as well).
+mkdir -p "$HOME/.local/state/phoenix"
+exec >"$HOME/.local/state/phoenix/session.log" 2>&1
 if [ "$(cat "$HOME/.config/desktop-session" 2>/dev/null)" = "plasma" ] && [ -x /usr/bin/startplasma-wayland ]; then
     start=$SECONDS
     /usr/lib/plasma-dbus-run-session-if-needed /usr/bin/startplasma-wayland

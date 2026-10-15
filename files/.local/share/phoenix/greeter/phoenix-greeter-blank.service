@@ -1,0 +1,17 @@
+# Phoenix login screen (2026-10-12): blank the text console the login screen runs on. After you sign in, the login
+# screen closes and the desktop needs a moment to start; without this, that moment showed whatever the console still
+# had from booting (the startup image or text). Installed by `phoenix login-screen install`.
+[Unit]
+Description=Phoenix login screen: black console behind it
+After=systemd-vconsole-setup.service
+Before=greetd.service
+
+[Service]
+Type=oneshot
+# hide the cursor, clear the screen and the scrollback, then print one space: the kernel console only takes over the
+# screen when a real character is printed (escape codes don't count). Without that, the boot menu's picture (rEFInd)
+# stayed in the screen memory and showed for a split second after signing in (2026-10-15).
+ExecStart=/usr/bin/sh -c 'printf "\\033[?25l\\033[2J\\033[3J\\033[H \\033[H" > /dev/tty1'
+
+[Install]
+WantedBy=greetd.service

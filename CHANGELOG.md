@@ -1,5 +1,10 @@
 # Changelog
 
+## custom 2.250 (2026-10-15, fix)
+- Login screen: no text or boot picture flashing before the login screen and after signing in (its output and the desktop's start-up log go to log files; the console underneath is black). Run 'phoenix login-screen install' once to apply
+- Login screen install: the settings file is written whole or not at all
+- Device batteries: mice reported as keyboards get the mouse icon; optional extra devices (e.g. a ROG keyboard via a helper) update every 5 s while the sidebar is open
+
 ## custom 2.240 (2026-10-09, fix)
 - Desktop menu: "Live wallpaper" replaced by "Wallpaper Engine" (opens the running app and brings its window to your workspace; "Choose wallpaper…" when Wallpaper Engine is off)
 

@@ -1,3 +1,4 @@
+import qs
 import qs.modules.common
 import qs.modules.common.widgets
 import QtQuick
@@ -26,7 +27,43 @@ Rectangle {
         { model: "Headphones (demo)", percentage: 0.82, type: UPowerDeviceType.Headphones, state: UPowerDeviceState.Charging },
     ]
     readonly property var devices: demo ? demoDevices
-        : UPower.devices.values.filter(d => !d.isLaptopBattery && !d.powerSupply && d.isPresent && d.ready)
+        : UPower.devices.values.filter(d => !d.isLaptopBattery && !d.powerSupply && d.isPresent && d.ready).concat(extraDevices)
+
+    // Devices UPower can't see, from an optional helper (Phoenix 2026-10-15): ~/.local/bin/rog-kbd-battery reads a
+    // ROG keyboard on the ROG OMNI receiver. Only used when that helper exists; asked every 5 s while the sidebar is
+    // open (so the row stays live while you look at it), never while it's closed.
+    property var extraDevices: []
+    readonly property string rogHelper: `${Quickshell.env("HOME")}/.local/bin/rog-kbd-battery`
+    property bool rogHelperFound: false
+    FileView {
+        path: root.rogHelper
+        printErrors: false
+        onLoaded: root.rogHelperFound = true
+        onLoadFailed: root.rogHelperFound = false
+    }
+    Process {
+        id: rogProc
+        command: [root.rogHelper]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                let d = {};
+                try { d = JSON.parse(this.text) } catch (e) {}
+                root.extraDevices = (d && d.percent !== undefined) ? [{
+                    model: d.name || "Keyboard",
+                    percentage: Math.max(0, Math.min(100, d.percent)) / 100,
+                    type: UPowerDeviceType.Keyboard,
+                    state: d.charging ? UPowerDeviceState.Charging : UPowerDeviceState.Discharging,
+                }] : [];
+            }
+        }
+    }
+    Timer {
+        interval: 5000
+        running: root.rogHelperFound && !root.demo && Config.options.sidebar.deviceBatteries && GlobalStates.sidebarRightOpen
+        repeat: true
+        triggeredOnStart: true
+        onTriggered: if (!rogProc.running) rogProc.running = true
+    }
     property real horizontalPadding: 12
     property real verticalPadding: 10
 
@@ -35,7 +72,11 @@ Rectangle {
     radius: Appearance.rounding.normal
     color: Appearance.colors.colLayer1
 
-    function iconFor(type) {
+    function iconFor(type, name) {
+        // UPower reports some Logitech mice (e.g. the G502 over its receiver) as keyboards: trust the name first
+        const n = (name || "").toLowerCase();
+        if (/\bmouse\b/.test(n)) return "mouse";
+        if (/\b(headset|headphones?|earbuds)\b/.test(n)) return "headphones";
         switch (type) {
         case UPowerDeviceType.Mouse: return "mouse";
         case UPowerDeviceType.Keyboard: return "keyboard";
@@ -77,7 +118,7 @@ Rectangle {
                 spacing: 10
 
                 MaterialSymbol {
-                    text: root.iconFor(row.modelData.type)
+                    text: root.iconFor(row.modelData.type, row.modelData.model)
                     iconSize: Appearance.font.pixelSize.larger
                     color: row.low ? Appearance.colors.colError : Appearance.colors.colOnLayer1
                 }

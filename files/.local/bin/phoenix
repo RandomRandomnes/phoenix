@@ -193,6 +193,11 @@ cmd_login_screen() {
             sudo install -D -m 644 -o root -g root "$GREETER_SRC/greeter.qml" "$GREETER_DIR/greeter.qml" \
                 && sudo install -D -m 755 -o root -g root "$GREETER_SRC/phoenix-session" /usr/local/bin/phoenix-session \
                 || die "copying the login screen failed"
+            # a black console behind the login screen: no boot image flashing between sign-in and the desktop (2026-10-12)
+            if [ -f "$GREETER_SRC/phoenix-greeter-blank.service" ]; then
+                sudo install -m 644 -o root -g root "$GREETER_SRC/phoenix-greeter-blank.service" /etc/systemd/system/phoenix-greeter-blank.service \
+                    && sudo systemctl daemon-reload && sudo systemctl enable -q phoenix-greeter-blank.service
+            fi
             # the font the login screen uses, also for the greeter user (Phoenix installs it for you only)
             local font="$HOME/.local/share/fonts/illogical-impulse-google-sans-flex"
             if [ -d "$font" ]; then
@@ -217,10 +222,14 @@ cmd_login_screen() {
             for f in $(autologin_files); do sudo mkdir -p "$LS_SAVE/getty" && sudo mv "$f" "$LS_SAVE/getty/" && moved+=("$f"); done
             local olddm; olddm=$(cat "$LS_SAVE/display-manager" 2>/dev/null)
             if [ -n "$olddm" ] && [ "$olddm" != "greetd.service" ]; then sudo systemctl disable "$olddm"; fi
+            # the login screen's own log goes to a file: on the console it ran on, that text flashed on screen when the login
+            # screen started and right after signing in (2026-10-15)
             printf '%s\n' "# Written by \`phoenix login-screen install\` (the Phoenix login screen). \`phoenix login-screen remove\` puts back what was here." \
                 "[terminal]" "vt = 1" "" "[default_session]" \
-                "command = \"env QT_WAYLAND_DISABLE_WINDOWDECORATION=1$(greeter_xkb_env) cage -s -m last -- qs -p $GREETER_DIR/greeter.qml\"" "user = \"greeter\"" \
-                | sudo tee /etc/greetd/config.toml >/dev/null
+                "command = \"sh -c 'exec env QT_WAYLAND_DISABLE_WINDOWDECORATION=1$(greeter_xkb_env) cage -s -m last -- qs -p $GREETER_DIR/greeter.qml >/var/lib/phoenix-greeter/state/greeter.log 2>&1'\"" "user = \"greeter\"" \
+                | sudo tee /etc/greetd/config.toml.phoenix-new >/dev/null \
+                && sudo mv -f /etc/greetd/config.toml.phoenix-new /etc/greetd/config.toml \
+                || die "writing /etc/greetd/config.toml failed"   # written whole or not at all (2026-10-15: an interrupted install left it empty)
             # signing in at the login screen also unlocks the login keyring, like other login managers do (QA 2026-10-09:
             # /etc/pam.d/greetd had no pam_gnome_keyring, so the keyring asked for the password again after login)
             if [ -f /usr/lib/security/pam_gnome_keyring.so ] && [ -f /etc/pam.d/greetd ] && ! grep -q pam_gnome_keyring /etc/pam.d/greetd; then
@@ -247,13 +256,17 @@ cmd_login_screen() {
             elif grep -q "phoenix login-screen" /etc/greetd/config.toml 2>/dev/null; then sudo rm -f /etc/greetd/config.toml; fi
             sudo rm -rf "${GREETER_DIR:?}" /var/lib/phoenix-greeter /usr/local/share/fonts/phoenix-greeter "${LS_SAVE:?}"
             sudo rm -f /usr/local/bin/phoenix-session
+            sudo systemctl disable -q phoenix-greeter-blank.service 2>/dev/null
+            sudo rm -f /etc/systemd/system/phoenix-greeter-blank.service
             sudo systemctl daemon-reload
             echo "Removed: the PC signs in the way it did before, from the next start (greetd and cage stay installed)." ;;
         status)
             local dm; dm=$(basename "$(readlink /etc/systemd/system/display-manager.service 2>/dev/null)" 2>/dev/null)
             if systemctl is-enabled -q greetd.service 2>/dev/null && grep -q "$GREETER_DIR" /etc/greetd/config.toml 2>/dev/null; then
                 # the running copies are root's: a Phoenix update only changes the ones in your home (QA 2026-10-08)
-                if ! cmp -s "$GREETER_SRC/greeter.qml" "$GREETER_DIR/greeter.qml" || ! cmp -s "$GREETER_SRC/phoenix-session" /usr/local/bin/phoenix-session; then
+                if ! cmp -s "$GREETER_SRC/greeter.qml" "$GREETER_DIR/greeter.qml" || ! cmp -s "$GREETER_SRC/phoenix-session" /usr/local/bin/phoenix-session \
+                    || { [ -f "$GREETER_SRC/phoenix-greeter-blank.service" ] && ! cmp -s "$GREETER_SRC/phoenix-greeter-blank.service" /etc/systemd/system/phoenix-greeter-blank.service; } \
+                    || ! grep -q "greeter.log" /etc/greetd/config.toml; then
                     echo "Login screen: on (asks for the password at startup); an update is ready: phoenix login-screen install"
                 else
                     echo "Login screen: on (asks for the password at startup)"

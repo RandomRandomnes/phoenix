@@ -6,15 +6,17 @@
   "format": "custom-fixes",
   "line": "custom",
   "version": 2.99,
-  "label": "2.240",
+  "label": "2.250",
   "kind": "fix",
-  "date": "2026-10-09",
+  "date": "2026-10-15",
   "publisher": "RandomRandomnes",
   "notes": [
-    "Desktop menu: \"Live wallpaper\" replaced by \"Wallpaper Engine\" (opens the running app and brings its window to your workspace; \"Choose wallpaper\u2026\" when Wallpaper Engine is off)"
+    "Login screen: no text or boot picture flashing before the login screen and after signing in (its output and the desktop's start-up log go to log files; the console underneath is black). Run 'phoenix login-screen install' once to apply",
+    "Login screen install: the settings file is written whole or not at all",
+    "Device batteries: mice reported as keyboards get the mouse icon; optional extra devices (e.g. a ROG keyboard via a helper) update every 5 s while the sidebar is open"
   ],
   "payload": "fixes.tar.gz",
-  "payloadSha256": "ab9957c4542d92447acb506183b17dcff944446e7406f0a5c645bfadf591e6fb",
+  "payloadSha256": "c4b76ed7bbcb102b597e41d0714313634277df5e4de3c0c14dfdebf901158ce5",
   "files": {
     ".config/hypr/custom/env.lua": "1902700f304ac6fc6d6c484da2bce2e14821964285f199fdd36971381b347edf",
     ".config/hypr/custom/execs.lua": "7d39d1525b32999f8b0afa49b078610d4eaddc30752fc26e0fd8424c2e60cb1b",
@@ -626,7 +628,7 @@
     ".config/quickshell/end4-pC/modules/ii/sidebarLeft/translator/TextCanvas.qml": "f00408f5afeb7102c38935d6e546e204f9e31ee31ae4115e1f23e62556ad882e",
     ".config/quickshell/end4-pC/modules/ii/sidebarRight/BottomWidgetGroup.qml": "10ee48b2a3f0bab4eaea1fd9790897f1e7db33af1feaf40299f6f72b761594af",
     ".config/quickshell/end4-pC/modules/ii/sidebarRight/CenterWidgetGroup.qml": "0fd84eda27398340e58f96b1a6dbee7b1b1a1ece570adcbb5bdf63f5656efe29",
-    ".config/quickshell/end4-pC/modules/ii/sidebarRight/DeviceBatteries.qml": "fceaea11bbde10918e2453af710e6f25f10e256b4fcfe8fa2c39488e984b89e0",
+    ".config/quickshell/end4-pC/modules/ii/sidebarRight/DeviceBatteries.qml": "d228887e3de3304cd93db60b6e37f8e7fe1dc69e1e805d2869c03c837d1e27ec",
     ".config/quickshell/end4-pC/modules/ii/sidebarRight/QuickSliders.qml": "72afdb412c246569a4932b06f7f2c838161270124aff1f746d0c72413bc6795d",
     ".config/quickshell/end4-pC/modules/ii/sidebarRight/SidebarRight.qml": "e5febdc1d697e92eaa98a509d1bf41421bd49bcab79ac8d2ae30dc4955e64bc0",
     ".config/quickshell/end4-pC/modules/ii/sidebarRight/SidebarRightContent.qml": "4f4a9d057023f57d31627e3900923db6285897b4b67d13ec0b5b9a0a3c79a027",
@@ -894,7 +896,7 @@
     ".local/bin/display-profiles": "35d27019115b69495daa5a897b146256e2a34aefe017940ede12b199f1551da3",
     ".local/bin/linux-wallpaper-engine": "42fad852f27ed5c452a1742d4b7053ba8cf85a6c19e1b927350f8ee4f6711813",
     ".local/bin/linux-wallpaper-engine-ux": "dee95f03a345c6a6c54f75d79cf9e343939ce27c9b2d094d1d21b37e2cf69fd6",
-    ".local/bin/phoenix": "1c6b3b38d4178684f89197bca6a9fdebc3653331f3344c1003ded449edd95ac6",
+    ".local/bin/phoenix": "69d35cc24cc729441ddf669301838934725806506c94b506d0e4751c3c7d9a29",
     ".local/bin/phoenix-check": "10e38f21b89df4147a11c43329d48d1d4c9a1f1c23d1a97730b91bee432f449c",
     ".local/bin/phoenix-file-picker": "0721de431105a9c401a2784b47da7f9780068da6f6def76a5d234ccdbf7470ac",
     ".local/bin/phoenix-greeter-theme": "b22756525eae2ece3b45deca4b2d71e2cfd2f643a4b8c3344305f424b2a0e959",
@@ -917,7 +919,8 @@
     ".local/share/custom-fixes/allowed_signers": "1bc55052b9f5850a21273aff66d29e2dae2de5da7ea2e52afa341a2ba4740077",
     ".local/share/custom-fixes/source.json": "efeba863f6f4bb8ac5ce8aa7639e2bf5bb7ecae762a4cfe431e9486eb4ccc64a",
     ".local/share/phoenix/greeter/greeter.qml": "9004433d75a5fc2a81aa70fd8c0beff538472b4468bfac10e67028d208a0577a",
-    ".local/share/phoenix/greeter/phoenix-session": "cbf51c851c7dd18597c0593acb72f6f93e310f6693f0372e6905ab54fcf75fdd",
+    ".local/share/phoenix/greeter/phoenix-greeter-blank.service": "62894a18e1760766600d26c87c3f0ad16a659bfe3597e12ec5eb9febd387f518",
+    ".local/share/phoenix/greeter/phoenix-session": "f6c9701fec62bed6692908e1b11456211274cbd2a8f01132532b2250619b03c5",
     ".local/share/phoenix/src/wallpaper-engine-hyprland/build.sh": "7a5c81330608903bfd2a893e9e2e484b66661e32ac66d9c230de150c5d1aa451",
     ".local/share/phoenix/src/wallpaper-engine-hyprland/phoenix.patch": "f088ee3aa754f7e8b62973f52597f262e1fe12a7247028c138940a067543f98b",
     ".local/share/phoenix/system/phoenix-power-meter": "ddbfaf483cd99b45375c1a2a8f697251523dcb4f9515f8e8d47101a528c8e05e",
@@ -991,7 +994,10 @@
     ".local/share/setup-profiles/stock-config.json": "ba83849d539a915adf655ea127ec2550993927a01f69efa0ea05a8f16cb76328"
   },
   "changed": [
-    ".config/quickshell/end4-pC/modules/ii/desktopMenu/DesktopMenu.qml"
+    ".config/quickshell/end4-pC/modules/ii/sidebarRight/DeviceBatteries.qml",
+    ".local/bin/phoenix",
+    ".local/share/phoenix/greeter/phoenix-greeter-blank.service",
+    ".local/share/phoenix/greeter/phoenix-session"
   ],
   "test": false
 }
