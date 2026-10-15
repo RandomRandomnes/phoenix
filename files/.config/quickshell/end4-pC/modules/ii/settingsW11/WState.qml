@@ -32,6 +32,24 @@ Singleton {
     ]
 
     readonly property var subTitles: ({
+        "apps/autostart": "Autostart apps",
+        "time/time-more": "More time & language settings",
+        "devices/input": "Mouse, keyboard & touchpad (advanced)",
+        "system/screenshots": "Screenshots & recording",
+        "system/notifications-more": "More notification settings",
+        "system/power-more": "More power settings",
+        "system/sound-more": "More sound settings",
+        "system/display-more": "More display settings",
+        "personalization/windows": "Windows & effects",
+        "personalization/sidebar-more": "More sidebar settings",
+        "personalization/lockscreen-more": "More lock screen settings",
+        "personalization/start-more": "More Start settings",
+        "personalization/fonts": "Fonts",
+        "personalization/colors-more": "More color settings",
+        "personalization/widgets-more": "More widget settings",
+        "personalization/background-more": "More background settings",
+        "personalization/dock-more": "More dock settings",
+        "personalization/taskbar-more": "More taskbar settings",
         "system/display": "Display",
         "system/sound": "Sound",
         "system/notifications": "Notifications",
@@ -64,6 +82,25 @@ Singleton {
 
     // title, extra search words, page, sub
     readonly property var index: [
+        // Phoenix (2026-10-15): the pages that took over the original illogical-impulse settings
+        ["More taskbar settings", "bar layout workspaces resources utility buttons tray frame dynamic island tooltips media", "personalization", "taskbar-more"],
+        ["More dock settings", "dock position size style previews border color", "personalization", "dock-more"],
+        ["More background settings", "wallpaper split collage blur lock screen wallpaper picker selector", "personalization", "background-more"],
+        ["More widget settings", "desktop widgets clock cookie digital quote custom image visualizer text sticker", "personalization", "widgets-more"],
+        ["More color settings", "color scheme transparency material you terminal qt gtk apps generation", "personalization", "colors-more"],
+        ["Fonts", "font typeface family text size", "personalization", "fonts"],
+        ["More Start settings", "overview grid rows columns search prefixes launcher", "personalization", "start-more"],
+        ["More lock screen settings", "lock blur zoom shape dots hyprlock", "personalization", "lockscreen-more"],
+        ["More sidebar settings", "sidebar left right quick toggles sliders hot corners translator", "personalization", "sidebar-more"],
+        ["Windows & effects", "gaps borders rounding blur shadows animations focus layout dwindle master tiling cursor", "personalization", "windows"],
+        ["More display settings", "monitor arrange resolution refresh rate scale position orientation", "system", "display-more"],
+        ["More sound settings", "volume protection earbang system sounds", "system", "sound-more"],
+        ["More power settings", "battery warning device batteries idle lock screen off standby", "system", "power-more"],
+        ["More notification settings", "on screen display osd popup timeout", "system", "notifications-more"],
+        ["Screenshots & recording", "screenshot screen snip record video save folder google lens region selector", "system", "screenshots"],
+        ["Mouse, keyboard & touchpad (advanced)", "input keyboard layout repeat rate pointer sensitivity acceleration touchpad", "devices", "input"],
+        ["More time & language settings", "clock format seconds date language locale", "time", "time-more"],
+        ["Autostart apps", "startup login commands apps start", "apps", "autostart"],
         ["Display", "screen monitor resolution refresh rate scale", "system", "display"],
         ["Brightness", "screen display dim", "system", "display"],
         ["Night light", "blue light warm color temperature hyprsunset", "system", "display"],
@@ -135,7 +172,7 @@ Singleton {
         ["Work safety", "hide nsfw wallpaper clipboard", "privacy", ""],
         ["Windows Update", "updates upgrade pacman packages system update", "update", ""],
         ["Shell update", "illogical impulse end4 dotfiles shell phoenix updates", "update", ""],
-        ["Advanced settings", "illogical impulse original all settings", "advanced", ""],
+        ["How updates install", "automatic updates ask confirm manual review update mode", "update", ""],
     ]
 
     function search(q) {
@@ -164,10 +201,7 @@ Singleton {
     }
 
     function go(page, sub = "") {
-        if (page === "advanced") {
-            root.advanced = true;
-            return;
-        }
+        if (page === "advanced") return;   // the original settings were merged into these pages (2026-10-15)
         if (page === root.page && sub === root.sub && !root.advanced) return;
         root.history = root.history.concat([{ page: root.page, sub: root.sub }]);
         root.advanced = false;
@@ -192,12 +226,37 @@ Singleton {
 
     readonly property bool canGoBack: advanced || history.length > 0 || sub !== ""
 
-    // Launcher search results deep-link into the original settings pages (GlobalStates.openSettingsAt).
-    // This singleton is created before the embedded original settings, so this handler runs first.
+    // Launcher search results still name the original settings pages (GlobalStates.openSettingsAt). Since 2026-10-15
+    // those settings live in these pages: open the page that now has that section.
+    readonly property var oldSections: ({
+        "desktop/Wallpaper": ["personalization", "background-more"], "desktop/Multiple wallpapers": ["personalization", "background-more"],
+        "interface/Color Schemes": ["personalization", "colors-more"], "interface/Transparency": ["personalization", "colors-more"],
+        "interface/Color generation": ["personalization", "colors-more"], "interface/Left Sidebar": ["personalization", "sidebar-more"],
+        "interface/Right Sidebar": ["personalization", "sidebar-more"], "interface/Hot Corners": ["personalization", "sidebar-more"],
+        "interface/Overview": ["personalization", "start-more"], "interface/Dock": ["personalization", "dock-more"],
+        "interface/Lock screen": ["personalization", "lockscreen-more"], "interface/Overlay": ["extras", ""],
+        "interface/Region selector (screen snipping/Google Lens)": ["system", "screenshots"],
+        "interface/On-screen display": ["system", "notifications-more"], "interface/Wallpaper selector": ["personalization", "background-more"],
+        "interface/Fonts": ["personalization", "fonts"], "interface/Settings Panel": ["personalization", ""],
+        "services/Save paths": ["system", "screenshots"], "services/Search": ["personalization", "start-more"],
+        "general/System Appearance": ["personalization", "colors-more"], "general/Time": ["time", "time-more"],
+        "general/Language": ["time", "time-more"], "general/Device batteries": ["system", "power-more"],
+        "general/Battery": ["system", "power-more"], "general/Audio": ["system", "sound-more"], "general/Sounds": ["system", "sound-more"],
+        "general/Work safety": ["privacy", ""], "hyprland/Displays": ["system", "display-more"], "hyprland/Input": ["devices", "input"],
+        "hyprland/Idle": ["system", "power-more"], "hyprland/Autostart Apps": ["apps", "autostart"],
+    })
+    readonly property var oldPages: ({
+        "quick": ["personalization", ""], "general": ["personalization", "colors-more"], "bar": ["personalization", "taskbar-more"],
+        "desktop": ["personalization", "widgets-more"], "interface": ["personalization", ""], "services": ["extras", ""],
+        "hyprland": ["personalization", "windows"], "about": ["system", "about"],
+    })
     Connections {
         target: GlobalStates
         function onSettingsTargetChanged() {
-            if (GlobalStates.settingsTarget) root.advanced = true;
+            const t = GlobalStates.settingsTarget;
+            if (!t) return;
+            const to = root.oldSections[`${t.page}/${t.section}`] ?? root.oldPages[t.page] ?? ["home", ""];
+            root.go(to[0], to[1]);
         }
         // Closing Settings leaves the original (advanced) pages: the next open starts at Phoenix's own Settings again
         // (2026-10-08; it used to stay in the advanced view for good)

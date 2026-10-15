@@ -35,7 +35,7 @@ Scope {
     PanelLoader { extraCondition: GlobalStates.backgroundVisible; component: Background {} }
     PanelLoader { extraCondition: Config.options.dock.enable; component: Dock {} }
     PanelLoader { component: EqualizerPopup {} }
-    PanelLoader { component: Lock {} }
+    PanelLoader { gated: false; component: Lock {} }   // never waits: it is what the others wait for
     PanelLoader { component: MediaControls {} }
     PanelLoader { component: NotificationPopup {} }
     PanelLoader { component: OnScreenDisplay {} }

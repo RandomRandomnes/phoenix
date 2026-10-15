@@ -13,7 +13,8 @@ Item {
 
     Loader {
         anchors.fill: parent
-        sourceComponent: ({ "datetime": datetime, "language": language })[WState.sub] ?? overview
+        sourceComponent: ({ "datetime": datetime, "language": language, "time-more": timeMorePage
+        })[WState.sub] ?? overview
     }
 
     Component {
@@ -40,6 +41,10 @@ Item {
             WSection {
                 WLink { icon: "schedule"; title: "Date & time"; description: "Time zone, automatic clock, 24-hour time, date format"; sub: "datetime" }
                 WLink { icon: "translate"; title: "Language & region"; description: "Display language, first day of week"; sub: "language" }
+            }
+            WSection {
+                title: "More"
+                WLink { icon: "tune"; title: "More time & language settings"; description: "Clock format, seconds, language"; sub: "time-more" }
             }
         }
     }
@@ -87,8 +92,8 @@ Item {
                     description: `Current: ${dt.timezone}. Type a city or region, e.g. America/Chicago`
                     Rectangle {
                         implicitWidth: 260; implicitHeight: 34
-                        radius: Appearance.rounding.verysmall
-                        color: Appearance.colors.colLayer3
+                        radius: 12
+                        color: Appearance.colors.colLayer4
                         border.width: tzField.activeFocus ? 2 : 0
                         border.color: Appearance.colors.colPrimary
                         TextField {
@@ -194,6 +199,14 @@ Item {
                     onToggled: v => Config.options.bar.weather.useUSCS = v
                 }
             }
+        }
+    }
+
+    // Phoenix (2026-10-15): settings moved here from illogical-impulse's original settings
+    Component {
+        id: timeMorePage
+        WPage {
+            STime {}
         }
     }
 }

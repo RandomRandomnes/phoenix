@@ -4,8 +4,38 @@
 # 0) restore point (~/.local/bin/restore-point)  1) system packages via yay  2) system fixes for the new versions
 # (always)  3) Phoenix updates, which include the shell (if enabled). Since 2026-10-09 the shell no longer follows
 # upstream illogical-impulse: it comes only with Phoenix releases (custom-update), so there is no separate shell step.
-# Unattended apart from the sudo password at the start. The window closes by itself on success
-# and stays open on failure.
+# Two ways to run (2026-10-15), asked once on the first update after installing and kept in config.json
+# extras.updateMode (Settings › Update › "How updates install" changes it):
+#   ask  = like the installer: yay shows what will be updated (and AUR build files) and asks before installing;
+#          Phoenix updates show their notes and ask
+#   auto = unattended apart from the sudo password at the start
+# The window closes by itself on success and stays open on failure.
+CONFIG="$HOME/.config/illogical-impulse/config.json"
+update_mode() { python3 -c 'import json,sys
+try: print(json.load(open(sys.argv[1])).get("extras", {}).get("updateMode", ""))
+except Exception: print("")' "$CONFIG"; }
+set_update_mode() { python3 -c 'import json,os,sys
+p=sys.argv[1]; c=json.load(open(p)); c.setdefault("extras", {})["updateMode"]=sys.argv[2]
+t=p+".tmp"; json.dump(c, open(t, "w"), indent=4); os.replace(t, p)' "$CONFIG" "$1"; }
+
+mode=$(update_mode)
+if [ "$mode" != ask ] && [ "$mode" != auto ]; then
+    if [ -t 0 ]; then
+        # first update after installing: ask once, like the installer does
+        echo -e "\e[1m==> How should updates install?\e[0m"
+        echo "  1) Show me what will be updated and ask before installing (like the installer)"
+        echo "  2) Install everything automatically (only asks for your password)"
+        echo "You can change this later in Settings › Update."
+        read -r -p "Choose 1 or 2 [1]: " a
+        [ "$a" = 2 ] && mode=auto || mode=ask
+        set_update_mode "$mode" && echo "Saved: $( [ $mode = ask ] && echo 'ask before installing' || echo 'install automatically' )." \
+            || echo "Couldn't save the choice; asking again next time."
+        echo
+    else
+        mode=auto   # no terminal to answer in: keep the old behaviour and ask next time
+    fi
+fi
+
 hypr_before=$(pacman -Q hyprland 2>/dev/null)
 kernel_before=$(pacman -Q linux 2>/dev/null)
 plasma_before=$(pacman -Q plasma-workspace 2>/dev/null)
@@ -20,7 +50,7 @@ if [ -x "$HOME/.local/bin/phoenix-check" ]; then
     crit=$?
     if [ $crit -ne 0 ] && [ -d "$HOME/.local/state/custom-fixes-publisher" ] && [ -r /dev/tty ]; then
         echo
-        echo "This PC publishes Phoenix: try these in the test VM first (~/clone-usb/vm/vmlab.sh start fresh, then update there)."
+        echo "This PC publishes Phoenix: try these in the test VM first (~/clone-usb/vm/vmlab.sh start plain, then update there)."
         read -r -p "Install everything now anyway? [y/N] " a < /dev/tty
         if [[ ! "$a" =~ ^[yY] ]]; then
             echo "Nothing was installed."
@@ -41,10 +71,19 @@ fi
 echo
 
 echo -e "\e[1m==> System packages\e[0m"
-# --noconfirm: accept pacman's default answers. --answer*: skip yay's clean/diff/edit review menus.
 # --sudoloop: keep sudo alive through long AUR builds so the password is only asked once.
-yay -Syu --combinedupgrade=false --noconfirm --sudoloop \
-    --answerclean None --answerdiff None --answeredit None --removemake
+# pacman-contrib (checkupdates: the taskbar's update count and the critical-update check) is added when missing;
+# the installer didn't install it before 2026-10-15.
+extra=(); pacman -Q pacman-contrib >/dev/null 2>&1 || extra=(--needed pacman-contrib)
+if [ "$mode" = ask ]; then
+    # yay lists every package with old → new version, offers to show the AUR build files, and asks before installing
+    echo "Review the list below; nothing is installed until you confirm."
+    yay -Syu --combinedupgrade=false --sudoloop --removemake "${extra[@]}"
+else
+    # --noconfirm: accept pacman's default answers. --answer*: skip yay's clean/diff/edit review menus.
+    yay -Syu --combinedupgrade=false --noconfirm --sudoloop \
+        --answerclean None --answerdiff None --answeredit None --removemake "${extra[@]}"
+fi
 yay_rc=$?
 
 # 2) system fixes: always, right after the packages and the shell they belong to (only those matching the installed
@@ -59,12 +98,14 @@ fixes_rc=0
 if grep -q '"customFixes": *true' "$HOME/.config/illogical-impulse/config.json" 2>/dev/null; then
     echo
     echo -e "\e[1m==> Phoenix updates\e[0m"
-    "$HOME/.local/bin/custom-update" apply --yes
+    if [ "$mode" = ask ]; then "$HOME/.local/bin/custom-update" apply; else "$HOME/.local/bin/custom-update" apply --yes; fi
     fixes_rc=$?
 fi
 
 msgs=()
-[ $yay_rc -eq 0 ] && msgs+=("System packages: updated.") || msgs+=("System packages: update failed (exit code $yay_rc). See the output above.")
+if [ $yay_rc -eq 0 ]; then msgs+=("System packages: updated.")
+elif [ "$mode" = ask ]; then msgs+=("System packages: not updated (you said no, or it failed; see the output above).")
+else msgs+=("System packages: update failed (exit code $yay_rc). See the output above."); fi
 [ $sysfix_rc -ne 0 ] && msgs+=("System fixes: installation failed (see the output above).")
 [ $fixes_rc -ne 0 ] && msgs+=("Custom fixes: installation failed (see the output above).")
 [ "$hypr_before" != "$(pacman -Q hyprland 2>/dev/null)" ] && [ $in_hypr -eq 1 ] && msgs+=("Hyprland was updated: log out and log in again to complete the update.")

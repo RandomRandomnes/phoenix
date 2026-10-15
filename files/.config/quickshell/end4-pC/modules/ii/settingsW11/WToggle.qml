@@ -3,11 +3,11 @@ import QtQuick.Layouts
 import qs.modules.common
 import qs.modules.common.widgets
 
-// Card with an On/Off switch. Bind `checked`, react in onToggled(value).
+// Card with a switch (Material: no On/Off text next to it, 2026-10-15). Bind `checked`, react in onToggled(value).
 WCard {
     id: root
     property bool checked: false
-    property bool showStateText: true
+    property bool showStateText: false
     signal toggled(bool value)
 
     clickable: true

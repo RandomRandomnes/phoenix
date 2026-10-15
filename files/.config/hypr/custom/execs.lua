@@ -129,7 +129,18 @@ end
 
 
 -- autostart-start
+-- Lock-screen sign-in (2026-10-15): phoenix-session started this desktop without a password (PHOENIX_LOCK_FIRST=1), so
+-- until the lock screen is up no shortcut may do anything: start in an empty submap. The lock screen leaves it
+-- (LockScreen.qml, hl.dsp.submap("reset")) once the compositor confirms the lock; if it never comes up, phoenix-session's
+-- watchdog ends the session and the login screen takes over. Only at start, never on a config reload.
+hl.define_submap("phoenix-boot", function()
+    -- a submap with no binds isn't registered ("submap doesn't exist"); this one does nothing on a key nobody presses
+    hl.bind("SUPER + CTRL + ALT + SHIFT + F24", hl.dsp.no_op())
+end)
 hl.on("hyprland.start", function()
+    if os.getenv("PHOENIX_LOCK_FIRST") == "1" then
+        hl.dispatch(hl.dsp.submap("phoenix-boot"))
+    end
     hl.exec_cmd("$HOME/.config/hypr/custom/scripts/autostart.sh")
 end)
 -- autostart-end

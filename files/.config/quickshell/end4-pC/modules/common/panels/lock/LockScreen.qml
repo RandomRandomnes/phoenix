@@ -92,8 +92,47 @@ Scope {
         surface: root.sessionLockSurface
         onSecureChanged: {
             if (lock.secure) GlobalStates.startupLockPending = false;
+            if (lock.secure && GlobalStates.lockFirst && !GlobalStates.startupGateOpen) root.startupLockIsUp();
         }
     }
+
+    // ---- Phoenix lock-screen sign-in (2026-10-15) -------------------------------------------------------------------
+    // phoenix-session starts the desktop without a password (greetd autologin) and sets PHOENIX_LOCK_FIRST=1. Then the
+    // lock comes first, whatever the lock.launchOnStartup setting says, and the rest of the shell waits for it.
+    // "Unlocked once" lives in $XDG_RUNTIME_DIR (gone at reboot/logout): a shell restarted before the first unlock locks
+    // again instead of leaving Hyprland's red "lock screen died" screen.
+    readonly property string runDir: Quickshell.env("XDG_RUNTIME_DIR") || "/tmp"
+    property bool unlockedOnce: false
+    property bool unlockedOnceKnown: !GlobalStates.lockFirst
+    property bool initDone: false
+    FileView {
+        path: GlobalStates.lockFirst ? `${root.runDir}/phoenix-unlocked-once` : ""
+        printErrors: false
+        onLoaded: { root.unlockedOnce = true; root.unlockedOnceKnown = true; root.initIfReady(); }
+        onLoadFailed: { root.unlockedOnceKnown = true; root.initIfReady(); }
+    }
+    Timer {
+        id: gateTimer
+        interval: 1000          // a moment of margin after the compositor confirmed the lock
+        onTriggered: GlobalStates.startupGateOpen = true
+    }
+    function startupLockIsUp() {
+        // tell phoenix-session's watchdog, and give the keyboard back (Hyprland started in an empty submap)
+        Quickshell.execDetached(["sh", "-c", `touch "${root.runDir}/phoenix-lock-up"; hyprctl dispatch 'hl.dsp.submap("reset")' >/dev/null`]);
+        gateTimer.restart();
+    }
+    Connections {
+        target: GlobalStates
+        enabled: GlobalStates.lockFirst
+        function onScreenLockedChanged() {
+            if (GlobalStates.screenLocked || root.unlockedOnce) return;
+            // first unlock since the session started: the user's own startup items may run now (autostart.sh waits for this)
+            root.unlockedOnce = true;
+            GlobalStates.startupGateOpen = true;
+            Quickshell.execDetached(["touch", `${root.runDir}/phoenix-unlocked-once`]);
+        }
+    }
+    // -----------------------------------------------------------------------------------------------------------------
 
     function lock() {
         if (Config.options.lock.useHyprlock) {
@@ -134,7 +173,18 @@ Scope {
     }
 
     function initIfReady() {
-        if (!Config.ready || !Persistent.ready) return;
+        if (!Config.ready || !Persistent.ready || !root.unlockedOnceKnown || root.initDone) return;
+        root.initDone = true;
+        if (GlobalStates.lockFirst) {
+            if (!root.unlockedOnce) {
+                GlobalStates.screenLocked = true;   // always the shell's own lock here (not hyprlock): the gate needs it
+            } else {
+                GlobalStates.startupGateOpen = true; // shell restarted after the first unlock: normal start
+                KeyringStorage.fetchKeyringData();
+                GlobalStates.startupLockPending = false;
+            }
+            return;
+        }
         if (Config.options.lock.launchOnStartup && Persistent.isNewHyprlandInstance) {
             root.lock();
         } else {

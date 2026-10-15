@@ -124,8 +124,8 @@ ApplicationWindow {
         required property string label
         implicitWidth: Math.max(34, keyText.implicitWidth + 18)
         implicitHeight: 30
-        radius: 6
-        color: Appearance.colors.colLayer2
+        radius: 8
+        color: Appearance.colors.colLayer3
         border.width: 1
         border.color: Appearance.colors.colOutlineVariant
         StyledText {
@@ -144,7 +144,7 @@ ApplicationWindow {
         Rectangle {   // page list
             Layout.fillHeight: true
             Layout.preferredWidth: 230
-            color: Appearance.colors.colLayer1
+            color: "transparent"   // Material look (2026-10-15): the list sits on the window background, like Settings' rail
             ColumnLayout {
                 anchors { fill: parent; margins: 20 }
                 spacing: 4
@@ -154,9 +154,10 @@ ApplicationWindow {
                     MaterialSymbol { text: "menu_book"; iconSize: 24; fill: 1; color: Appearance.colors.colPrimary }
                     StyledText {
                         text: "Quick Start"
+                        font.family: Appearance.font.family.expressive
                         font.pixelSize: Appearance.font.pixelSize.larger
                         font.weight: Font.DemiBold
-                        color: Appearance.colors.colOnLayer1
+                        color: Appearance.colors.colOnLayer0
                     }
                 }
                 Repeater {
@@ -166,9 +167,10 @@ ApplicationWindow {
                         required property var modelData
                         required property int index
                         Layout.fillWidth: true
-                        implicitHeight: 36
-                        buttonRadius: Appearance.rounding.small
-                        colBackground: index === root.page ? Appearance.colors.colLayer2 : "transparent"
+                        implicitHeight: 40
+                        buttonRadius: height / 2
+                        colBackground: index === root.page ? Appearance.colors.colSecondaryContainer : "transparent"
+                        colBackgroundHover: index === root.page ? Appearance.colors.colSecondaryContainerHover : Appearance.colors.colLayer1Hover
                         onClicked: root.page = index
                         contentItem: RowLayout {
                             spacing: 12
@@ -177,13 +179,13 @@ ApplicationWindow {
                                 text: navButton.modelData.icon
                                 iconSize: 20
                                 fill: navButton.index === root.page ? 1 : 0
-                                color: navButton.index === root.page ? Appearance.colors.colPrimary : Appearance.colors.colOnLayer1
+                                color: navButton.index === root.page ? Appearance.colors.colOnSecondaryContainer : Appearance.colors.colOnLayer0
                             }
                             StyledText {
                                 Layout.fillWidth: true
                                 text: navButton.modelData.title
                                 font.weight: navButton.index === root.page ? Font.DemiBold : Font.Normal
-                                color: Appearance.colors.colOnLayer1
+                                color: navButton.index === root.page ? Appearance.colors.colOnSecondaryContainer : Appearance.colors.colOnLayer0
                             }
                         }
                     }
@@ -192,119 +194,134 @@ ApplicationWindow {
             }
         }
 
-        ColumnLayout {   // current page
+        Rectangle {   // the page in one rounded panel (Material look, like Settings; 2026-10-15)
             Layout.fillWidth: true
             Layout.fillHeight: true
-            Layout.margins: 28
-            spacing: 14
+            Layout.topMargin: 12
+            Layout.rightMargin: 12
+            Layout.bottomMargin: 12
+            radius: Appearance.rounding.verylarge
+            color: Appearance.colors.colLayer1
+            clip: true
 
-            StyledText {
-                text: root.cur.heading
-                font.pixelSize: Appearance.font.pixelSize.hugeass + 6
-                font.weight: Font.DemiBold
-                color: Appearance.colors.colOnLayer0
-            }
+            ColumnLayout {   // current page
+                anchors.fill: parent
+                anchors.margins: 28
+                anchors.leftMargin: 32
+                spacing: 14
 
-            WPage {
-                id: body
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                maxContentWidth: 760
-                Repeater {
-                    model: root.cur.blocks
-                    Loader {
-                        id: block
-                        required property var modelData
-                        Layout.fillWidth: true
-                        sourceComponent: modelData.p !== undefined ? para : modelData.h !== undefined ? heading
-                            : modelData.keys !== undefined ? keys : modelData.row !== undefined ? card : openButton
-                        Component {
-                            id: para
-                            StyledText {
-                                wrapMode: Text.WordWrap
-                                text: block.modelData.p
-                                font.pixelSize: Appearance.font.pixelSize.normal
-                                color: Appearance.colors.colOnLayer0
-                            }
-                        }
-                        Component {
-                            id: heading
-                            StyledText {
-                                topPadding: 8
-                                text: block.modelData.h
-                                font.pixelSize: Appearance.font.pixelSize.large
-                                font.weight: Font.DemiBold
-                                color: Appearance.colors.colOnLayer0
-                            }
-                        }
-                        Component {
-                            id: keys
-                            RowLayout {
-                                spacing: 6
-                                Item {   // keys column, fixed width so descriptions line up
-                                    Layout.preferredWidth: 230
-                                    implicitHeight: 30
-                                    Row {
-                                        spacing: 6
-                                        Repeater {
-                                            model: block.modelData.keys
-                                            Row {
-                                                required property var modelData
-                                                required property int index
-                                                spacing: 6
-                                                StyledText {
-                                                    visible: index > 0
-                                                    anchors.verticalCenter: parent.verticalCenter
-                                                    text: "+"
-                                                    color: Appearance.colors.colSubtext
-                                                }
-                                                KeyCap { label: modelData }
-                                            }
-                                        }
-                                    }
-                                }
+                StyledText {
+                    text: root.cur.heading
+                    font.pixelSize: Appearance.font.pixelSize.hugeass + 6
+                    font.weight: Font.DemiBold
+                    color: Appearance.colors.colOnLayer0
+                }
+
+                WPage {
+                    id: body
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    maxContentWidth: 760
+                    Repeater {
+                        model: root.cur.blocks
+                        Loader {
+                            id: block
+                            required property var modelData
+                            required property int index
+                            Layout.fillWidth: true
+                            // cards right after each other join into one grouped list (4 px apart, like Settings)
+                            Layout.topMargin: modelData.row !== undefined && index > 0
+                                && root.cur.blocks[index - 1].row !== undefined ? -18 : 0
+                            sourceComponent: modelData.p !== undefined ? para : modelData.h !== undefined ? heading
+                                : modelData.keys !== undefined ? keys : modelData.row !== undefined ? card : openButton
+                            Component {
+                                id: para
                                 StyledText {
-                                    Layout.fillWidth: true
                                     wrapMode: Text.WordWrap
-                                    text: block.modelData.what
+                                    text: block.modelData.p
+                                    font.pixelSize: Appearance.font.pixelSize.normal
                                     color: Appearance.colors.colOnLayer0
                                 }
                             }
-                        }
-                        Component {
-                            id: card
-                            WCard {
-                                title: block.modelData.row
-                                description: block.modelData.text
+                            Component {
+                                id: heading
+                                StyledText {
+                                    topPadding: 8
+                                    text: block.modelData.h
+                                    font.pixelSize: Appearance.font.pixelSize.large
+                                    font.weight: Font.DemiBold
+                                    color: Appearance.colors.colOnLayer0
+                                }
                             }
-                        }
-                        Component {
-                            id: openButton
-                            RowLayout {
-                                WButton {
-                                    accent: true
-                                    buttonText: block.modelData.open
-                                    onClicked: Quickshell.execDetached(block.modelData.cmd)
+                            Component {
+                                id: keys
+                                RowLayout {
+                                    spacing: 6
+                                    Item {   // keys column, fixed width so descriptions line up
+                                        Layout.preferredWidth: 230
+                                        implicitHeight: 30
+                                        Row {
+                                            spacing: 6
+                                            Repeater {
+                                                model: block.modelData.keys
+                                                Row {
+                                                    required property var modelData
+                                                    required property int index
+                                                    spacing: 6
+                                                    StyledText {
+                                                        visible: index > 0
+                                                        anchors.verticalCenter: parent.verticalCenter
+                                                        text: "+"
+                                                        color: Appearance.colors.colSubtext
+                                                    }
+                                                    KeyCap { label: modelData }
+                                                }
+                                            }
+                                        }
+                                    }
+                                    StyledText {
+                                        Layout.fillWidth: true
+                                        wrapMode: Text.WordWrap
+                                        text: block.modelData.what
+                                        color: Appearance.colors.colOnLayer0
+                                    }
+                                }
+                            }
+                            Component {
+                                id: card
+                                WCard {
+                                    title: block.modelData.row
+                                    description: block.modelData.text
+                                }
+                            }
+                            Component {
+                                id: openButton
+                                RowLayout {
+                                    WButton {
+                                        accent: true
+                                        buttonText: block.modelData.open
+                                        onClicked: Quickshell.execDetached(block.modelData.cmd)
+                                    }
                                 }
                             }
                         }
                     }
                 }
-            }
 
-            RowLayout {
-                Layout.fillWidth: true
-                spacing: 10
-                WButton {
-                    visible: root.page > 0
-                    buttonText: "Back"
-                    onClicked: root.page--
-                }
-                Item { Layout.fillWidth: true }
-                WButton {
-                    accent: true
-                    buttonText: root.page < root.pages.length - 1 ? "Next" : "Done"
-                    onClicked: root.page < root.pages.length - 1 ? root.page++ : Qt.quit()
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 10
+                    WButton {
+                        visible: root.page > 0
+                        buttonText: "Back"
+                        onClicked: root.page--
+                    }
+                    Item { Layout.fillWidth: true }
+                    WButton {
+                        accent: true
+                        buttonText: root.page < root.pages.length - 1 ? "Next" : "Done"
+                        onClicked: root.page < root.pages.length - 1 ? root.page++ : Qt.quit()
+                    }
                 }
             }
         }

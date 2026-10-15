@@ -242,4 +242,8 @@ WPage {
             description: "Steam starts minimized to the system tray after login"
         }
     }
+
+    // Phoenix (2026-10-15): settings moved here from illogical-impulse's original settings
+    SServices {}
+    SOverlay {}
 }

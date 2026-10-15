@@ -18,7 +18,9 @@ AbstractBackgroundWidget {
 
     readonly property string clockStyle: GlobalStates.screenLocked ? Config.options.background.widgets.clock.styleLocked : Config.options.background.widgets.clock.style
     readonly property bool forceCenter: (GlobalStates.screenLocked && Config.options.lock.centerClock)
-    readonly property bool shouldShow: (!Config.options.background.widgets.clock.showOnlyWhenLocked || GlobalStates.screenLocked)
+    // Phoenix (2026-10-15): the Phoenix lock screen styles draw their own clock; only "original" uses this one when locked
+    readonly property bool lockStyleHasClock: GlobalStates.screenLocked && (Config.options.lock.style ?? "original") !== "original"
+    readonly property bool shouldShow: (!Config.options.background.widgets.clock.showOnlyWhenLocked || GlobalStates.screenLocked) && !lockStyleHasClock
     readonly property string customClockColorKey: Config.options.background.widgets.clock.color ?? ""
     readonly property color resolvedClockColor: {
         if (customClockColorKey === "") return root.colText;
@@ -145,7 +147,7 @@ AbstractBackgroundWidget {
                 }
                 ClockStatusText {
                     id: lockStatusText
-                    shown: GlobalStates.screenLocked && Config.options.lock.showLockedText
+                    shown: GlobalStates.screenLocked && Config.options.lock.showLockedText && !root.lockStyleHasClock
                     statusIcon: "lock"
                     statusText: Translation.tr("Locked")
                 }

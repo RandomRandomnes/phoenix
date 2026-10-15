@@ -719,6 +719,9 @@ Singleton {
             property JsonObject lock: JsonObject {
                 property bool useHyprlock: false
                 property bool launchOnStartup: false
+                // Phoenix (2026-10-15): look of the lock screen (modules/ii/lock/styles/LockStyleLoader.qml). "original" is
+                // illogical-impulse's own; others: islands, cookie, frosted, hello, editorial, clock, user, bar, plain
+                property string style: "original"
                 property bool showWidgets: false
                 property bool showMedia: true
                 property bool showToolbars: true
@@ -875,6 +878,7 @@ Singleton {
                 property bool displayProfilesAuto: true // switch to the saved display profile for the displays plugged in (services/DisplayProfiles.qml)
                 property bool customFixes: false      // get the author's bug fixes (~/.local/bin/custom-update); asked in the setup wizard
                 property bool customFixesTest: false  // also see test releases (testers)
+                property string updateMode: ""        // "ask" | "auto"; "" = not chosen yet: system-update asks on the first update (2026-10-15)
             }
 
             property JsonObject sidebar: JsonObject {

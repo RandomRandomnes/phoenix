@@ -2,9 +2,17 @@
 log="$HOME/.local/state/phoenix/autostart.log"; mkdir -p "$HOME/.local/state/phoenix"
 echo "$(date +%T) autostart script started" > "$log"
 # Your own login commands (not part of Phoenix, never shipped or overwritten): custom/scripts/autostart-user.sh
+# With lock-screen sign-in (PHOENIX_LOCK_FIRST=1, see phoenix-session) they wait for the first unlock: nothing of yours
+# (drive mounts, apps) runs before the password. The lock screen leaves $XDG_RUNTIME_DIR/phoenix-unlocked-once.
 if [ -f "$HOME/.config/hypr/custom/scripts/autostart-user.sh" ]; then
-  echo "$(date +%T) running autostart-user.sh" >> "$log"
-  sh "$HOME/.config/hypr/custom/scripts/autostart-user.sh" >> "$log" 2>&1 &
+  (
+    if [ "${PHOENIX_LOCK_FIRST:-}" = 1 ]; then
+      echo "$(date +%T) autostart-user.sh waits for the first unlock" >> "$log"
+      while [ ! -e "${XDG_RUNTIME_DIR:-/tmp}/phoenix-unlocked-once" ]; do sleep 1; done
+    fi
+    echo "$(date +%T) running autostart-user.sh" >> "$log"
+    sh "$HOME/.config/hypr/custom/scripts/autostart-user.sh" >> "$log" 2>&1
+  ) &
 fi
 # In a virtual machine, idle sleep (hypridle → systemctl suspend) freezes the virtual graphics card on wake-up and the VM
 # can then only be reset (QA 2026-10-08): hold off sleep for this session there. Real PCs are not affected.

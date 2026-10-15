@@ -80,8 +80,8 @@ WPage {
         Rectangle {
             Layout.fillWidth: true
             implicitHeight: 340
-            radius: Appearance.rounding.verysmall + 2
-            color: Appearance.colors.colLayer2
+            radius: Appearance.rounding.large
+            color: Appearance.colors.colLayer3
             StyledFlickable {
                 id: flick
                 anchors { fill: parent; margins: 12 }

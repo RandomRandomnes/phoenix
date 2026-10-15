@@ -126,7 +126,7 @@ ShellRoot {
             stateView.setText(JSON.stringify({ user: root.user.name, session: s.id }))
             root.message = "Signing in…"
             root.messageIsError = false
-            Greetd.launch(["/usr/local/bin/phoenix-session", s.id], ["XDG_SESSION_TYPE=wayland"], true)
+            Greetd.launch(["/usr/local/bin/phoenix-session", s.id], ["XDG_SESSION_TYPE=wayland", "PHOENIX_AUTHENTICATED=1"], true)   // signed in: no lock-first start (phoenix-session)
         }
         function onAuthFailure(message) {
             justFailed.restart()

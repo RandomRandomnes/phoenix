@@ -7,7 +7,7 @@ import qs.modules.common.widgets
 StyledFlickable {
     id: root
     default property alias content: column.data
-    property real maxContentWidth: 1000
+    property real maxContentWidth: 1200
 
     clip: true
     contentWidth: width
@@ -19,6 +19,6 @@ StyledFlickable {
         x: 0
         y: 4
         width: Math.min(root.width - 24, root.maxContentWidth)
-        spacing: 18
+        spacing: 22
     }
 }

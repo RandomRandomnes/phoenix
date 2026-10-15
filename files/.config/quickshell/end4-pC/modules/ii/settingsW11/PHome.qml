@@ -27,8 +27,8 @@ WPage {
         Rectangle {
             implicitWidth: 196
             implicitHeight: 110
-            radius: Appearance.rounding.small
-            color: Appearance.colors.colLayer2
+            radius: Appearance.rounding.normal
+            color: Appearance.colors.colLayer3
             Image {
                 id: wallThumb
                 anchors.fill: parent
@@ -38,7 +38,7 @@ WPage {
                 asynchronous: true
                 layer.enabled: true
                 layer.effect: OpacityMask {
-                    maskSource: Rectangle { width: wallThumb.width; height: wallThumb.height; radius: Appearance.rounding.small }
+                    maskSource: Rectangle { width: wallThumb.width; height: wallThumb.height; radius: Appearance.rounding.normal }
                 }
             }
         }
@@ -86,9 +86,9 @@ WPage {
                 Layout.minimumWidth: 140
                 Layout.fillWidth: false
                 implicitHeight: 64
-                buttonRadius: Appearance.rounding.small
-                colBackground: Appearance.colors.colLayer2
-                colBackgroundHover: Appearance.colors.colLayer2Hover
+                buttonRadius: Appearance.rounding.normal
+                colBackground: Appearance.colors.colLayer3
+                colBackgroundHover: Appearance.colors.colLayer3Hover
                 onClicked: WState.go(modelData.page)
                 contentItem: RowLayout {
                     spacing: 12
@@ -151,9 +151,9 @@ WPage {
                         required property bool modelData
                         Layout.fillWidth: true
                         implicitHeight: 76
-                        buttonRadius: Appearance.rounding.small
+                        buttonRadius: Appearance.rounding.normal
                         toggled: Appearance.m3colors.darkmode === modelData
-                        colBackground: Appearance.colors.colLayer3
+                        colBackground: Appearance.colors.colLayer4
                         colBackgroundToggled: Appearance.colors.colPrimaryContainer
                         colBackgroundToggledHover: Appearance.colors.colPrimaryContainerHover
                         onClicked: if (!toggled) darkMode.mainAction()
@@ -196,7 +196,7 @@ WPage {
                         width: 46
                         height: 46
                         radius: Appearance.rounding.small
-                        color: Appearance.colors.colLayer3
+                        color: Appearance.colors.colLayer4
                         IconImage {
                             anchors.centerIn: parent
                             implicitSize: 28

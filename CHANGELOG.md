@@ -1,5 +1,15 @@
 # Changelog
 
+## custom 2.260 (2026-10-15, fix)
+- Sign in at the lock screen (optional): the desktop loads behind the lock screen so it's ready when you type your password (Settings › Accounts › Sign-in at startup)
+- Lock screen designs: choose from 10 in Settings › Personalization › Lock screen, with a preview; the default is unchanged
+- One Settings menu: illogical-impulse's original settings are now inside Settings; Advanced settings removed
+- New Material look for Settings, the setup assistant, Quick Start and the desktop menu; fits small screens
+- Updates: the first update asks whether to review and confirm updates or install them automatically (Settings › Update)
+- Installer: your answer to illogical-impulse's 'confirm every time?' question also decides whether Phoenix's install steps ask
+- Taskbar update count and the critical-update check now work on PCs installed from GitHub (pacman-contrib comes with the next update)
+- Desktop check no longer says the shell isn't running after the shell restarts itself
+
 ## custom 2.250 (2026-10-15, fix)
 - Login screen: no text or boot picture flashing before the login screen and after signing in (its output and the desktop's start-up log go to log files; the console underneath is black). Run 'phoenix login-screen install' once to apply
 - Login screen install: the settings file is written whole or not at all

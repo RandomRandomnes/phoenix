@@ -15,6 +15,32 @@ esac
 # second after signing in (2026-10-12). It goes to a file instead (Hyprland keeps its own log as well).
 mkdir -p "$HOME/.local/state/phoenix"
 exec >"$HOME/.local/state/phoenix/session.log" 2>&1
+if [ "${PHOENIX_AUTHENTICATED:-}" = 1 ]; then echo "$(date '+%F %T') session start: signed in at the login screen"
+else echo "$(date '+%F %T') session start: no password yet (autologin), lock screen first"; fi
+# Lock-screen sign-in (2026-10-15, `phoenix login-screen install --mode lock`): greetd's initial_session starts this once
+# per boot WITHOUT a password. Then the desktop starts behind the lock screen: PHOENIX_LOCK_FIRST=1 makes the shell lock
+# first and build everything else behind it, and Hyprland start with no working shortcuts until the lock is up.
+# Only the login screen's own flag (PHOENIX_AUTHENTICATED=1, set by greeter.qml after the password) means "unlocked";
+# anything else (missing, garbled) means lock first.
+if [ "${PHOENIX_AUTHENTICATED:-}" = 1 ]; then
+    unset PHOENIX_LOCK_FIRST
+else
+    if [ "$(cat "$HOME/.config/desktop-session" 2>/dev/null)" = "plasma" ]; then
+        echo "KDE Plasma was the last desktop: it has no lock-screen start, so the full login screen takes over"
+        exit 0
+    fi
+    export PHOENIX_LOCK_FIRST=1
+    run="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
+    rm -f "$run/phoenix-lock-up" "$run/phoenix-unlocked-once"
+    # Watchdog, fail closed: if the lock screen isn't confirmed within 30 s, end the session; greetd then shows the full
+    # login screen (initial_session only runs once per boot, so this can't loop).
+    (
+        for _ in $(seq 60); do [ -e "$run/phoenix-lock-up" ] && exit 0; sleep 0.5; done
+        echo "$(date +%T) the lock screen didn't come up within 30 s: ending the session (the login screen takes over)"
+        pkill -TERM -u "$(id -u)" -x Hyprland; sleep 5; pkill -KILL -u "$(id -u)" -x Hyprland
+    ) &
+fi
+unset PHOENIX_AUTHENTICATED
 if [ "$(cat "$HOME/.config/desktop-session" 2>/dev/null)" = "plasma" ] && [ -x /usr/bin/startplasma-wayland ]; then
     start=$SECONDS
     /usr/lib/plasma-dbus-run-session-if-needed /usr/bin/startplasma-wayland

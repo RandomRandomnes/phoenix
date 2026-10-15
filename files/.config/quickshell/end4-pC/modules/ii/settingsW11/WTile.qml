@@ -14,13 +14,13 @@ Rectangle {
 
     Layout.fillWidth: true
     Layout.preferredWidth: 100     // grid columns share the width evenly instead of growing to fit content
-    implicitHeight: col.implicitHeight + 36
-    radius: Appearance.rounding.small
-    color: Appearance.colors.colLayer2
+    implicitHeight: col.implicitHeight + 40
+    radius: Appearance.rounding.large
+    color: Appearance.colors.colLayer3
 
     ColumnLayout {
         id: col
-        anchors { left: parent.left; right: parent.right; top: parent.top; margins: 18 }
+        anchors { left: parent.left; right: parent.right; top: parent.top; margins: 20 }
         spacing: 12
 
         ColumnLayout {
@@ -28,6 +28,7 @@ Rectangle {
             Layout.fillWidth: true
             StyledText {
                 text: root.title
+                font.family: Appearance.font.family.expressive
                 font.pixelSize: Appearance.font.pixelSize.larger
                 font.weight: Font.DemiBold
                 color: Appearance.colors.colOnLayer2

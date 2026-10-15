@@ -19,7 +19,7 @@ Item {
         anchors.fill: parent
         sourceComponent: ({
             "display": display, "sound": sound, "notifications": notifications, "power": power,
-            "storage": storage, "multitasking": multitasking, "clipboard": clipboard, "about": about, "report": report
+            "storage": storage, "multitasking": multitasking, "clipboard": clipboard, "about": about, "report": report, "display-more": displayMorePage, "sound-more": soundMorePage, "power-more": powerMorePage, "notifications-more": notificationsMorePage, "screenshots": screenshotsPage
         })[WState.sub] ?? overview
     }
 
@@ -53,6 +53,10 @@ Item {
                 WLink { icon: "content_paste"; title: "Clipboard"; description: "Clipboard history"; sub: "clipboard" }
                 WLink { icon: "info"; title: "About"; description: "Device specifications, rename this PC"; sub: "about" }
                 WLink { icon: "bug_report"; title: "Report a problem"; description: "Send the Phoenix project a report with your system details"; sub: "report" }
+            }
+            WSection {
+                title: "More"
+                WLink { icon: "screenshot_monitor"; title: "Screenshots & recording"; description: "Save folders, screen snipping and Google Lens"; sub: "screenshots" }
             }
         }
     }
@@ -290,7 +294,11 @@ Item {
 
             WSection {
                 title: "Related settings"
-                WLink { icon: "hdr_on"; title: "Advanced display"; description: "Arrange displays, position, HDR, color management"; action: () => { WState.go("advanced"); GlobalStates.openSettingsAt("hyprland"); } }
+                WLink { icon: "hdr_on"; title: "Advanced display"; description: "Arrange displays, position, HDR, color management"; sub: "display-more" }
+            }
+            WSection {
+                title: "More"
+                WLink { icon: "tune"; title: "More display settings"; description: "Arrange screens, resolution, refresh rate, scaling per screen"; sub: "display-more" }
             }
         }
     }
@@ -301,8 +309,8 @@ Item {
         signal committed(string v)
         implicitWidth: 72
         implicitHeight: 34
-        radius: Appearance.rounding.verysmall
-        color: Appearance.colors.colLayer3
+        radius: 12
+        color: Appearance.colors.colLayer4
         border.width: input.activeFocus ? 2 : 0
         border.color: Appearance.colors.colPrimary
         TextInput {
@@ -411,6 +419,10 @@ Item {
                     onSelected: v => Config.options.sounds.theme = v
                 }
                 WLink { icon: "tune"; title: "More sound settings"; description: "Open the full volume control app"; action: () => Quickshell.execDetached(["bash", "-c", Config.options.apps.volumeMixer]) ; chevronIcon: "open_in_new" }
+            }
+            WSection {
+                title: "More"
+                WLink { icon: "tune"; title: "More sound settings"; description: "Volume protection, system sounds"; sub: "sound-more" }
             }
         }
     }
@@ -562,6 +574,10 @@ Item {
                     WButton { buttonText: "Clear all"; enabled: Notifications.list.length > 0; onClicked: Notifications.discardAllNotifications() }
                 }
             }
+            WSection {
+                title: "More"
+                WLink { icon: "tune"; title: "More notification settings"; description: "On-screen display (volume and brightness popups)"; sub: "notifications-more" }
+            }
         }
     }
 
@@ -648,6 +664,10 @@ Item {
                     checked: Config.options.lock.security.requirePasswordToPower
                     onToggled: v => Config.options.lock.security.requirePasswordToPower = v
                 }
+            }
+            WSection {
+                title: "More"
+                WLink { icon: "tune"; title: "More power settings"; description: "Battery warnings, device batteries, idle timers"; sub: "power-more" }
             }
         }
     }
@@ -904,8 +924,8 @@ Item {
                 description: "Letters, numbers and hyphens. You'll be asked for your password."
                 Rectangle {
                     implicitWidth: 220; implicitHeight: 34
-                    radius: Appearance.rounding.verysmall
-                    color: Appearance.colors.colLayer3
+                    radius: 12
+                    color: Appearance.colors.colLayer4
                     TextInput {
                         id: nameInput
                         anchors { fill: parent; leftMargin: 10; rightMargin: 10 }
@@ -935,8 +955,8 @@ Item {
                 Rectangle {
                     Layout.fillWidth: true
                     implicitHeight: specCol.implicitHeight + 28
-                    radius: Appearance.rounding.verysmall + 2
-                    color: Appearance.colors.colLayer2
+                    radius: Appearance.rounding.large
+                    color: Appearance.colors.colLayer3
                     ColumnLayout {
                         id: specCol
                         anchors { left: parent.left; right: parent.right; top: parent.top; margins: 14; leftMargin: 18 }
@@ -986,9 +1006,51 @@ Item {
                 title: "Related"
                 WLink { icon: "monitoring"; title: "Task manager"; chevronIcon: "open_in_new"; action: () => Quickshell.execDetached(["bash", "-c", Config.options.apps.taskManager]) }
                 WLink { icon: "local_fire_department"; title: "About Phoenix"; description: "Project page, updates, setup profiles"; chevronIcon: "open_in_new"; action: () => Quickshell.execDetached(["xdg-open", "https://github.com/RandomRandomnes/phoenix"]) }
-                WLink { icon: "info"; title: "About illogical-impulse"; description: "Shell version, credits, links"; action: () => { WState.go("advanced"); GlobalStates.openSettingsAt("about"); } }
+                WLink { icon: "info"; title: "About illogical-impulse"; description: "The desktop shell Phoenix is built on (opens its project page)"; chevronIcon: "open_in_new"; action: () => Qt.openUrlExternally("https://github.com/end-4/dots-hyprland") }
                 WLink { icon: "bug_report"; title: "Report a problem"; description: "Something not working? Send a report"; sub: "report" }
             }
+        }
+    }
+
+    // Phoenix (2026-10-15): settings moved here from illogical-impulse's original settings
+    Component {
+        id: displayMorePage
+        WPage {
+            SDisplays {}
+        }
+    }
+
+    // Phoenix (2026-10-15): settings moved here from illogical-impulse's original settings
+    Component {
+        id: soundMorePage
+        WPage {
+            SSound {}
+        }
+    }
+
+    // Phoenix (2026-10-15): settings moved here from illogical-impulse's original settings
+    Component {
+        id: powerMorePage
+        WPage {
+            SPowerGeneral {}
+            SIdle {}
+        }
+    }
+
+    // Phoenix (2026-10-15): settings moved here from illogical-impulse's original settings
+    Component {
+        id: notificationsMorePage
+        WPage {
+            SOsd {}
+        }
+    }
+
+    // Phoenix (2026-10-15): settings moved here from illogical-impulse's original settings
+    Component {
+        id: screenshotsPage
+        WPage {
+            SScreenRegion {}
+            SSavePaths {}
         }
     }
 }

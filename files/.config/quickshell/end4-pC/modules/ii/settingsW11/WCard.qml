@@ -3,8 +3,10 @@ import QtQuick.Layouts
 import qs.modules.common
 import qs.modules.common.widgets
 
-// One Windows 11 style settings row: icon, title + description, control on the right.
+// One settings row: icon, title + description, control on the right.
 // Clickable cards (links, toggles) get a hover state; `chevron` adds the "go to page" arrow.
+// Phoenix (2026-10-15, "Material rail" look): cards that sit right after each other form one grouped list, with big
+// corners at the two ends and small ones in between; the icon sits in a tinted rounded square.
 Rectangle {
     id: root
 
@@ -14,18 +16,43 @@ Rectangle {
     property bool clickable: false
     property bool chevron: false
     property string chevronIcon: "chevron_right"
-    property real minHeight: 66
-    property real iconSize: 22
+    property real minHeight: 64
+    property real iconSize: 20
     property Component leading: null          // optional custom left item (app icon, avatar…)
+    property bool grouped: true               // false: stands alone with all-round corners (notices)
     default property alias control: controlRow.data
     signal clicked()
 
+    readonly property bool isWCard: true
+    // neighbours in the same column (skipping zero-size helpers such as a Repeater). A card made by a Loader is
+    // compared with the Loader's siblings, so cards from a Repeater of Loaders group too (Quick Start, setup wizard).
+    function neighbour(step) {
+        const self = root.parent && root.parent.sourceComponent !== undefined ? root.parent : root;
+        const list = self.parent ? self.parent.visibleChildren : [];
+        let i = -1;
+        for (let k = 0; k < list.length; k++) if (list[k] === self) { i = k; break; }
+        if (i < 0) return null;
+        for (let k = i + step; k >= 0 && k < list.length; k += step) {
+            const c = list[k];
+            if (c.width === 0 && c.height === 0) continue;
+            return c.sourceComponent !== undefined && c.item ? c.item : c;
+        }
+        return null;
+    }
+    readonly property bool groupTop: !grouped || !(neighbour(-1)?.isWCard && neighbour(-1)?.grouped)
+    readonly property bool groupBottom: !grouped || !(neighbour(1)?.isWCard && neighbour(1)?.grouped)
+    readonly property real bigRadius: Appearance.rounding.large
+    readonly property real smallRadius: 6
+
     Layout.fillWidth: true
-    implicitHeight: Math.max(minHeight, contentRow.implicitHeight + 24)
-    radius: Appearance.rounding.verysmall + 2
-    color: mouse.pressed && clickable ? Appearance.colors.colLayer2Active
-        : mouse.containsMouse && clickable ? Appearance.colors.colLayer2Hover
-        : Appearance.colors.colLayer2
+    implicitHeight: Math.max(minHeight, contentRow.implicitHeight + 28)
+    topLeftRadius: groupTop ? bigRadius : smallRadius
+    topRightRadius: groupTop ? bigRadius : smallRadius
+    bottomLeftRadius: groupBottom ? bigRadius : smallRadius
+    bottomRightRadius: groupBottom ? bigRadius : smallRadius
+    color: mouse.pressed && clickable ? Appearance.colors.colLayer3Active
+        : mouse.containsMouse && clickable ? Appearance.colors.colLayer3Hover
+        : Appearance.colors.colLayer3
     opacity: enabled ? 1 : 0.5
 
     Behavior on color {
@@ -47,8 +74,8 @@ Rectangle {
             left: parent.left
             right: parent.right
             verticalCenter: parent.verticalCenter
-            leftMargin: 18
-            rightMargin: 14
+            leftMargin: 16
+            rightMargin: 18
         }
         spacing: 16
 
@@ -60,23 +87,29 @@ Rectangle {
         }
         Component {
             id: defaultIcon
-            MaterialSymbol {
-                text: root.icon
-                iconSize: root.iconSize
-                color: Appearance.colors.colOnLayer2
-                horizontalAlignment: Text.AlignHCenter
-                width: 26
+            Rectangle {
+                implicitWidth: 40
+                implicitHeight: 40
+                radius: 12
+                color: Appearance.colors.colSecondaryContainer
+                MaterialSymbol {
+                    anchors.centerIn: parent
+                    text: root.icon
+                    iconSize: root.iconSize
+                    color: Appearance.colors.colOnSecondaryContainer
+                }
             }
         }
 
         ColumnLayout {
             Layout.fillWidth: true
             Layout.alignment: Qt.AlignVCenter
-            spacing: 1
+            spacing: 2
             StyledText {
                 Layout.fillWidth: true
                 text: root.title
-                font.pixelSize: Appearance.font.pixelSize.small
+                font.pixelSize: Appearance.font.pixelSize.normal
+                font.weight: Font.Medium
                 color: Appearance.colors.colOnLayer2
                 elide: Text.ElideRight
             }
@@ -84,7 +117,7 @@ Rectangle {
                 Layout.fillWidth: true
                 visible: root.description.length > 0
                 text: root.description
-                font.pixelSize: Appearance.font.pixelSize.smaller
+                font.pixelSize: Appearance.font.pixelSize.smallie
                 color: Appearance.colors.colSubtext
                 wrapMode: Text.Wrap
             }

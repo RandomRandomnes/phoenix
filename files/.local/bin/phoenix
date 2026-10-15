@@ -5,7 +5,7 @@
 #   phoenix activate             use the Phoenix shell (your own illogical-impulse setup is kept aside)
 #   phoenix deactivate           back to your own illogical-impulse setup (Phoenix is kept aside)
 #   phoenix uninstall [--yes]    remove Phoenix and put back everything it replaced
-#   phoenix login-screen [install|remove|status]
+#   phoenix login-screen [install [--mode lock|greeter]|toggle|remove|status]
 #                                a Phoenix-style login screen at startup (greetd) instead of signing in automatically
 #   phoenix power-meter [install|remove|status]
 #                                CPU power for the system stats: a small root service that publishes a coarse reading
@@ -185,6 +185,17 @@ cmd_login_screen() {
     local me="${USER:-$(id -un)}"
     case "${1:-status}" in
         install)
+            # --mode lock: sign in at the lock screen (the desktop starts behind it, greetd initial_session = autologin
+            # into a locked session, 2026-10-15); --mode greeter: the full login screen. Default: keep the current mode.
+            local mode=""
+            [ "${2:-}" = "--mode" ] && mode="${3:-}"
+            case "$mode" in ""|lock|greeter) ;; *) die "usage: phoenix login-screen install [--mode lock|greeter]" ;; esac
+            if [ -z "$mode" ]; then
+                grep -q '^\[initial_session\]' /etc/greetd/config.toml 2>/dev/null && mode=lock || mode=greeter
+            fi
+            if [ "$mode" = lock ] && [ "$(awk -F: '$3>=1000 && $3<60000 && $7 !~ /(nologin|false)$/' /etc/passwd | wc -l)" -gt 1 ]; then
+                echo "Note: this PC has more than one account; the lock screen always signs in as $me (others: --mode greeter)."
+            fi
             [ -f "$GREETER_SRC/greeter.qml" ] && [ -f "$GREETER_SRC/phoenix-session" ] \
                 || die "the login screen files are missing in $GREETER_SRC (update Phoenix first)"
             echo "Installing the Phoenix login screen (asks for your password)."
@@ -224,9 +235,15 @@ cmd_login_screen() {
             if [ -n "$olddm" ] && [ "$olddm" != "greetd.service" ]; then sudo systemctl disable "$olddm"; fi
             # the login screen's own log goes to a file: on the console it ran on, that text flashed on screen when the login
             # screen started and right after signing in (2026-10-15)
-            printf '%s\n' "# Written by \`phoenix login-screen install\` (the Phoenix login screen). \`phoenix login-screen remove\` puts back what was here." \
-                "[terminal]" "vt = 1" "" "[default_session]" \
-                "command = \"sh -c 'exec env QT_WAYLAND_DISABLE_WINDOWDECORATION=1$(greeter_xkb_env) cage -s -m last -- qs -p $GREETER_DIR/greeter.qml >/var/lib/phoenix-greeter/state/greeter.log 2>&1'\"" "user = \"greeter\"" \
+            {
+                printf '%s\n' "# Written by \`phoenix login-screen install\` (the Phoenix login screen). \`phoenix login-screen remove\` puts back what was here." \
+                    "[terminal]" "vt = 1" "" "[default_session]" \
+                    "command = \"sh -c 'exec env QT_WAYLAND_DISABLE_WINDOWDECORATION=1$(greeter_xkb_env) cage -s -m last -- qs -p $GREETER_DIR/greeter.qml >/var/lib/phoenix-greeter/state/greeter.log 2>&1'\"" "user = \"greeter\""
+                if [ "$mode" = lock ]; then
+                    printf '%s\n' "" "# Lock-screen sign-in: once per boot the desktop starts behind the lock screen (phoenix-session locks first)" \
+                        "[initial_session]" "command = \"/usr/local/bin/phoenix-session\"" "user = \"$me\""
+                fi
+            } \
                 | sudo tee /etc/greetd/config.toml.phoenix-new >/dev/null \
                 && sudo mv -f /etc/greetd/config.toml.phoenix-new /etc/greetd/config.toml \
                 || die "writing /etc/greetd/config.toml failed"   # written whole or not at all (2026-10-15: an interrupted install left it empty)
@@ -263,18 +280,31 @@ cmd_login_screen() {
         status)
             local dm; dm=$(basename "$(readlink /etc/systemd/system/display-manager.service 2>/dev/null)" 2>/dev/null)
             if systemctl is-enabled -q greetd.service 2>/dev/null && grep -q "$GREETER_DIR" /etc/greetd/config.toml 2>/dev/null; then
+                local how=", mode: login screen"
+                grep -q '^\[initial_session\]' /etc/greetd/config.toml && how=", mode: lock screen (the desktop starts behind it)"
                 # the running copies are root's: a Phoenix update only changes the ones in your home (QA 2026-10-08)
                 if ! cmp -s "$GREETER_SRC/greeter.qml" "$GREETER_DIR/greeter.qml" || ! cmp -s "$GREETER_SRC/phoenix-session" /usr/local/bin/phoenix-session \
                     || { [ -f "$GREETER_SRC/phoenix-greeter-blank.service" ] && ! cmp -s "$GREETER_SRC/phoenix-greeter-blank.service" /etc/systemd/system/phoenix-greeter-blank.service; } \
                     || ! grep -q "greeter.log" /etc/greetd/config.toml; then
-                    echo "Login screen: on (asks for the password at startup); an update is ready: phoenix login-screen install"
+                    echo "Login screen: on (asks for the password at startup)$how; an update is ready: phoenix login-screen install"
                 else
-                    echo "Login screen: on (asks for the password at startup)"
+                    echo "Login screen: on (asks for the password at startup)$how"
                 fi
             elif [ -n "$(autologin_files)" ]; then echo "Login screen: off (signs in automatically)"
             elif [ -n "$dm" ]; then echo "Login screen: off (login manager: ${dm%.service})"
             else echo "Login screen: off"; fi ;;
-        *) die "usage: phoenix login-screen [install|remove|status]" ;;
+        toggle)   # switch between sign-in at the lock screen and the full login screen (easy to type from Ctrl+Alt+F2)
+            if ! grep -q "$GREETER_DIR" /etc/greetd/config.toml 2>/dev/null; then
+                die "the Phoenix login screen isn't on; turn it on with: phoenix login-screen install"
+            fi
+            if grep -q '^\[initial_session\]' /etc/greetd/config.toml; then
+                echo "Now: sign-in at the lock screen. Switching to the full login screen."
+                cmd_login_screen install --mode greeter
+            else
+                echo "Now: the full login screen. Switching to sign-in at the lock screen."
+                cmd_login_screen install --mode lock
+            fi ;;
+        *) die "usage: phoenix login-screen [install [--mode lock|greeter]|toggle|remove|status]" ;;
     esac
 }
 
@@ -284,6 +314,6 @@ case "${1:-status}" in
     deactivate) cmd_deactivate ;;
     uninstall) cmd_uninstall "${2:-}" ;;
     power-meter) cmd_power_meter "${2:-status}" ;;
-    login-screen) cmd_login_screen "${2:-status}" ;;
+    login-screen) cmd_login_screen "${2:-status}" "${@:3}" ;;
     *) sed -n '2,17p' "$0" | sed 's/^# \{0,1\}//'; exit 2 ;;
 esac

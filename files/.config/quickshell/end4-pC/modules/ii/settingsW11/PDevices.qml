@@ -14,7 +14,8 @@ Item {
 
     Loader {
         anchors.fill: parent
-        sourceComponent: ({ "bluetooth": bluetooth, "mouse": mouse, "keyboard": keyboard })[WState.sub] ?? overview
+        sourceComponent: ({ "bluetooth": bluetooth, "mouse": mouse, "keyboard": keyboard, "input": inputPage
+        })[WState.sub] ?? overview
     }
 
     // Device row with connect/forget buttons (shared by overview + Devices page)
@@ -87,6 +88,10 @@ Item {
             WSection {
                 title: "Related settings"
                 WLink { icon: "settings_bluetooth"; title: "More Bluetooth settings"; chevronIcon: "open_in_new"; action: () => Quickshell.execDetached(["bash", "-c", Config.options.apps.bluetooth]) }
+            }
+            WSection {
+                title: "More"
+                WLink { icon: "mouse"; title: "Mouse, keyboard & touchpad (advanced)"; description: "Pointer speed, acceleration, touchpad gestures, keyboard repeat"; sub: "input" }
             }
         }
     }
@@ -242,8 +247,8 @@ Item {
                     description: "XKB layout codes, comma separated for several (e.g. us,de). Current: " + HyprlandXkb.currentLayoutName
                     Rectangle {
                         implicitWidth: 160; implicitHeight: 34
-                        radius: Appearance.rounding.verysmall
-                        color: Appearance.colors.colLayer3
+                        radius: 12
+                        color: Appearance.colors.colLayer4
                         border.width: kbInput.activeFocus ? 2 : 0
                         border.color: Appearance.colors.colPrimary
                         TextInput {
@@ -306,6 +311,14 @@ Item {
                 title: "Related"
                 WLink { icon: "keyboard_command_key"; title: "Keyboard shortcuts"; description: "Edit your Hyprland keybinds file"; chevronIcon: "open_in_new"; action: () => Quickshell.execDetached(["xdg-open", `${Directories.config}/hypr/custom/keybinds.lua`.replace("file://", "")]) }
             }
+        }
+    }
+
+    // Phoenix (2026-10-15): settings moved here from illogical-impulse's original settings
+    Component {
+        id: inputPage
+        WPage {
+            SInput {}
         }
     }
 }

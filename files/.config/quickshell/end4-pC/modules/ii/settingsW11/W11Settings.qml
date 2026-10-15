@@ -13,10 +13,9 @@ import qs.services
 import qs.modules.common
 import qs.modules.common.widgets
 import qs.modules.common.functions as CF
-import qs.modules.ii.settings
 
 // Windows 11 style settings window. Replaces modules/ii/settings/Settings.qml in the panel family;
-// the original settings stay reachable as "Advanced settings" (embedded SettingsContent).
+// the original illogical-impulse settings were merged into these pages on 2026-10-15 (settingsW11/S*.qml).
 Scope {
     id: root
 
@@ -90,146 +89,198 @@ Scope {
                 }
             }
 
-            ColumnLayout {
+            // Phoenix (2026-10-15): "Material rail" look (concept 2): an icon rail on the left, the page in one big rounded
+            // panel with an expressive title and a pill search box. Colors are the theme's (Material You).
+            RowLayout {
                 anchors.fill: parent
                 spacing: 0
 
-                // ── Title bar ───────────────────────────────────────────────
-                Item {
-                    Layout.fillWidth: true
-                    implicitHeight: 46
-
-                    // The window has no system title bar (hypr/custom/rules.lua "settings-no-titlebar"): drag this
-                    // header to move it (Wayland interactive move), double-click to maximize/restore.
-                    MouseArea {
-                        // the move starts only once the mouse moves, so a double-click still reaches onDoubleClicked
-                        property point pressAt
-                        anchors.fill: parent
-                        onPressed: mouse => pressAt = Qt.point(mouse.x, mouse.y)
-                        onPositionChanged: mouse => {
-                            if (pressed && Math.abs(mouse.x - pressAt.x) + Math.abs(mouse.y - pressAt.y) > 4)
-                                win.Window.window.startSystemMove()
-                        }
-                        onDoubleClicked: Quickshell.execDetached(["hyprctl", "dispatch",
-                            'hl.dsp.window.fullscreen({ mode = "maximized", action = "toggle" })'])
-                    }
-
-                    RowLayout {
-                        anchors { fill: parent; leftMargin: 12; rightMargin: 12 }
-                        spacing: 8
-
-                        RippleButton {
-                            visible: WState.canGoBack
-                            implicitWidth: 38
-                            implicitHeight: 32
-                            buttonRadius: Appearance.rounding.verysmall
-                            onClicked: WState.back()
-                            contentItem: MaterialSymbol {
-                                text: "arrow_back"
-                                iconSize: 20
-                                horizontalAlignment: Text.AlignHCenter
-                                color: Appearance.colors.colOnLayer0
-                            }
-                        }
-                        MaterialSymbol {
-                            Layout.leftMargin: WState.canGoBack ? 0 : 6
-                            text: "settings"
-                            iconSize: 18
-                            fill: 1
-                            color: Appearance.colors.colPrimary
-                        }
-                        StyledText {
-                            text: WState.advanced ? "Settings  ·  Advanced" : "Settings"
-                            font.pixelSize: Appearance.font.pixelSize.smallie
-                            color: Appearance.colors.colOnLayer0
-                        }
-                        Item { Layout.fillWidth: true }
-                        RippleButton {
-                            implicitWidth: 44
-                            implicitHeight: 32
-                            buttonRadius: Appearance.rounding.verysmall
-                            colBackgroundHover: Appearance.colors.colErrorContainer
-                            onClicked: panelWindow.hide()
-                            contentItem: MaterialSymbol {
-                                text: "close"
-                                iconSize: 20
-                                horizontalAlignment: Text.AlignHCenter
-                                color: Appearance.colors.colOnLayer0
-                            }
-                        }
-                    }
-                }
-
-                // ── Body ─────────────────────────────────────────────────────
-                Item {
-                    Layout.fillWidth: true
+                // ── Navigation rail ─────────────────────────────────────────
+                ColumnLayout {
                     Layout.fillHeight: true
+                    Layout.preferredWidth: 96
+                    Layout.maximumWidth: 96
+                    spacing: 0
 
-                    RowLayout {
-                        anchors.fill: parent
-                        anchors.bottomMargin: 8
-                        spacing: 0
-                        visible: !WState.advanced
+                    // drag strip (no system title bar: hypr/custom/rules.lua "settings-no-titlebar")
+                    WDragArea { Layout.fillWidth: true; implicitHeight: 16 }
 
-                        // Navigation pane
-                        ColumnLayout {
-                            Layout.fillHeight: true
-                            Layout.preferredWidth: 290
-                            Layout.maximumWidth: 290
-                            Layout.minimumWidth: 290
-                            Layout.leftMargin: 14
-                            Layout.rightMargin: 14
-                            spacing: 6
+                    RippleButton {   // search
+                        Layout.alignment: Qt.AlignHCenter
+                        Layout.bottomMargin: 12
+                        implicitWidth: 56
+                        implicitHeight: 56
+                        buttonRadius: Appearance.rounding.normal
+                        colBackground: Appearance.colors.colPrimaryContainer
+                        colBackgroundHover: Appearance.colors.colPrimaryContainerHover
+                        colRipple: Appearance.colors.colPrimaryContainerActive
+                        onClicked: searchField.forceActiveFocus()
+                        contentItem: MaterialSymbol {
+                            text: "search"
+                            iconSize: 24
+                            horizontalAlignment: Text.AlignHCenter
+                            verticalAlignment: Text.AlignVCenter
+                            color: Appearance.colors.colOnPrimaryContainer
+                        }
+                        StyledToolTip { text: "Find a setting (Ctrl+F)" }
+                    }
 
-                            // Profile card → Accounts
-                            RippleButton {
-                                Layout.fillWidth: true
-                                implicitHeight: 82
-                                buttonRadius: Appearance.rounding.small
-                                onClicked: WState.go("accounts")
-                                contentItem: RowLayout {
-                                    spacing: 14
-                                    UserAvatar {
-                                        Layout.leftMargin: 6
-                                        implicitWidth: 60
-                                        implicitHeight: 60
-                                    }
-                                    ColumnLayout {
-                                        spacing: 0
-                                        Layout.fillWidth: true
-                                        StyledText {
-                                            Layout.fillWidth: true
-                                            text: Config.options.profile.displayName || SystemInfo.username
-                                            font.pixelSize: Appearance.font.pixelSize.large
-                                            font.weight: Font.DemiBold
-                                            color: Appearance.colors.colOnLayer0
-                                            elide: Text.ElideRight
-                                        }
-                                        StyledText {
-                                            Layout.fillWidth: true
-                                            text: `Local account · ${SystemInfo.hostname || SystemInfo.distroName}`
-                                            font.pixelSize: Appearance.font.pixelSize.smaller
-                                            color: Appearance.colors.colSubtext
-                                            elide: Text.ElideRight
-                                        }
-                                    }
+                    ListView {
+                        id: navList
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        Layout.bottomMargin: 8
+                        clip: true
+                        spacing: 2
+                        boundsBehavior: Flickable.StopAtBounds
+                        model: WState.categories
+                        // short labels under the icons (the full name is the page title). On short windows (1280×800
+                        // screens) the rail goes compact: icons only, the name as a tooltip, so every category fits.
+                        readonly property bool compact: height < WState.categories.length * 54
+                        readonly property var shortNames: ({ personalization: "Personalize", devices: "Devices",
+                            network: "Network", time: "Time", accessibility: "Access", privacy: "Privacy" })
+                        delegate: Item {
+                            id: navItem
+                            required property var modelData
+                            readonly property bool current: WState.page === modelData.id
+                            width: navList.width
+                            height: navList.compact ? 40 : 52
+                            MouseArea {
+                                id: navMouse
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: {
+                                    WState.history = [];
+                                    WState.go(navItem.modelData.id);
+                                    WState.history = [];
                                 }
                             }
+                            Rectangle {   // the pill behind the icon
+                                id: pill
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                y: navList.compact ? 4 : 2
+                                width: navItem.current ? 56 : (navMouse.containsMouse ? 56 : 32)
+                                height: 32
+                                radius: 16
+                                color: navItem.current ? Appearance.colors.colSecondaryContainer
+                                    : navMouse.containsMouse ? Appearance.colors.colLayer1Hover : "transparent"
+                                Behavior on width { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
+                                Behavior on color { ColorAnimation { duration: 150 } }
+                                MaterialSymbol {
+                                    anchors.centerIn: parent
+                                    text: navItem.modelData.icon
+                                    iconSize: 22
+                                    fill: navItem.current ? 1 : 0
+                                    color: navItem.current ? Appearance.colors.colOnSecondaryContainer : Appearance.colors.colOnLayer0
+                                }
+                            }
+                            StyledToolTip {
+                                text: navItem.modelData.name
+                                extraVisibleCondition: navList.compact && navMouse.containsMouse
+                            }
+                            StyledText {
+                                visible: !navList.compact
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                anchors.top: pill.bottom
+                                anchors.topMargin: 3
+                                text: navList.shortNames[navItem.modelData.id] ?? navItem.modelData.name
+                                font.pixelSize: Appearance.font.pixelSize.smaller
+                                font.weight: navItem.current ? Font.DemiBold : Font.Normal
+                                color: navItem.current ? Appearance.colors.colOnLayer0 : Appearance.colors.colSubtext
+                            }
+                        }
+                    }
 
-                            // Search box
-                            Rectangle {
+                }
+
+                // ── Page panel ──────────────────────────────────────────────
+                Rectangle {
+                    id: panel
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    Layout.topMargin: 12
+                    Layout.rightMargin: 12
+                    Layout.bottomMargin: 12
+                    radius: Appearance.rounding.verylarge
+                    color: Appearance.colors.colLayer1
+                    clip: true
+
+                    WDragArea { anchors { left: parent.left; right: parent.right; top: parent.top } height: 24 }
+
+                    ColumnLayout {
+                        anchors.fill: parent
+                        anchors.leftMargin: 36
+                        anchors.rightMargin: 18
+                        anchors.topMargin: 22
+                        spacing: 18
+
+                        // header: back, overline + expressive title, search, close
+                        RowLayout {
+                            Layout.fillWidth: true
+                            Layout.rightMargin: 4
+                            spacing: 14
+
+                            RippleButton {
+                                visible: WState.canGoBack
+                                Layout.alignment: Qt.AlignVCenter
+                                implicitWidth: 44
+                                implicitHeight: 44
+                                buttonRadius: 22
+                                colBackground: Appearance.colors.colLayer2
+                                colBackgroundHover: Appearance.colors.colLayer2Hover
+                                onClicked: WState.back()
+                                contentItem: MaterialSymbol {
+                                    text: "arrow_back"
+                                    iconSize: 22
+                                    horizontalAlignment: Text.AlignHCenter
+                                    verticalAlignment: Text.AlignVCenter
+                                    color: Appearance.colors.colOnLayer1
+                                }
+                            }
+                            ColumnLayout {
                                 Layout.fillWidth: true
-                                Layout.topMargin: 4
-                                Layout.bottomMargin: 8
-                                implicitHeight: 38
-                                radius: Appearance.rounding.verysmall
-                                color: Appearance.colors.colLayer1
+                                spacing: 0
+                                StyledText {
+                                    id: crumbRoot
+                                    text: WState.sub ? WState.categoryName(WState.page) : "Settings"
+                                    font.pixelSize: Appearance.font.pixelSize.small
+                                    color: Appearance.colors.colSubtext
+                                    MouseArea {
+                                        anchors.fill: parent
+                                        enabled: WState.sub !== ""
+                                        cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
+                                        onClicked: WState.go(WState.page, "")
+                                    }
+                                }
+                                StyledText {
+                                    Layout.fillWidth: true
+                                    text: WState.sub ? WState.subTitle(WState.page, WState.sub) : WState.categoryName(WState.page)
+                                    font.family: Appearance.font.family.expressive
+                                    font.pixelSize: 40
+                                    font.weight: Font.DemiBold
+                                    color: Appearance.colors.colOnLayer1
+                                    elide: Text.ElideRight
+                                }
+                            }
+                            // search pill
+                            Rectangle {
+                                id: searchPill
+                                Layout.alignment: Qt.AlignVCenter
+                                implicitWidth: 300
+                                implicitHeight: 48
+                                radius: 24
+                                color: Appearance.colors.colLayer2
                                 border.width: searchField.activeFocus ? 2 : 0
                                 border.color: Appearance.colors.colPrimary
-
                                 RowLayout {
-                                    anchors { fill: parent; leftMargin: 12; rightMargin: 10 }
-                                    spacing: 8
+                                    anchors { fill: parent; leftMargin: 18; rightMargin: 16 }
+                                    spacing: 10
+                                    MaterialSymbol {
+                                        text: "search"
+                                        iconSize: 20
+                                        color: Appearance.colors.colSubtext
+                                    }
                                     TextField {
                                         id: searchField
                                         Layout.fillWidth: true
@@ -246,161 +297,40 @@ Scope {
                                         }
                                         Keys.onEscapePressed: text = ""
                                     }
-                                    MaterialSymbol {
-                                        text: "search"
-                                        iconSize: 18
-                                        color: Appearance.colors.colSubtext
-                                    }
                                 }
                             }
-
-                            // Categories
-                            ListView {
-                                id: navList
-                                Layout.fillWidth: true
-                                Layout.fillHeight: true
-                                clip: true
-                                spacing: 2
-                                boundsBehavior: Flickable.StopAtBounds
-                                model: WState.categories
-                                delegate: RippleButton {
-                                    id: navItem
-                                    required property var modelData
-                                    readonly property bool current: WState.page === modelData.id
-                                    width: navList.width
-                                    implicitHeight: 40
-                                    buttonRadius: Appearance.rounding.verysmall
-                                    colBackground: current ? Appearance.colors.colLayer1 : "transparent"
-                                    colBackgroundHover: current ? Appearance.colors.colLayer1Hover : Appearance.colors.colLayer0Hover
-                                    onClicked: {
-                                        WState.history = [];
-                                        WState.go(modelData.id);
-                                        WState.history = [];
-                                    }
-                                    contentItem: Item {
-                                        // the Windows 11 accent pill on the selected item
-                                        Rectangle {
-                                            anchors.verticalCenter: parent.verticalCenter
-                                            x: -2
-                                            width: 3
-                                            height: navItem.current ? 16 : 0
-                                            radius: 2
-                                            color: Appearance.colors.colPrimary
-                                            Behavior on height { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
-                                        }
-                                        RowLayout {
-                                            anchors { fill: parent; leftMargin: 12 }
-                                            spacing: 14
-                                            MaterialSymbol {
-                                                text: navItem.modelData.icon
-                                                iconSize: 20
-                                                fill: navItem.current ? 1 : 0
-                                                color: Appearance.colors.colPrimary
-                                            }
-                                            StyledText {
-                                                Layout.fillWidth: true
-                                                text: navItem.modelData.name
-                                                font.pixelSize: Appearance.font.pixelSize.small
-                                                font.weight: navItem.current ? Font.DemiBold : Font.Normal
-                                                color: Appearance.colors.colOnLayer0
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                            // Way back to the full original illogical-impulse settings
                             RippleButton {
-                                Layout.fillWidth: true
-                                implicitHeight: 40
-                                buttonRadius: Appearance.rounding.verysmall
-                                colBackground: "transparent"
-                                colBackgroundHover: Appearance.colors.colLayer0Hover
-                                onClicked: WState.go("advanced")
-                                contentItem: RowLayout {
-                                    anchors { fill: parent; leftMargin: 12 }
-                                    spacing: 14
-                                    MaterialSymbol { text: "tune"; iconSize: 20; color: Appearance.colors.colSubtext }
-                                    StyledText {
-                                        Layout.fillWidth: true
-                                        text: "Advanced settings"
-                                        font.pixelSize: Appearance.font.pixelSize.small
-                                        color: Appearance.colors.colSubtext
-                                    }
-                                    MaterialSymbol { text: "chevron_right"; iconSize: 18; color: Appearance.colors.colSubtext; Layout.rightMargin: 8 }
+                                Layout.alignment: Qt.AlignVCenter
+                                implicitWidth: 44
+                                implicitHeight: 44
+                                buttonRadius: 22
+                                colBackgroundHover: Appearance.colors.colErrorContainer
+                                onClicked: panelWindow.hide()
+                                contentItem: MaterialSymbol {
+                                    text: "close"
+                                    iconSize: 22
+                                    horizontalAlignment: Text.AlignHCenter
+                                    verticalAlignment: Text.AlignVCenter
+                                    color: Appearance.colors.colOnLayer1
                                 }
                             }
                         }
 
-                        // Content pane
-                        ColumnLayout {
+                        Loader {
+                            id: pageLoader
                             Layout.fillWidth: true
                             Layout.fillHeight: true
-                            Layout.rightMargin: 22
-                            spacing: 14
-
-                            // Breadcrumb title
-                            RowLayout {
-                                Layout.fillWidth: true
-                                Layout.topMargin: 2
-                                spacing: 10
-                                StyledText {
-                                    id: crumbRoot
-                                    text: WState.categoryName(WState.page)
-                                    font.pixelSize: 30
-                                    font.weight: Font.DemiBold
-                                    color: WState.sub ? Appearance.colors.colSubtext : Appearance.colors.colOnLayer0
-                                    MouseArea {
-                                        anchors.fill: parent
-                                        enabled: WState.sub !== ""
-                                        hoverEnabled: true
-                                        cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
-                                        onClicked: WState.go(WState.page, "")
-                                        onContainsMouseChanged: crumbRoot.opacity = containsMouse ? 0.8 : 1
-                                    }
-                                }
-                                MaterialSymbol {
-                                    visible: WState.sub !== ""
-                                    text: "chevron_right"
-                                    iconSize: 26
-                                    color: Appearance.colors.colSubtext
-                                }
-                                StyledText {
-                                    visible: WState.sub !== ""
-                                    Layout.fillWidth: true
-                                    text: WState.subTitle(WState.page, WState.sub)
-                                    font.pixelSize: 30
-                                    font.weight: Font.DemiBold
-                                    color: Appearance.colors.colOnLayer0
-                                    elide: Text.ElideRight
-                                }
-                                Item { Layout.fillWidth: WState.sub === "" }
+                            active: GlobalStates.settingsOpen || item !== null
+                            source: {
+                                const p = WState.page;
+                                return `P${p.charAt(0).toUpperCase()}${p.slice(1)}.qml`;
                             }
-
-                            Loader {
-                                id: pageLoader
-                                Layout.fillWidth: true
-                                Layout.fillHeight: true
-                                active: GlobalStates.settingsOpen || item !== null
-                                source: {
-                                    const p = WState.page;
-                                    return `P${p.charAt(0).toUpperCase()}${p.slice(1)}.qml`;
-                                }
-                                opacity: status === Loader.Ready ? 1 : 0
-                                Behavior on opacity { NumberAnimation { duration: 160; easing.type: Easing.OutCubic } }
-                            }
+                            opacity: status === Loader.Ready ? 1 : 0
+                            Behavior on opacity { NumberAnimation { duration: 160; easing.type: Easing.OutCubic } }
                         }
                     }
 
-                    // Advanced: the original illogical-impulse settings, untouched
-                    SettingsContent {
-                        id: legacy
-                        anchors.fill: parent
-                        anchors.margins: 4
-                        visible: WState.advanced
-                        enabled: visible
-                    }
-
-                    // Search results flyout
+                    // Search results, under the search pill (solid: easier to read than the see-through layers)
                     Rectangle {
                         id: searchPopup
                         property var results: WState.search(searchField.text)
@@ -408,24 +338,26 @@ Scope {
                             searchField.text = "";
                             WState.go(r.page, r.sub);
                         }
-                        visible: searchField.text.length > 0 && !WState.advanced
-                        x: 14
-                        y: 136
+                        visible: searchField.text.length > 0
+                        anchors.right: parent.right
+                        anchors.rightMargin: 80
+                        y: 84
                         z: 10
-                        width: 290
-                        height: resultsCol.implicitHeight + 12
-                        radius: Appearance.rounding.verysmall
-                        color: Appearance.colors.colLayer2
+                        width: 360
+                        height: resultsCol.implicitHeight + 16
+                        radius: Appearance.rounding.large
+                        // solid, not the see-through layer color: the page underneath made the results hard to read (2026-10-15)
+                        color: Appearance.m3colors.m3surfaceContainerHigh
                         border.width: 1
                         border.color: Appearance.colors.colOutlineVariant
 
                         ColumnLayout {
                             id: resultsCol
-                            anchors { left: parent.left; right: parent.right; top: parent.top; margins: 6 }
-                            spacing: 0
+                            anchors { left: parent.left; right: parent.right; top: parent.top; margins: 8 }
+                            spacing: 2
                             StyledText {
                                 visible: searchPopup.results.length === 0
-                                Layout.margins: 10
+                                Layout.margins: 12
                                 text: "No results"
                                 color: Appearance.colors.colSubtext
                                 font.pixelSize: Appearance.font.pixelSize.small
@@ -435,29 +367,41 @@ Scope {
                                 RippleButton {
                                     required property var modelData
                                     Layout.fillWidth: true
-                                    implicitHeight: 40
-                                    buttonRadius: Appearance.rounding.verysmall
+                                    implicitHeight: 52
+                                    buttonRadius: Appearance.rounding.normal
                                     onClicked: searchPopup.open(modelData)
                                     contentItem: RowLayout {
-                                        spacing: 10
-                                        MaterialSymbol {
+                                        spacing: 12
+                                        Rectangle {
                                             Layout.leftMargin: 6
-                                            text: WState.categories.find(c => c.id === modelData.page)?.icon ?? "tune"
-                                            iconSize: 18
-                                            color: Appearance.colors.colPrimary
+                                            implicitWidth: 36
+                                            implicitHeight: 36
+                                            radius: 12
+                                            color: Appearance.colors.colSecondaryContainer
+                                            MaterialSymbol {
+                                                anchors.centerIn: parent
+                                                text: WState.categories.find(c => c.id === modelData.page)?.icon ?? "tune"
+                                                iconSize: 18
+                                                color: Appearance.colors.colOnSecondaryContainer
+                                            }
                                         }
                                         ColumnLayout {
                                             spacing: 0
                                             Layout.fillWidth: true
                                             StyledText {
+                                                Layout.fillWidth: true
+                                                horizontalAlignment: Text.AlignLeft
                                                 text: modelData.title
                                                 font.pixelSize: Appearance.font.pixelSize.small
                                                 color: Appearance.colors.colOnLayer2
+                                                elide: Text.ElideRight
                                             }
                                             StyledText {
-                                                text: modelData.page === "advanced" ? "Advanced"
-                                                    : WState.categoryName(modelData.page) + (modelData.sub ? " › " + WState.subTitle(modelData.page, modelData.sub) : "")
-                                                font.pixelSize: Appearance.font.pixelSize.smallest
+                                                Layout.fillWidth: true
+                                                horizontalAlignment: Text.AlignLeft
+                                                elide: Text.ElideRight
+                                                text: WState.categoryName(modelData.page) + (modelData.sub ? " › " + WState.subTitle(modelData.page, modelData.sub) : "")
+                                                font.pixelSize: Appearance.font.pixelSize.smaller
                                                 color: Appearance.colors.colSubtext
                                             }
                                         }

@@ -19,7 +19,7 @@ Rectangle {
 
     Layout.fillWidth: true
     implicitHeight: DeskMenuStyle.rowHeight
-    radius: DeskMenuStyle.menuRadius - 3
+    radius: DeskMenuStyle.menuRadius - 4
     color: rowMouse.pressed ? DeskMenuStyle.colPressed : (rowMouse.containsMouse || row.active) ? DeskMenuStyle.colHover : "transparent"
 
     MouseArea {

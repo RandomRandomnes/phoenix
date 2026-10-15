@@ -161,8 +161,14 @@ def health():
                               "text": "Windows have no title bars: the title bar plugin isn't loaded"
                                       + (f" (Hyprland {bare(hv)}, plugin built for {bare(bv)})" if hv and bv and bare(hv) != bare(bv) else "") + ".",
                               "fix": "Update the plugin (`yay -S hyprland-plugin-hyprbars`), then log out and in."})
-    rc, shells = run(["pgrep", "-f", "^qs -c [e]nd4-pC$"], timeout=10)
-    n = len(shells.split())
+    # count running shells with Quickshell's own instance list: after Quickshell restarts itself from a crash its
+    # process is named "/usr/bin/quickshell", so the process-name match alone reported "isn't running" (2026-10-15)
+    rc, inst = run(["qs", "list", "-c", "end4-pC"], timeout=10)
+    if rc == 0:
+        n = len(re.findall(r"^Instance ", inst, re.M))
+    else:
+        rc, shells = run(["pgrep", "-f", "^qs -c [e]nd4-pC$"], timeout=10)
+        n = len(shells.split())
     if in_hypr and n != 1:
         probs.append({"id": "shells", "level": "high",
                       "text": "The desktop shell isn't running." if n == 0 else f"{n} copies of the desktop shell are running (bars stack).",

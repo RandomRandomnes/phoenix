@@ -70,6 +70,11 @@ Singleton {
     }
     property bool diSessionOpen: false
     property bool startupLockPending: true
+    // Phoenix lock-screen sign-in (2026-10-15): the session was started without a password (greetd autologin, see
+    // /usr/local/bin/phoenix-session), so the lock screen comes first and the rest of the desktop is only created once
+    // the compositor confirms the lock (LockScreen.qml opens the gate). Normal starts: the gate is open from the start.
+    readonly property bool lockFirst: Quickshell.env("PHOENIX_LOCK_FIRST") === "1"
+    property bool startupGateOpen: !lockFirst
     property bool backgroundVisible: true
     // Phoenix's background services are started from shell.qml (2026-10-08): GlobalStates is also loaded by the setup
     // assistant and quick-start (separate qs -p processes), which then ran a second copy of each service.

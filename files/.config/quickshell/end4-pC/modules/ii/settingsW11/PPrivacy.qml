@@ -92,4 +92,7 @@ WPage {
             WButton { buttonText: "Clear"; enabled: Notifications.list.length > 0; onClicked: Notifications.discardAllNotifications() }
         }
     }
+
+    // Phoenix (2026-10-15): settings moved here from illogical-impulse's original settings
+    SWorkSafety {}
 }

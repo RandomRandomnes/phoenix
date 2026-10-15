@@ -3,7 +3,7 @@ import QtQuick.Layouts
 import qs.modules.common
 import qs.modules.common.widgets
 
-// A titled group of cards, stacked with the small gaps Windows 11 uses.
+// A titled group of cards; the cards join into one grouped list (WCard).
 ColumnLayout {
     id: root
     property string title: ""
@@ -15,16 +15,16 @@ ColumnLayout {
     StyledText {
         visible: root.title.length > 0
         Layout.topMargin: 6
-        Layout.leftMargin: 2
+        Layout.leftMargin: 6
         text: root.title
         font.pixelSize: Appearance.font.pixelSize.small
-        font.weight: Font.DemiBold
-        color: Appearance.colors.colOnLayer1
+        font.weight: Font.Medium
+        color: Appearance.colors.colSubtext
     }
 
     ColumnLayout {
         id: cardColumn
         Layout.fillWidth: true
-        spacing: 3
+        spacing: 4
     }
 }

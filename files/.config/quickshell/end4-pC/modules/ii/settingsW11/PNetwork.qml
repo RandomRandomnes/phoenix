@@ -42,8 +42,8 @@ Item {
             Rectangle {
                 Layout.fillWidth: true
                 implicitHeight: 96
-                radius: Appearance.rounding.small
-                color: Appearance.colors.colLayer2
+                radius: Appearance.rounding.large
+                color: Appearance.colors.colLayer3
                 RowLayout {
                     anchors { fill: parent; leftMargin: 22; rightMargin: 18 }
                     spacing: 18
@@ -109,8 +109,8 @@ Item {
                 Rectangle {
                     Layout.fillWidth: true
                     implicitHeight: propCol.implicitHeight + 28
-                    radius: Appearance.rounding.verysmall + 2
-                    color: Appearance.colors.colLayer2
+                    radius: Appearance.rounding.large
+                    color: Appearance.colors.colLayer3
                     ColumnLayout {
                         id: propCol
                         anchors { left: parent.left; right: parent.right; top: parent.top; margins: 14; leftMargin: 18 }
@@ -208,8 +208,8 @@ Item {
                                 spacing: 8
                                 Rectangle {
                                     implicitWidth: 220; implicitHeight: 34
-                                    radius: Appearance.rounding.verysmall
-                                    color: Appearance.colors.colLayer3
+                                    radius: 12
+                                    color: Appearance.colors.colLayer4
                                     border.width: 2
                                     border.color: Appearance.colors.colPrimary
                                     TextField {

@@ -79,8 +79,8 @@ date -r /var/lib/pacman/sync/core.db '+%b %-d, %-I:%M %p' 2>/dev/null`]
     Rectangle {
         Layout.fillWidth: true
         implicitHeight: 110
-        radius: Appearance.rounding.small
-        color: Appearance.colors.colLayer2
+        radius: Appearance.rounding.large
+        color: Appearance.colors.colLayer3
         RowLayout {
             anchors { fill: parent; leftMargin: 24; rightMargin: 20 }
             spacing: 20
@@ -403,7 +403,7 @@ date -r /var/lib/pacman/sync/core.db '+%b %-d, %-I:%M %p' 2>/dev/null`]
                 Layout.fillWidth: true
                 Layout.topMargin: 4
                 implicitHeight: riskRow.implicitHeight + 20
-                radius: Appearance.rounding.small
+                radius: Appearance.rounding.normal
                 color: Appearance.colors.colErrorContainer
                 RowLayout {
                     id: riskRow
@@ -557,6 +557,16 @@ date -r /var/lib/pacman/sync/core.db '+%b %-d, %-I:%M %p' 2>/dev/null`]
 
     WSection {
         title: "Advanced options"
+        WCombo {
+            icon: "rule"
+            title: "How updates install"
+            description: Config.options.extras.updateMode === ""
+                ? "You'll be asked at the next update. Ask first: see what will be updated and confirm, like the installer"
+                : "Ask first: see what will be updated and confirm, like the installer. Automatically: only your password is asked"
+            model: [{ displayName: "Ask first", value: "ask" }, { displayName: "Automatically", value: "auto" }]
+            currentValue: Config.options.extras.updateMode
+            onSelected: v => Config.options.extras.updateMode = v
+        }
         WToggle {
             icon: "notifications_active"
             title: "Check for updates automatically"
@@ -578,8 +588,8 @@ date -r /var/lib/pacman/sync/core.db '+%b %-d, %-I:%M %p' 2>/dev/null`]
         Rectangle {
             Layout.fillWidth: true
             implicitHeight: histCol.implicitHeight + 24
-            radius: Appearance.rounding.verysmall + 2
-            color: Appearance.colors.colLayer2
+            radius: Appearance.rounding.large
+            color: Appearance.colors.colLayer3
             ColumnLayout {
                 id: histCol
                 anchors { left: parent.left; right: parent.right; top: parent.top; margins: 12; leftMargin: 18 }

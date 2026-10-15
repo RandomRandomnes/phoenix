@@ -15,7 +15,8 @@ Item {
 
     Loader {
         anchors.fill: parent
-        sourceComponent: ({ "installed": installed, "defaults": defaults, "startup": startup, "rules": rules })[WState.sub] ?? overview
+        sourceComponent: ({ "installed": installed, "defaults": defaults, "startup": startup, "rules": rules, "autostart": autostartPage
+        })[WState.sub] ?? overview
     }
 
     readonly property string helper: Quickshell.shellPath("modules/ii/settingsW11/defaultapps.py")
@@ -81,8 +82,8 @@ esac`;
                 title: `${ip.apps.length} apps`
                 Rectangle {
                     implicitWidth: 300; implicitHeight: 36
-                    radius: Appearance.rounding.verysmall
-                    color: Appearance.colors.colLayer3
+                    radius: 12
+                    color: Appearance.colors.colLayer4
                     border.width: appSearch.activeFocus ? 2 : 0
                     border.color: Appearance.colors.colPrimary
                     TextField {
@@ -270,8 +271,8 @@ esac`;
                     title: "Add a startup app"
                     Rectangle {
                         implicitWidth: 280; implicitHeight: 36
-                        radius: Appearance.rounding.verysmall
-                        color: Appearance.colors.colLayer3
+                        radius: 12
+                        color: Appearance.colors.colLayer4
                         border.width: addSearch.activeFocus ? 2 : 0
                         border.color: Appearance.colors.colPrimary
                         TextField {
@@ -316,6 +317,18 @@ esac`;
                     WButton { buttonText: "Edit script"; onClicked: Quickshell.execDetached(["xdg-open", `${FileUtils.trimFileProtocol(Directories.config)}/hypr/custom/scripts/autostart.sh`]) }
                 }
             }
+            WSection {
+                title: "More"
+                WLink { icon: "rocket_launch"; title: "Autostart apps"; description: "Apps and commands that start with the desktop"; sub: "autostart" }
+            }
+        }
+    }
+
+    // Phoenix (2026-10-15): settings moved here from illogical-impulse's original settings
+    Component {
+        id: autostartPage
+        WPage {
+            SAutostart {}
         }
     }
 }

@@ -62,8 +62,8 @@ ColumnLayout {
         property string iconName
         implicitWidth: 34
         implicitHeight: 34
-        buttonRadius: Appearance.rounding.verysmall
-        colBackgroundHover: Appearance.colors.colLayer3Hover
+        buttonRadius: height / 2
+        colBackgroundHover: Appearance.colors.colLayer4Hover
         contentItem: MaterialSymbol {
             text: parent.iconName
             iconSize: 20
@@ -111,8 +111,8 @@ ColumnLayout {
         Rectangle {
             implicitWidth: 280
             implicitHeight: 36
-            radius: Appearance.rounding.verysmall
-            color: Appearance.colors.colLayer3
+            radius: 12
+            color: Appearance.colors.colLayer4
             border.width: search.activeFocus ? 2 : 0
             border.color: Appearance.colors.colPrimary
             RowLayout {

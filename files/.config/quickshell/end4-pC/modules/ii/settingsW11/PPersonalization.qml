@@ -16,7 +16,7 @@ Item {
         anchors.fill: parent
         sourceComponent: ({
             "background": background, "colors": colors, "taskbar": taskbar, "dock": dock,
-            "start": start, "appgrid": appgrid, "lockscreen": lockscreen, "widgets": widgets, "sidebar": sidebar
+            "start": start, "appgrid": appgrid, "lockscreen": lockscreen, "widgets": widgets, "sidebar": sidebar, "taskbar-more": taskbarMorePage, "dock-more": dockMorePage, "background-more": backgroundMorePage, "widgets-more": widgetsMorePage, "colors-more": colorsMorePage, "fonts": fontsPage, "start-more": startMorePage, "lockscreen-more": lockscreenMorePage, "sidebar-more": sidebarMorePage, "windows": windowsPage
         })[WState.sub] ?? overview
     }
 
@@ -80,6 +80,14 @@ Item {
                 WLink { icon: "widgets"; title: "Desktop widgets"; description: "Clock, calendar, notes, to-do and more on your desktop"; sub: "widgets" }
                 WLink { icon: "right_panel_open"; title: "Sidebar"; description: "Show or hide the extras in the right sidebar"; sub: "sidebar" }
             }
+            WSection {
+                title: "More"
+                WLink { icon: "font_download"; title: "Fonts"; description: "The fonts the desktop uses"; sub: "fonts" }
+            }
+            WSection {
+                title: "More"
+                WLink { icon: "select_window_2"; title: "Windows & effects"; description: "Gaps, borders, rounding, blur, shadows, animations, focus"; sub: "windows" }
+            }
         }
     }
 
@@ -93,10 +101,10 @@ Item {
                 required property bool modelData
                 implicitWidth: 120
                 implicitHeight: 70
-                buttonRadius: Appearance.rounding.small
+                buttonRadius: Appearance.rounding.normal
                 toggled: Appearance.m3colors.darkmode === modelData
-                colBackground: Appearance.colors.colLayer2
-                colBackgroundHover: Appearance.colors.colLayer2Hover
+                colBackground: Appearance.colors.colLayer3
+                colBackgroundHover: Appearance.colors.colLayer3Hover
                 colBackgroundToggled: Appearance.colors.colPrimaryContainer
                 colBackgroundToggledHover: Appearance.colors.colPrimaryContainerHover
                 onClicked: if (!toggled) dm.mainAction()
@@ -223,6 +231,10 @@ Item {
                     onToggled: v => Config.options.background.hideWhenFullscreen = v
                 }
             }
+            WSection {
+                title: "More"
+                WLink { icon: "tune"; title: "More background settings"; description: "Wallpaper options, several wallpapers at once, the wallpaper picker"; sub: "background-more" }
+            }
         }
     }
 
@@ -330,6 +342,10 @@ Item {
                     }
                 }
             }
+            WSection {
+                title: "More"
+                WLink { icon: "tune"; title: "More color settings"; description: "Color schemes, transparency, colors for apps and the terminal"; sub: "colors-more" }
+            }
         }
     }
 
@@ -431,7 +447,7 @@ Item {
                         onToggled: v => tp.setShown(modelData.id, v, modelData.side)
                     }
                 }
-                WLink { icon: "view_week"; title: "Rearrange taskbar items"; description: "Drag items between left, center and right"; action: () => { WState.go("advanced"); GlobalStates.openSettingsAt("bar"); } }
+                WLink { icon: "view_week"; title: "Rearrange taskbar items"; description: "Drag items between left, center and right"; sub: "taskbar-more" }
             }
 
             WSection {
@@ -527,7 +543,11 @@ Item {
                     checked: Config.options.bar.tooltips.enable
                     onToggled: v => Config.options.bar.tooltips.enable = v
                 }
-                WLink { icon: "style"; title: "Taskbar style"; description: "Corner style, grouping, frame, dynamic island"; action: () => { WState.go("advanced"); GlobalStates.openSettingsAt("bar"); } }
+                WLink { icon: "style"; title: "Taskbar style"; description: "Corner style, grouping, frame, dynamic island"; sub: "taskbar-more" }
+            }
+            WSection {
+                title: "More"
+                WLink { icon: "tune"; title: "More taskbar settings"; description: "Layout, workspaces, resources, utility buttons, frame, dynamic island, tray"; sub: "taskbar-more" }
             }
         }
     }
@@ -658,8 +678,8 @@ Item {
                     title: "Hide an app"
                     Rectangle {
                         implicitWidth: 220; implicitHeight: 34
-                        radius: Appearance.rounding.verysmall
-                        color: Appearance.colors.colLayer3
+                        radius: 12
+                        color: Appearance.colors.colLayer4
                         border.width: hideInput.activeFocus ? 2 : 0
                         border.color: Appearance.colors.colPrimary
                         TextInput {
@@ -682,6 +702,10 @@ Item {
                         }
                     }
                 }
+            }
+            WSection {
+                title: "More"
+                WLink { icon: "tune"; title: "More dock settings"; description: "Position, size, style, previews, colors"; sub: "dock-more" }
             }
         }
     }
@@ -736,6 +760,10 @@ Item {
                     checked: Config.options.search.prefix.showDefaultActionsWithoutPrefix
                     onToggled: v => Config.options.search.prefix.showDefaultActionsWithoutPrefix = v
                 }
+            }
+            WSection {
+                title: "More"
+                WLink { icon: "tune"; title: "More Start settings"; description: "Overview grid, search prefixes and results"; sub: "start-more" }
             }
         }
     }
@@ -813,6 +841,35 @@ Item {
         id: lockscreen
         WPage {
             WSection {
+                title: "Style"
+                // Phoenix lock screen styles (2026-10-15): modules/ii/lock/styles/, preview = lock-preview.qml
+                WCombo {
+                    id: lockStyle
+                    icon: "style"
+                    title: "Lock screen style"
+                    description: "The screen you see when the PC is locked, and when you sign in at startup"
+                    model: [
+                        { displayName: "Original (illogical-impulse)", value: "original" },
+                        { displayName: "Material islands", value: "islands" },
+                        { displayName: "Cookie clock", value: "cookie" },
+                        { displayName: "Frosted card", value: "frosted" },
+                        { displayName: "Windows Hello", value: "hello" },
+                        { displayName: "Split editorial", value: "editorial" },
+                        { displayName: "Just the clock", value: "clock" },
+                        { displayName: "You and a password", value: "user" },
+                        { displayName: "One bar at the bottom", value: "bar" },
+                        { displayName: "Plain dark", value: "plain" },
+                    ]
+                    currentValue: Config.options.lock.style ?? "original"
+                    onSelected: v => Config.options.lock.style = v
+                    WButton {
+                        buttonText: "Preview"
+                        onClicked: Quickshell.execDetached(["bash", "-c",
+                            `PHOENIX_LOCK_PREVIEW='${lockStyle.currentValue}' exec qs -p '${Quickshell.shellPath("lock-preview.qml")}'`])
+                    }
+                }
+            }
+            WSection {
                 title: "Appearance"
                 WToggle {
                     icon: "blur_on"
@@ -821,12 +878,14 @@ Item {
                     onToggled: v => Config.options.lock.blur.enable = v
                 }
                 WToggle {
+                    visible: (Config.options.lock.style ?? "original") === "original"   // only the original lock screen has this
                     icon: "schedule"
                     title: "Center the clock"
                     checked: Config.options.lock.centerClock
                     onToggled: v => Config.options.lock.centerClock = v
                 }
                 WToggle {
+                    visible: ["original", "islands"].includes(Config.options.lock.style ?? "original")
                     icon: "lock"
                     title: "Show \"Locked\" text"
                     checked: Config.options.lock.showLockedText
@@ -845,6 +904,7 @@ Item {
                     onToggled: v => Config.options.lock.showWidgets = v
                 }
                 WToggle {
+                    visible: ["original", "islands"].includes(Config.options.lock.style ?? "original")
                     icon: "toolbar"
                     title: "Show toolbars"
                     description: "Power, keyboard layout and battery buttons"
@@ -875,6 +935,10 @@ Item {
                     onToggled: v => Config.options.lock.useHyprlock = v
                 }
                 WLink { icon: "timer"; title: "Lock automatically after…"; description: "In Power › Screen and sleep"; page: "system"; sub: "power" }
+            }
+            WSection {
+                title: "More"
+                WLink { icon: "tune"; title: "More lock screen settings"; description: "Blur strength and zoom, shape dots"; sub: "lockscreen-more" }
             }
         }
     }
@@ -911,7 +975,11 @@ Item {
                         onToggled: v => Config.options.background.widgets[modelData[0]].enable = v
                     }
                 }
-                WLink { icon: "tune"; title: "Widget styles and placement"; action: () => { WState.go("advanced"); GlobalStates.openSettingsAt("desktop"); } }
+                WLink { icon: "tune"; title: "Widget styles and placement"; sub: "widgets-more" }
+            }
+            WSection {
+                title: "More"
+                WLink { icon: "tune"; title: "More widget settings"; description: "Clock styles, custom image, visualizer, text and every desktop widget"; sub: "widgets-more" }
             }
         }
     }
@@ -944,6 +1012,93 @@ Item {
                     onToggled: v => Config.options.sidebar.desktopSwitch = v
                 }
             }
+            WSection {
+                title: "More"
+                WLink { icon: "tune"; title: "More sidebar settings"; description: "Left and right sidebar contents, hot corners"; sub: "sidebar-more" }
+            }
+        }
+    }
+
+    // Phoenix (2026-10-15): settings moved here from illogical-impulse's original settings
+    Component {
+        id: taskbarMorePage
+        WPage {
+            STaskbar {}
+        }
+    }
+
+    // Phoenix (2026-10-15): settings moved here from illogical-impulse's original settings
+    Component {
+        id: dockMorePage
+        WPage {
+            SDock {}
+        }
+    }
+
+    // Phoenix (2026-10-15): settings moved here from illogical-impulse's original settings
+    Component {
+        id: backgroundMorePage
+        WPage {
+            SBackground {}
+            SWallpaperPicker {}
+        }
+    }
+
+    // Phoenix (2026-10-15): settings moved here from illogical-impulse's original settings
+    Component {
+        id: widgetsMorePage
+        WPage {
+            SWidgets {}
+        }
+    }
+
+    // Phoenix (2026-10-15): settings moved here from illogical-impulse's original settings
+    Component {
+        id: colorsMorePage
+        WPage {
+            SColors {}
+            SAppearanceGeneral {}
+        }
+    }
+
+    // Phoenix (2026-10-15): settings moved here from illogical-impulse's original settings
+    Component {
+        id: fontsPage
+        WPage {
+            SFonts {}
+        }
+    }
+
+    // Phoenix (2026-10-15): settings moved here from illogical-impulse's original settings
+    Component {
+        id: startMorePage
+        WPage {
+            SOverview {}
+            SSearch {}
+        }
+    }
+
+    // Phoenix (2026-10-15): settings moved here from illogical-impulse's original settings
+    Component {
+        id: lockscreenMorePage
+        WPage {
+            SLock {}
+        }
+    }
+
+    // Phoenix (2026-10-15): settings moved here from illogical-impulse's original settings
+    Component {
+        id: sidebarMorePage
+        WPage {
+            SSidebar {}
+        }
+    }
+
+    // Phoenix (2026-10-15): settings moved here from illogical-impulse's original settings
+    Component {
+        id: windowsPage
+        WPage {
+            SWindows {}
         }
     }
 }

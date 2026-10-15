@@ -426,8 +426,8 @@ ApplicationWindow {
         Rectangle {
             Layout.preferredWidth: 190
             implicitHeight: 34
-            radius: Appearance.rounding.small
-            color: Appearance.colors.colLayer2
+            radius: 12
+            color: Appearance.colors.colLayer3
             StyledText {
                 anchors.centerIn: parent
                 text: key.keys
@@ -450,15 +450,16 @@ ApplicationWindow {
         Rectangle {   // step list
             Layout.fillHeight: true
             Layout.preferredWidth: 250
-            color: Appearance.colors.colLayer1
+            color: "transparent"   // Material look (2026-10-15): the list sits on the window background, like Settings' rail
             ColumnLayout {
                 anchors { fill: parent; margins: 22 }
                 spacing: 4
                 StyledText {
                     text: "Set up your PC"
+                    font.family: Appearance.font.family.expressive
                     font.pixelSize: Appearance.font.pixelSize.larger
                     font.weight: Font.DemiBold
-                    color: Appearance.colors.colOnLayer1
+                    color: Appearance.colors.colOnLayer0
                     Layout.bottomMargin: 12
                 }
                 Repeater {
@@ -468,9 +469,11 @@ ApplicationWindow {
                         required property var modelData
                         required property int index
                         Layout.fillWidth: true
-                        implicitHeight: 34
-                        buttonRadius: Appearance.rounding.small
-                        colBackground: "transparent"
+                        // shrinks a little on short windows (1280×800 screens) so all 14 steps fit
+                        implicitHeight: Math.max(30, Math.min(40, (root.height - 120) / root.steps.length - 4))
+                        buttonRadius: height / 2
+                        colBackground: index === root.step ? Appearance.colors.colSecondaryContainer : "transparent"
+                        colBackgroundHover: index === root.step ? Appearance.colors.colSecondaryContainerHover : Appearance.colors.colLayer1Hover
                         enabled: index <= root.step && !root.busy && !(root.blocked && index > root.step)
                         onClicked: root.go(index)
                         contentItem: RowLayout {
@@ -483,14 +486,14 @@ ApplicationWindow {
                                     : !root.online && root.onlineSteps.includes(stepButton.modelData.id) ? "cloud_off" : stepButton.modelData.icon
                                 fill: stepButton.index <= root.step ? 1 : 0
                                 iconSize: 20
-                                color: stepButton.index === root.step ? Appearance.colors.colPrimary : Appearance.colors.colOnLayer1
+                                color: stepButton.index === root.step ? Appearance.colors.colOnSecondaryContainer : Appearance.colors.colOnLayer0
                             }
                             StyledText {
                                 Layout.fillWidth: true
                                 text: stepButton.modelData.title
                                 elide: Text.ElideRight
                                 font.weight: stepButton.index === root.step ? Font.DemiBold : Font.Normal
-                                color: Appearance.colors.colOnLayer1
+                                color: stepButton.index === root.step ? Appearance.colors.colOnSecondaryContainer : Appearance.colors.colOnLayer0
                             }
                         }
                     }
@@ -499,76 +502,87 @@ ApplicationWindow {
             }
         }
 
-        ColumnLayout {   // current step
+        Rectangle {   // the page in one rounded panel (Material look, like Settings; 2026-10-15)
             Layout.fillWidth: true
             Layout.fillHeight: true
-            Layout.margins: 28
-            spacing: 14
+            Layout.topMargin: 12
+            Layout.rightMargin: 12
+            Layout.bottomMargin: 12
+            radius: Appearance.rounding.verylarge
+            color: Appearance.colors.colLayer1
+            clip: true
 
-            StyledText {
-                text: root.cur.heading
-                font.pixelSize: Appearance.font.pixelSize.hugeass + 6
-                font.weight: Font.DemiBold
-                color: Appearance.colors.colOnLayer0
-            }
-            StyledText {
-                Layout.fillWidth: true
-                wrapMode: Text.WordWrap
-                text: root.cur.text
-                font.pixelSize: Appearance.font.pixelSize.normal
-                color: Appearance.colors.colSubtext
-            }
+            ColumnLayout {   // current step
+                anchors.fill: parent
+                anchors.margins: 28
+                anchors.leftMargin: 32
+                spacing: 14
 
-            Loader {
-                id: body
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                sourceComponent: ({
-                    welcome: welcomePage, wifi: networkPage, bluetooth: devicesPage, region: regionPage,
-                    keyboard: devicesPage, display: systemPage, profile: profilePage, colors: personalizationPage,
-                    wallpaper: personalizationPage, account: accountPage, apps: appsPage, system: hardwarePage,
-                    shortcuts: shortcutsPage, done: donePage,
-                })[root.cur.id]
-            }
-
-            StyledText {
-                visible: root.error !== ""
-                Layout.fillWidth: true
-                wrapMode: Text.WordWrap
-                text: root.error
-                color: Appearance.colors.colError
-            }
-
-            RowLayout {
-                Layout.fillWidth: true
-                spacing: 10
-                WButton {
-                    visible: root.step > 0 && root.cur.id !== "done"
-                    enabled: !root.busy
-                    buttonText: "Back"
-                    onClicked: root.go(root.step - 1)
-                }
-                Item { Layout.fillWidth: true }
-                WButton {
-                    visible: root.cur.id !== "welcome" && root.cur.id !== "done" && root.cur.id !== "profile"
-                        && !(root.cur.id === "system" && root.fixesQuestion)
-                    buttonText: "Skip"
-                    onClicked: root.go(root.step + 1)
+                StyledText {
+                    text: root.cur.heading
+                    font.pixelSize: Appearance.font.pixelSize.hugeass + 6
+                    font.weight: Font.DemiBold
+                    color: Appearance.colors.colOnLayer0
                 }
                 StyledText {
-                    visible: root.blocked && root.fixesNudge
-                    text: "Select Yes or No above to continue"
-                    font.weight: Font.DemiBold
+                    Layout.fillWidth: true
+                    wrapMode: Text.WordWrap
+                    text: root.cur.text
+                    font.pixelSize: Appearance.font.pixelSize.normal
+                    color: Appearance.colors.colSubtext
+                }
+
+                Loader {
+                    id: body
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    sourceComponent: ({
+                        welcome: welcomePage, wifi: networkPage, bluetooth: devicesPage, region: regionPage,
+                        keyboard: devicesPage, display: systemPage, profile: profilePage, colors: personalizationPage,
+                        wallpaper: personalizationPage, account: accountPage, apps: appsPage, system: hardwarePage,
+                        shortcuts: shortcutsPage, done: donePage,
+                    })[root.cur.id]
+                }
+
+                StyledText {
+                    visible: root.error !== ""
+                    Layout.fillWidth: true
+                    wrapMode: Text.WordWrap
+                    text: root.error
                     color: Appearance.colors.colError
                 }
-                WButton {
-                    accent: true
-                    enabled: !root.busy
-                    buttonText: root.busy ? "Applying…" : root.cur.id === "welcome" ? "Get started"
-                        : root.cur.id === "done" ? "Finish" : "Next"
-                    onClicked: {
-                        if (root.blocked) { root.fixesNudge = true; root.nudgeRequested(); return }
-                        root.next()
+
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 10
+                    WButton {
+                        visible: root.step > 0 && root.cur.id !== "done"
+                        enabled: !root.busy
+                        buttonText: "Back"
+                        onClicked: root.go(root.step - 1)
+                    }
+                    Item { Layout.fillWidth: true }
+                    WButton {
+                        visible: root.cur.id !== "welcome" && root.cur.id !== "done" && root.cur.id !== "profile"
+                            && !(root.cur.id === "system" && root.fixesQuestion)
+                        buttonText: "Skip"
+                        onClicked: root.go(root.step + 1)
+                    }
+                    StyledText {
+                        visible: root.blocked && root.fixesNudge
+                        text: "Select Yes or No above to continue"
+                        font.weight: Font.DemiBold
+                        color: Appearance.colors.colError
+                    }
+                    WButton {
+                        accent: true
+                        enabled: !root.busy
+                        buttonText: root.busy ? "Applying…" : root.cur.id === "welcome" ? "Get started"
+                            : root.cur.id === "done" ? "Finish" : "Next"
+                        onClicked: {
+                            if (root.blocked) { root.fixesNudge = true; root.nudgeRequested(); return }
+                            root.next()
+                        }
                     }
                 }
             }
@@ -945,7 +959,7 @@ ApplicationWindow {
             anchors.centerIn: parent
             width: Math.min(parent.width - 80, 520)
             height: Math.min(parent.height - 80, confirmColumn.implicitHeight + 48)
-            radius: Appearance.rounding.normal
+            radius: Appearance.rounding.verylarge
             color: Appearance.colors.colLayer1Base   // opaque, like the shell's popups
             border.width: 1
             border.color: Appearance.colors.colLayer0Border
@@ -957,9 +971,10 @@ ApplicationWindow {
                 spacing: 12
                 StyledText {
                     text: `Install ${root.picked.length} application${root.picked.length === 1 ? "" : "s"}?`
+                    font.family: Appearance.font.family.expressive
                     font.pixelSize: Appearance.font.pixelSize.larger
                     font.weight: Font.DemiBold
-                    color: Appearance.colors.colOnLayer1
+                    color: Appearance.colors.colOnLayer0
                 }
                 StyledText {
                     Layout.fillWidth: true

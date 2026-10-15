@@ -111,8 +111,8 @@ WPage {
             description: "Valorant-style crosshair code"
             Rectangle {
                 implicitWidth: 280; implicitHeight: 34
-                radius: Appearance.rounding.verysmall
-                color: Appearance.colors.colLayer3
+                radius: 12
+                color: Appearance.colors.colLayer4
                 TextInput {
                     anchors { fill: parent; leftMargin: 10; rightMargin: 10 }
                     verticalAlignment: Text.AlignVCenter

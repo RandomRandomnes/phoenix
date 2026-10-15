@@ -4,6 +4,7 @@ import qs.services
 import qs.modules.common
 import qs.modules.common.functions
 import qs.modules.common.panels.lock
+import qs.modules.ii.lock.styles
 import QtQuick
 import Quickshell
 import Quickshell.Io
@@ -35,7 +36,8 @@ LockScreen {
         }
     }
 
-    lockSurface: LockSurface {
+    // Phoenix (2026-10-15): the style chosen in Settings › Personalization › Lock screen (falls back to LockSurface)
+    lockSurface: LockStyleLoader {
         context: root.context
     }
 

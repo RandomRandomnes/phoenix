@@ -5,13 +5,14 @@
 #   or: git clone https://github.com/RandomRandomnes/phoenix && cd phoenix && ./install.sh
 #
 # Needs Arch Linux with Hyprland. Installs illogical-impulse first if it is missing (its official installer, after
-# asking). Every step is shown and asks before changing anything; files Phoenix replaces are backed up, and
+# asking). Every step is shown; you choose once whether to confirm each step or run them automatically (the same choice
+# as illogical-impulse's "confirm every time?" question, which carries over); files Phoenix replaces are backed up, and
 # `phoenix uninstall` puts them back. Phoenix files come from the newest signed release, checked against the key below.
 set -euo pipefail
 
 REPO="RandomRandomnes/phoenix"
 SIGNER='custom-fixes namespaces="custom-fixes" ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKnbnJ3PHwZ6xygmFRpLEsfTAmsPc1fuy0UtHNKRKTCl custom-fixes'
-PACKAGES=(git python openssh patch curl jq efibootmgr pciutils vulkan-tools kitty kdialog libnotify flatpak)
+PACKAGES=(git python openssh patch curl jq efibootmgr pciutils vulkan-tools kitty kdialog libnotify flatpak pacman-contrib)   # pacman-contrib: checkupdates (taskbar update count, critical-update check)
 AUR_PACKAGES=(hyprland-plugin-hyprbars)             # title bars for Windows-style windows
 STATE="$HOME/.local/state/phoenix"
 SWAP=(".config/hypr/custom" ".config/illogical-impulse/config.json")   # shared with illogical-impulse: swapped, never deleted
@@ -28,7 +29,7 @@ ask() {   # ask "question" default(y/n)
 }
 
 printf '%sPhoenix%s: a Windows-style desktop for Arch Linux, built on illogical-impulse (Hyprland).\n' "$B" "$N"
-echo "Nothing is changed until you confirm each step."
+echo "Every step is shown. You choose whether to confirm each one or let them run automatically."
 
 # ── 1. checks ──────────────────────────────────────────────────────────────────────────────────────────────────────
 step "Checking this system"
@@ -55,6 +56,8 @@ else
     ask "Run the illogical-impulse installer now?" y || die "install illogical-impulse first, then run this installer again"
     II_DIR="$HOME/.cache/dots-hyprland"
     if [ -d "$II_DIR/.git" ]; then
+        # an interrupted earlier run may have left the choice hook below in place
+        git -C "$II_DIR" checkout -q -- sdata/subcmd-install/0.greeting.sh sdata/subcmd-install/3.files.sh 2>/dev/null || true
         git -C "$II_DIR" pull -q --ff-only origin main || die "couldn't update $II_DIR; fix or remove it, then run this installer again"
     else
         git clone -q https://github.com/end-4/dots-hyprland "$II_DIR" || die "couldn't download illogical-impulse"
@@ -80,12 +83,48 @@ else
         qs_patched=1
         info "Qt $qt: illogical-impulse's Quickshell version needs a build fix; it is applied for this installation."
     fi
-    rc=0; (cd "$II_DIR" && ./setup install ${PHOENIX_II_ARGS:-} </dev/tty) || rc=$?
+    # Its "confirm every time before a command executes?" answer carries over to Phoenix's steps: for this run only, the
+    # end of its greeting (the answer) and of its last step (catches a later "yesforall") write its `ask` variable to a
+    # file; both files are put back afterwards, like the build fix above.
+    II_CHOICE=$(mktemp); II_HOOKED=()
+    for f in sdata/subcmd-install/0.greeting.sh sdata/subcmd-install/3.files.sh; do
+        [ -f "$II_DIR/$f" ] || continue
+        printf '\nif [ -n "${PHOENIX_II_CHOICE:-}" ]; then echo "${ask:-}" >> "$PHOENIX_II_CHOICE"; fi\n' >> "$II_DIR/$f"; II_HOOKED+=("$f")
+    done
+    rc=0; (cd "$II_DIR" && PHOENIX_II_CHOICE="$II_CHOICE" ./setup install ${PHOENIX_II_ARGS:-} </dev/tty) || rc=$?
+    [ ${#II_HOOKED[@]} -eq 0 ] || git -C "$II_DIR" checkout -q -- "${II_HOOKED[@]}"
+    case "$(tail -n 1 "$II_CHOICE" 2>/dev/null)" in false) ii_choice=auto;; true) ii_choice=ask;; *) ii_choice="";; esac
+    rm -f "$II_CHOICE"
     [ -n "$qs_patched" ] && { git -C "$II_DIR" checkout -q -- "${QS_PKG#"$II_DIR"/}/PKGBUILD"; rm -f "$QS_PKG/phoenix-qt612.patch"; }
     [ "$rc" = 0 ] || die "the illogical-impulse installer did not finish"
     has_ii || die "illogical-impulse still isn't complete; finish its installation, then run this installer again"
 fi
 [ -f "$HOME/.config/hypr/hyprland.lua" ] || die "this illogical-impulse uses the old Hyprland config format; Phoenix needs the Lua version (Hyprland 0.55 or newer). Update illogical-impulse first"
+
+# ── confirm each step, or run them automatically ───────────────────────────────────────────────────────────────────
+# The answer given to illogical-impulse's installer applies here too; if it didn't run (already installed), the same
+# question is asked once. PHOENIX_YES=1 (set beforehand) always means automatic.
+if [ -z "${PHOENIX_YES:-}" ]; then
+    if [ "${ii_choice:-}" = auto ]; then
+        info "You chose to run illogical-impulse's installer automatically, so Phoenix's steps run automatically too"
+        info "(with the recommended answers; the password is still asked)."
+        PHOENIX_YES=1
+    elif [ "${ii_choice:-}" = ask ]; then
+        info "You chose to confirm each step in illogical-impulse's installer; Phoenix asks before each step too."
+    else
+        step "How to install"
+        echo "    Do you want to confirm every step before it runs?"
+        echo "      y = Yes, ask me before each step. (default)"
+        echo "      n = No, run every step automatically with the recommended answers (the password is still asked)."
+        echo "      a = Abort."
+        read -r -p "    [Y/n/a]: " a </dev/tty || a=""
+        case "$a" in
+            [nN]*) PHOENIX_YES=1; info "Running the remaining steps automatically." ;;
+            [aA]*) die "stopped; nothing of Phoenix was installed" ;;
+            *) info "Asking before each step." ;;
+        esac
+    fi
+fi
 
 # ── 3. packages ────────────────────────────────────────────────────────────────────────────────────────────────────
 step "Packages Phoenix uses"
