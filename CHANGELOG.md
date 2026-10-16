@@ -1,5 +1,8 @@
 # Changelog
 
+## custom 2.343 (2026-10-16, fix)
+- Super menu: clicking anywhere off the menu closes it (the empty space beside the search bar and the app grid used to swallow the click)
+
 ## custom 2.333 (2026-10-16, fix)
 - Super search modes: chips under the search bar (All, Apps, Files, Windows, Settings, Commands); Tab / Shift+Tab switch between them
 - New: finds your files (recently opened first) and open windows; Settings results now open the exact Phoenix Settings page

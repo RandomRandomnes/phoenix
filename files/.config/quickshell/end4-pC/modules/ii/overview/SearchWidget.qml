@@ -25,6 +25,7 @@ Item { // Wrapper
     implicitHeight: searchWidgetContent.implicitHeight + searchBar.verticalPadding * 2 + Appearance.sizes.elevationMargin * 2
 
     property Item previewItem: null
+    readonly property Item panel: searchWidgetContent   // the visible search box + results (Overview's click-off catcher)
     property alias clipboardPopover: clipboardPopover
     property real previewAnchorY: 0
     property real previewMinY: 8

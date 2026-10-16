@@ -89,6 +89,32 @@ Scope {
             height: columnLayout.height
         }
 
+        // Click off the menu = close it (2026-10-16). The input area above is one box as wide as the workspace strip,
+        // so clicks on the empty space beside the search bar or the app grid landed in it and did nothing. This catcher
+        // sits under the panels and closes the menu unless the click hit one of them.
+        MouseArea {
+            x: maskArea.x
+            y: maskArea.y
+            width: maskArea.width
+            height: maskArea.height
+            enabled: GlobalStates.overviewOpen
+            acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
+            function onPanel(item, mx, my) {
+                if (!item || !item.visible || item.width <= 0) return false;
+                const p = mapToItem(item, mx, my);
+                return p.x >= 0 && p.y >= 0 && p.x <= item.width && p.y <= item.height;
+            }
+            onPressed: mouse => {
+                const view = overviewLoader.item;
+                const panels = [searchWidget.panel, view?.workspacesPanel ?? view, view?.appGridPanel];
+                if (panels.some(item => onPanel(item, mouse.x, mouse.y))) {
+                    mouse.accepted = false;
+                    return;
+                }
+                GlobalStates.overviewOpen = false;
+            }
+        }
+
         Column {
             id: columnLayout
             visible: GlobalStates.overviewOpen
@@ -142,11 +168,16 @@ Scope {
                     Column {
                         visible: (panelWindow.searchingText == "")
                         spacing: -8
+                        // the visible panels, for the click-off catcher above
+                        property Item workspacesPanel: visible ? workspacesView : null
+                        property Item appGridPanel: visible && appGridView.visible ? appGridView : null
                         OverviewWidget {
+                            id: workspacesView
                             anchors.horizontalCenter: parent.horizontalCenter
                             screen: panelWindow.screen
                         }
                         AppGridWidget {
+                            id: appGridView
                             visible: Config.options.extras.appGrid // ours; Settings › Extras
                             anchors.horizontalCenter: parent.horizontalCenter
                             screen: panelWindow.screen
