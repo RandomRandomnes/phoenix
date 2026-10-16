@@ -282,7 +282,7 @@ PopupWindow {
                             colBackgroundHover: ColorUtils.transparentize(Appearance.colors.colPrimary, 0.6)
                             colRipple: ColorUtils.transparentize(Appearance.colors.colPrimary, 0.4)
                             onClicked: {
-                                Quickshell.execDetached(["dolphin", Config.options.profile.avatarPath])
+                                Quickshell.execDetached(["phoenix-open", "files", Config.options.profile.avatarPath])   // the default file manager (2026-10-15)
                                 root.close()
                             }
                             contentItem: MaterialSymbol {

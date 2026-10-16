@@ -1,5 +1,10 @@
 # Changelog
 
+## custom 2.292 (2026-10-15, fix)
+- Shortcuts follow Settings › Apps: Super+Enter/Super+T/Ctrl+Alt+T (terminal), Super+E (file manager), Super+W (browser), Super+X (text editor), Ctrl+Super+V (volume mixer) and Ctrl+Shift+Esc (Task Manager) now open the same apps as the taskbar, power menu and Settings (new helper: phoenix-open)
+- Sidebar: the Bluetooth, Wi-Fi and volume Details buttons open Phoenix Settings (Bluetooth & devices, Network, Sound) instead of KDE's pages; Open in Terminal and Open file manager use your default apps
+- App menu: 'Settings' opens Phoenix Settings; KDE's System Settings no longer shows up in Phoenix (entries meant only for other desktops are hidden)
+
 ## custom 2.282 (2026-10-15, fix)
 - New: Task Manager (Ctrl+Shift+Esc, the app menu, the power menu): processes grouped into apps, background and system with live CPU, memory, GPU and disk use; End task (Force end if an app won't close); performance graphs; startup apps; services; users
 - Settings › Apps › Task manager: Phoenix's Task Manager is the default and Ctrl+Shift+Esc follows this setting

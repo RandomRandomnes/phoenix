@@ -1,0 +1,52 @@
+#!/bin/bash
+# phoenix-open (2026-10-15): one place that decides which app opens for each kind of thing, so every shortcut, button
+# and menu entry leads to the same app, the one chosen in Settings › Apps.
+#   phoenix-open terminal [command…]   Settings › Apps › Terminal (config apps.terminal)
+#   phoenix-open files [folder]        the default file manager (Settings › Apps › Default apps, inode/directory)
+#   phoenix-open browser [address]     the default web browser
+#   phoenix-open editor [file]         the default text editor (text/plain)
+#   phoenix-open taskmanager [page]    Settings › Apps › Task manager (Phoenix's Task Manager by default)
+#   phoenix-open volume                the volume mixer (config apps.volumeMixer)
+#   phoenix-open settings [page [sub]] Phoenix Settings (in KDE Plasma: KDE's System Settings)
+CONFIG="$HOME/.config/illogical-impulse/config.json"
+app() {   # config apps.<key>
+    python3 -c 'import json,sys
+try: print(json.load(open(sys.argv[1]))["apps"][sys.argv[2]])
+except Exception: print("")' "$CONFIG" "$1" 2>/dev/null
+}
+launch_default() {   # mime type, fallback command, args…
+    local mime="$1" fallback="$2"; shift 2
+    local entry; entry=$(xdg-mime query default "$mime" 2>/dev/null)
+    if [ -n "$entry" ] && command -v gtk-launch >/dev/null; then
+        exec gtk-launch "$entry" "$@"
+    fi
+    exec $fallback "$@"
+}
+
+what="${1:-}"; [ $# -gt 0 ] && shift
+case "$what" in
+    terminal)
+        cmd=$(app terminal); [ -n "$cmd" ] || cmd="kitty -1"
+        if [ $# -gt 0 ]; then exec bash -c "$cmd \"\$@\"" _ "$@"; else exec bash -c "$cmd"; fi ;;
+    files)
+        launch_default inode/directory dolphin "${@:-$HOME}" ;;
+    browser)
+        b=$(xdg-settings get default-web-browser 2>/dev/null)
+        if [ -n "$b" ] && command -v gtk-launch >/dev/null; then exec gtk-launch "$b" "$@"; fi
+        exec xdg-open "${1:-https://}" ;;
+    editor)
+        launch_default text/plain "kitty -1 vim" "$@" ;;
+    taskmanager)
+        exec "$HOME/.local/bin/phoenix-task-manager" --configured ;;
+    volume)
+        cmd=$(app volumeMixer); [ -n "$cmd" ] || cmd="pavucontrol-qt"
+        exec bash -c "$cmd" ;;
+    settings)
+        if pgrep -f '^qs -c [e]nd4-pC$' >/dev/null || qs list -c end4-pC 2>/dev/null | grep -q '^Instance'; then
+            if [ $# -gt 0 ]; then exec qs -c end4-pC ipc call settings go "$1" "${2:-}"
+            else exec qs -c end4-pC ipc call settings open; fi
+        fi
+        exec systemsettings ;;
+    *)
+        sed -n '2,11p' "$0" | sed 's/^# \{0,1\}//'; exit 1 ;;
+esac

@@ -50,7 +50,7 @@ WindowDialog {
         DialogButton {
             buttonText: Translation.tr("Details")
             onClicked: {
-                Quickshell.execDetached(["bash", "-c", `${Network.ethernet ? Config.options.apps.networkEthernet : Config.options.apps.network}`]);
+                Quickshell.execDetached((Network.ethernet ? ["phoenix-open", "settings", "network", ""] : ["phoenix-open", "settings", "network", "wifi"]));   // Phoenix 2026-10-15: Settings › Network
                 GlobalStates.sidebarRightOpen = false;
             }
         }

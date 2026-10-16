@@ -31,7 +31,7 @@ WindowDialog {
         DialogButton {
             buttonText: Translation.tr("Details")
             onClicked: {
-                Quickshell.execDetached(["bash", "-c", `${Config.options.apps.volumeMixer}`]);
+                Quickshell.execDetached(["phoenix-open", "settings", "system", "sound"]);   // Phoenix 2026-10-15: Settings › Sound (its "Volume mixer" opens the mixer)
                 GlobalStates.sidebarRightOpen = false;
             }
         }

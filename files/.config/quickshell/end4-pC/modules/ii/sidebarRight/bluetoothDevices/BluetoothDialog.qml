@@ -59,7 +59,7 @@ WindowDialog {
         DialogButton {
             buttonText: Translation.tr("Details")
             onClicked: {
-                Quickshell.execDetached(["bash", "-c", `${Config.options.apps.bluetooth}`]);
+                Quickshell.execDetached(["phoenix-open", "settings", "devices", "bluetooth"]);   // Phoenix 2026-10-15: Settings › Bluetooth & devices
                 GlobalStates.sidebarRightOpen = false;
             }
         }

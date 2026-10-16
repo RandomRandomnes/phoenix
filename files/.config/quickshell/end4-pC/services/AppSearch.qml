@@ -3,6 +3,8 @@ pragma Singleton
 import qs.modules.common
 import qs.modules.common.functions
 import Quickshell
+import Quickshell.Io
+import QtQuick
 
 /**
  * - Eases fuzzy searching for applications by name
@@ -40,12 +42,51 @@ Singleton {
         }
     ]
 
+    // Phoenix (2026-10-15): entries marked OnlyShowIn/NotShowIn for other desktops (e.g. KDE's "System Settings",
+    // OnlyShowIn=KDE) are left out, as the desktop-entry spec says; Quickshell's list doesn't do that by itself, so the
+    // menu showed KDE's settings next to Phoenix's. The files are read here (user entries override system ones).
+    property var hiddenHere: []
+    Process {
+        id: showInScan
+        running: true
+        command: ["python3", "-c", `
+import os, json
+desk = set(d for d in os.environ.get("XDG_CURRENT_DESKTOP", "Hyprland").split(":") if d) or {"Hyprland"}
+home = os.environ.get("XDG_DATA_HOME") or os.path.expanduser("~/.local/share")
+dirs = [home] + (os.environ.get("XDG_DATA_DIRS") or "/usr/local/share:/usr/share").split(":")
+seen, hidden = set(), []
+for d in dirs:
+    base = os.path.join(d, "applications")
+    for root, _, files in os.walk(base):
+        for f in files:
+            if not f.endswith(".desktop"): continue
+            did = os.path.relpath(os.path.join(root, f), base)[:-8].replace("/", "-")
+            if did in seen: continue
+            seen.add(did)
+            only = no = None; sect = None
+            try:
+                for line in open(os.path.join(root, f), errors="ignore"):
+                    line = line.strip()
+                    if line.startswith("["): sect = line
+                    elif sect == "[Desktop Entry]" and line.startswith("OnlyShowIn="): only = set(x for x in line[11:].split(";") if x)
+                    elif sect == "[Desktop Entry]" and line.startswith("NotShowIn="): no = set(x for x in line[10:].split(";") if x)
+            except OSError: continue
+            if (only is not None and not (only & desk)) or (no is not None and (no & desk)): hidden.append(did)
+print(json.dumps(hidden))`]
+        stdout: StdioCollector { onStreamFinished: { try { root.hiddenHere = JSON.parse(text) } catch (e) {} } }
+    }
+    Connections {
+        target: DesktopEntries.applications
+        function onValuesChanged() { showInScan.running = true }
+    }
+
     // Deduped list to fix double icons
     readonly property list<DesktopEntry> list: Array.from(DesktopEntries.applications.values)
         .filter((app, index, self) => 
             index === self.findIndex((t) => (
                 t.id === app.id
             ))
+        && !root.hiddenHere.includes(app.id)
     )
     
     readonly property var preppedNames: list.map(a => ({

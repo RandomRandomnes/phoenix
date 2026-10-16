@@ -9,10 +9,22 @@ hl.bind("CTRL+SUPER+ALT+Slash", hl.dsp.exec_cmd("xdg-open ~/.config/hypr/custom/
 hl.unbind("SUPER + I")
 hl.bind("SUPER + I", hl.dsp.exec_cmd("qs -c end4-pC ipc call settings toggle"), { description = "App: Settings app" })
 
--- Ctrl+Shift+Esc: the Task Manager chosen in Settings › Apps (Phoenix's own by default, 2026-10-15); the stock bind
--- tried gnome-system-monitor / KDE System Monitor / btop and ignored that setting.
-hl.unbind("CTRL + SHIFT + Escape")
-hl.bind("CTRL + SHIFT + Escape", hl.dsp.exec_cmd("phoenix-task-manager --configured"), { description = "App: Task manager" })
+-- App shortcuts open the apps chosen in Settings › Apps (2026-10-15), through ~/.local/bin/phoenix-open like every other
+-- button and menu entry. The stock binds picked "the first installed" app from fixed lists (Chrome before Firefox,
+-- kate/gnome-text-editor for text), so Super+W, Super+X, Ctrl+Shift+Esc… could open a different app than the taskbar,
+-- the power menu or Settings.
+for _, key in ipairs({ "SUPER + Return", "SUPER + T", "CTRL + ALT + T", "SUPER + E", "SUPER + W", "SUPER + X",
+                       "CTRL + SUPER + V", "CTRL + SHIFT + Escape" }) do
+    hl.unbind(key)
+end
+hl.bind("SUPER + Return", hl.dsp.exec_cmd("phoenix-open terminal"), { description = "App: Terminal" })
+hl.bind("SUPER + T", hl.dsp.exec_cmd("phoenix-open terminal"))
+hl.bind("CTRL + ALT + T", hl.dsp.exec_cmd("phoenix-open terminal"))
+hl.bind("SUPER + E", hl.dsp.exec_cmd("phoenix-open files"), { description = "App: File manager" })
+hl.bind("SUPER + W", hl.dsp.exec_cmd("phoenix-open browser"), { description = "App: Browser" })
+hl.bind("SUPER + X", hl.dsp.exec_cmd("phoenix-open editor"), { description = "App: Text editor" })
+hl.bind("CTRL + SUPER + V", hl.dsp.exec_cmd("phoenix-open volume"), { description = "App: Volume mixer" })
+hl.bind("CTRL + SHIFT + Escape", hl.dsp.exec_cmd("phoenix-open taskmanager"), { description = "App: Task manager" })
 
 -- Shift+Super+Alt+/: the stock bind opens the upstream welcome window (welcome.qml); this desktop uses the setup
 -- assistant instead (the same as Settings › Extras › Run the first-time setup again).

@@ -196,7 +196,7 @@ Scope {
                     text: Translation.tr("Open in Terminal")
                     onTriggered: {
                         root.close()
-                        Quickshell.execDetached(["kitty", "--directory", Quickshell.env("HOME")])
+                        Quickshell.execDetached(["bash", "-c", "cd ~ && exec phoenix-open terminal"])   // the terminal chosen in Settings › Apps (2026-10-15)
                     }
                 }
 

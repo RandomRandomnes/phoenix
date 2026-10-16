@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Settings
+GenericName=System Settings
+Comment=Phoenix Settings: display, sound, network, personalization, apps, updates and more
+Exec=phoenix-open settings
+Icon=preferences-system
+Categories=Settings;System;
+Keywords=settings;preferences;control panel;system settings;configuration;
+NotShowIn=KDE;

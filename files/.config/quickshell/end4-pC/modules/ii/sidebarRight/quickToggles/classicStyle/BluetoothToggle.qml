@@ -17,7 +17,7 @@ QuickToggleButton {
         BluetoothStatus.togglePower()
     }
     altAction: () => {
-        Quickshell.execDetached(["bash", "-c", `${Config.options.apps.bluetooth}`])
+        Quickshell.execDetached(["phoenix-open", "settings", "devices", "bluetooth"])   // Phoenix 2026-10-15: Settings › Bluetooth & devices (was KDE's page)
         GlobalStates.sidebarRightOpen = false
     }
     StyledToolTip {

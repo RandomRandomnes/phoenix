@@ -760,7 +760,7 @@ Item {
 
             WSection {
                 title: "Related settings"
-                WLink { icon: "folder_open"; title: "Open file manager"; chevronIcon: "open_in_new"; action: () => Quickshell.execDetached(["dolphin"]) }
+                WLink { icon: "folder_open"; title: "Open file manager"; chevronIcon: "open_in_new"; action: () => Quickshell.execDetached(["phoenix-open", "files"]) }
                 WLink { icon: "analytics"; title: "Disk usage analyzer"; description: "Opens Filelight if installed"; chevronIcon: "open_in_new"; action: () => Quickshell.execDetached(["bash", "-c", "command -v filelight >/dev/null && filelight / || dolphin /"]) }
             }
         }
