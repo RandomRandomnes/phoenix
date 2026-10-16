@@ -1,5 +1,8 @@
 # Changelog
 
+## custom 2.261 (2026-10-15, minor)
+- Night light: Settings no longer shows it as on when the screen isn't tinted
+
 ## custom 2.260 (2026-10-15, fix)
 - Sign in at the lock screen (optional): the desktop loads behind the lock screen so it's ready when you type your password (Settings › Accounts › Sign-in at startup)
 - Lock screen designs: choose from 10 in Settings › Personalization › Lock screen, with a preview; the default is unchanged

@@ -93,7 +93,10 @@ Singleton {
             root.disableTemperature();
             return;
         }
-        Quickshell.execDetached(["bash", "-c", `pidof hyprsunset || hyprsunset & disown; sleep 0.3; hyprctl hyprsunset identity`]);
+        // Phoenix (2026-10-15): set 6500 K before identity. hyprsunset 0.4 keeps reporting its last temperature (6000 K
+        // when freshly started) while in identity mode, and fetchState() counts anything but 6500 as "on", so Settings
+        // showed Night light on while nothing was tinted.
+        Quickshell.execDetached(["bash", "-c", `pidof hyprsunset || hyprsunset & disown; sleep 0.3; hyprctl hyprsunset temperature 6500; hyprctl hyprsunset identity`]);
         root.temperatureActive = false;
     }
 
@@ -111,7 +114,7 @@ Singleton {
         if (root.isNiri) {
             root.stopNiriSunset();
         } else {
-            Quickshell.execDetached(["hyprctl", "hyprsunset", "identity"]);
+            Quickshell.execDetached(["bash", "-c", "hyprctl hyprsunset temperature 6500; hyprctl hyprsunset identity"]);   // see load()
         }
         root.temperatureActive = false;
     }
