@@ -21,7 +21,7 @@ ShellRoot {
 
     // Phoenix (ours): background services that run once, in the main shell only (were started from GlobalStates, which
     // the setup assistant and quick-start also load: two notification servers, display profiles applied twice; 2026-10-08)
-    readonly property bool phoenixServices: Extras.extras !== undefined && GameAssist.extras !== undefined
+    readonly property bool phoenixServices: Extras.extras !== undefined && GameAssist.extras !== undefined && NewApps.loaded !== undefined
         && NightSchedule.place !== undefined && DisplayProfiles.tool !== undefined
 
     Process {

@@ -107,6 +107,64 @@ Item {
         }
     }
 
+    // ── Right-click menu (2026-10-16) ──
+    property var menuApp: null       // DesktopEntry the menu is for
+    property string menuKey: ""
+    function launch(app) {
+        NewApps.opened(app.id);
+        if (app.runInTerminal)
+            Quickshell.execDetached(["bash", "-c", `${Config.options.apps.terminal} -e '${StringUtils.shellSingleQuoteEscape(app.command.join(" "))}'`]);
+        else
+            app.execute();
+        GlobalStates.overviewOpen = false;
+    }
+    function openMenu(delegate, key, app) {
+        if (!app) return;
+        root.menuApp = app;
+        root.menuKey = key;
+        const p = delegate.mapToItem(gridBackground, delegate.width / 2, delegate.height * 0.7);
+        appMenu.place(p.x, p.y, delegate.mapToItem(gridBackground, 0, 0).y);
+    }
+    function closeMenu() { root.menuApp = null; }
+    readonly property string autostartCmd: menuApp ? `gtk-launch ${menuApp.id}` : ""
+    readonly property bool menuAppStarts: Config.options.hyprland.autostartApps.apps.some(a => a.cmd === root.autostartCmd)
+    readonly property var menuItems: {
+        const app = root.menuApp;
+        if (!app) return [];
+        const l = [{ icon: "open_in_new", text: Translation.tr("Open"), act: () => root.launch(app) }];
+        for (const a of (app.actions ?? []))
+            l.push({ icon: "chevron_right", text: a.name, act: () => { NewApps.opened(app.id); a.execute(); GlobalStates.overviewOpen = false; } });
+        l.push({ sep: true });
+        const pinned = TaskbarApps.isPinned(app.id);
+        l.push({ icon: pinned ? "keep_off" : "keep", text: pinned ? Translation.tr("Unpin from taskbar") : Translation.tr("Pin to taskbar"),
+                 act: () => TaskbarApps.togglePin(app.id) });
+        l.push({ icon: root.menuAppStarts ? "do_not_disturb_on" : "rocket_launch",
+                 text: root.menuAppStarts ? Translation.tr("Don't start when I sign in") : Translation.tr("Start when I sign in"),
+                 act: () => {
+                     const as = Config.options.hyprland.autostartApps;
+                     const cur = as.apps.filter(a => a.cmd && a.cmd.trim().length > 0);
+                     if (root.menuAppStarts) as.apps = cur.filter(a => a.cmd !== root.autostartCmd);
+                     else { as.apps = cur.concat([{ cmd: root.autostartCmd, delay: 0, workspace: 1 }]); as.enable = true; }
+                 } });
+        l.push({ icon: "visibility_off", text: Translation.tr("Remove from Super menu"), act: () => {
+            const o = Config.options.overview;
+            NewApps.opened(app.id);
+            if (o.appGridShowAll) o.appGridHidden = o.appGridHidden.concat([root.menuKey]);
+            else o.appGridApps = o.appGridApps.filter(id => id !== root.menuKey);
+        } });
+        l.push({ sep: true });
+        l.push({ icon: "settings", text: Translation.tr("App settings"), act: () => {
+            GlobalStates.overviewOpen = false;
+            Quickshell.execDetached([`${Quickshell.env("HOME")}/.local/bin/phoenix-open`, "settings", "apps", "installed"]);
+        } });
+        l.push({ icon: "delete", text: Translation.tr("Uninstall"), danger: true, act: () => { GlobalStates.overviewOpen = false; AppSearch.uninstall(app); } });
+        return l;
+    }
+    Connections {
+        target: GlobalStates
+        function onOverviewOpenChanged() { if (!GlobalStates.overviewOpen) root.closeMenu(); }
+    }
+
     implicitWidth: gridBackground.implicitWidth + Appearance.sizes.elevationMargin * 2
     implicitHeight: gridBackground.implicitHeight + Appearance.sizes.elevationMargin * 2
 
@@ -120,7 +178,7 @@ Item {
         anchors.margins: Appearance.sizes.elevationMargin
         anchors.centerIn: parent
         implicitWidth: grid.width + padding * 2
-        implicitHeight: grid.height + padding * 2
+        implicitHeight: Math.max(grid.height + padding * 2, appMenu.visible ? appMenu.height + 16 : 0)
         radius: Appearance.rounding.large
         color: Appearance.colors.colLayer0
 
@@ -145,6 +203,7 @@ Item {
                     width: root.cellWidth
                     height: root.cellHeight
                     hoverEnabled: true
+                    acceptedButtons: Qt.LeftButton | Qt.RightButton
                     cursorShape: dragging ? Qt.ClosedHandCursor : Qt.PointingHandCursor
                     preventStealing: true
                     z: dragging ? 10 : 0
@@ -177,7 +236,7 @@ Item {
 
                     SequentialAnimation {
                         id: entranceAnim
-                        PauseAnimation { duration: Math.min(appDelegate.index * 12, 300) }
+                        PauseAnimation { duration: Math.max(0, Math.min(appDelegate.index * 12, 300)) }
                         ParallelAnimation {
                             NumberAnimation {
                                 target: appDelegate
@@ -212,6 +271,11 @@ Item {
                             scale = containsMouse ? 1.08 : 1.0
                     }
                     onPressed: mouse => {
+                        if (mouse.button === Qt.RightButton) {
+                            root.openMenu(appDelegate, appDelegate.key, appDelegate.app);
+                            return;
+                        }
+                        if (root.menuApp) { root.closeMenu(); mouse.accepted = false; return; }
                         pressPos = Qt.point(mouse.x, mouse.y);
                         wasDragged = false;
                         grabOffset = Qt.point(mouse.x, mouse.y);
@@ -254,9 +318,8 @@ Item {
 
                     onClicked: mouse => {
                         // A drag ends with a release too; only launch on a real click.
-                        if (wasDragged) return;
-                        app.execute();
-                        GlobalStates.overviewOpen = false;
+                        if (wasDragged || mouse.button !== Qt.LeftButton) return;
+                        root.launch(app);
                     }
 
                     ColumnLayout {
@@ -266,6 +329,15 @@ Item {
                             Layout.alignment: Qt.AlignHCenter
                             implicitSize: 52
                             source: Quickshell.iconPath(appDelegate.app?.icon ?? "", "image-missing")
+                            // newly installed (services/NewApps.qml): a dot until it's opened once
+                            Rectangle {
+                                visible: NewApps.isNew(appDelegate.app?.id ?? "")
+                                anchors { top: parent.top; right: parent.right; topMargin: -2; rightMargin: -2 }
+                                width: 12; height: 12; radius: 6
+                                color: Appearance.colors.colPrimary
+                                border.width: 2
+                                border.color: Appearance.colors.colLayer0
+                            }
                         }
                         StyledText {
                             Layout.alignment: Qt.AlignHCenter
@@ -274,6 +346,98 @@ Item {
                             elide: Text.ElideRight
                             text: appDelegate.app?.name ?? ""
                             font.pixelSize: 12
+                        }
+                    }
+                }
+            }
+        }
+
+        // clicks anywhere else in the panel close the menu
+        MouseArea {
+            anchors.fill: parent
+            visible: appMenu.visible
+            z: 99
+            acceptedButtons: Qt.LeftButton | Qt.RightButton
+            onPressed: root.closeMenu()
+        }
+
+        Rectangle {
+            id: appMenu
+            visible: root.menuApp !== null
+            z: 100
+            width: 280
+            height: menuColumn.implicitHeight + 12
+            radius: Appearance.rounding.normal
+            color: Appearance.m3colors.m3surfaceContainerHigh   // solid: the grid mustn't show through
+            border.width: 1
+            border.color: Appearance.colors.colOutlineVariant
+            // where it was opened; x/y follow its real size (the rows load a moment after it opens)
+            property real px: 0
+            property real py: 0
+            property real cellTop: 0
+            function place(ax, ay, top) { px = ax; py = ay; cellTop = top; }
+            readonly property real panelH: grid.height + gridBackground.padding * 2
+            x: Math.max(8, Math.min(gridBackground.width - width - 8, px - 20))
+            // below the pointer if it fits, else above the icon, else as low as the panel allows
+            y: py + height + 8 <= Math.max(panelH, height + 16) ? py
+                : Math.max(8, Math.min(cellTop - height + 8, Math.max(panelH, height + 16) - height - 8))
+            opacity: visible ? 1 : 0
+            scale: visible ? 1 : 0.95
+            transformOrigin: Item.TopLeft
+            Behavior on opacity { NumberAnimation { duration: 120 } }
+            Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
+
+            ColumnLayout {
+                id: menuColumn
+                anchors { left: parent.left; right: parent.right; top: parent.top; margins: 6 }
+                spacing: 0
+                StyledText {
+                    Layout.fillWidth: true
+                    Layout.margins: 8
+                    Layout.bottomMargin: 4
+                    text: root.menuApp?.name ?? ""
+                    elide: Text.ElideRight
+                    font.pixelSize: Appearance.font.pixelSize.small
+                    font.weight: Font.DemiBold
+                    color: Appearance.colors.colOnLayer2
+                }
+                Repeater {
+                    model: root.menuItems
+                    delegate: Loader {
+                        id: row
+                        required property var modelData
+                        Layout.fillWidth: true
+                        sourceComponent: modelData.sep ? sepComp : itemComp
+                        Component {
+                            id: sepComp
+                            Rectangle { implicitHeight: 9; color: "transparent"
+                                Rectangle { anchors.centerIn: parent; width: parent.width - 12; height: 1; color: Appearance.colors.colOutlineVariant } }
+                        }
+                        Component {
+                            id: itemComp
+                            RippleButton {
+                                implicitHeight: 34
+                                buttonRadius: Appearance.rounding.small
+                                colBackground: "transparent"
+                                colBackgroundHover: Appearance.colors.colLayer2Hover
+                                onClicked: { const act = row.modelData.act; root.closeMenu(); act(); }
+                                contentItem: RowLayout {
+                                    spacing: 10
+                                    MaterialSymbol {
+                                        Layout.leftMargin: 6
+                                        text: row.modelData.icon
+                                        iconSize: Appearance.font.pixelSize.larger
+                                        color: row.modelData.danger ? Appearance.colors.colError : Appearance.colors.colOnLayer2
+                                    }
+                                    StyledText {
+                                        Layout.fillWidth: true
+                                        text: row.modelData.text
+                                        elide: Text.ElideRight
+                                        font.pixelSize: Appearance.font.pixelSize.small
+                                        color: row.modelData.danger ? Appearance.colors.colError : Appearance.colors.colOnLayer2
+                                    }
+                                }
+                            }
                         }
                     }
                 }

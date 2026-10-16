@@ -12,6 +12,23 @@ import QtQuick
  */
 Singleton {
     id: root
+
+    // Uninstall an app (Settings › Apps › Installed apps and the Super menu's right-click menu; moved here 2026-10-16)
+    function uninstall(entry) {
+        // pacman package (or flatpak) that owns the .desktop file; pacman/flatpak ask to confirm
+        const script = `id='${entry.id}'
+f=$(find ~/.local/share/applications /usr/share/applications /usr/local/share/applications /var/lib/flatpak/exports/share/applications ~/.local/share/flatpak/exports/share/applications -name "$id.desktop" 2>/dev/null | head -1)
+echo "Uninstalling: ${entry.name.replace(/'/g, "")}"; echo "Desktop file: $f"; echo
+if [ -z "$f" ]; then echo "Couldn't find its desktop file."; exit 1; fi
+gid=$(grep -oP 'steam://rungameid/\\K[0-9]+' "$f" | head -1)
+if [ -n "$gid" ]; then echo "A Steam game: Steam asks to confirm."; steam "steam://uninstall/$gid" >/dev/null 2>&1 & disown; exit 0; fi
+case "$f" in
+  *flatpak*) flatpak uninstall "$id" ;;
+  "$HOME"/*) echo "This is a user app (not from a package). Delete $f to remove it from menus."; ;;
+  *) pkg=$(pacman -Qqo "$f") && sudo pacman -Rns "$pkg" ;;
+esac`;
+        Quickshell.execDetached(["kitty", "-1", "--hold", "bash", "-c", script]);
+    }
     property bool sloppySearch: Config.options?.search.sloppy ?? false
     property real scoreThreshold: 0.2
     property var substitutions: ({

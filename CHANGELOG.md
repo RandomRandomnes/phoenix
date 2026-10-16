@@ -1,5 +1,9 @@
 # Changelog
 
+## custom 2.373 (2026-10-16, fix)
+- Super menu app grid: newly installed apps (packages, Flatpaks, Steam games) are added automatically with a dot until you open them; switch in Settings › Personalization › Super menu apps
+- Right-click an app in the grid: Open, the app's own actions (e.g. New Private Window), Pin to taskbar, Start when I sign in, Remove from Super menu, App settings, Uninstall (Steam games through Steam)
+
 ## custom 2.363 (2026-10-16, fix)
 - Resource popup: usage bars glide smoothly to each new reading instead of jumping (clock-per-thread and storage bars were rebuilt on every update)
 

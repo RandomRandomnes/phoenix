@@ -782,6 +782,13 @@ Item {
                     checked: Config.options.overview.appGridShowAll
                     onToggled: v => Config.options.overview.appGridShowAll = v
                 }
+                WToggle {
+                    icon: "new_releases"
+                    title: "Add new apps automatically"
+                    description: "Apps you install (packages, Flatpaks, Steam games) join the grid with a dot until you open them. Right-click an app in the grid for more options"
+                    checked: Config.options.overview.appGridAddNew
+                    onToggled: v => Config.options.overview.appGridAddNew = v
+                }
             }
 
             WSection {

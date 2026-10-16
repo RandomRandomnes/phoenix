@@ -405,6 +405,7 @@ Singleton {
                 iconType: LauncherSearchResult.IconType.System,
                 verb: Translation.tr("Open"),
                 execute: () => {
+                    NewApps.opened(entry.id);   // clears the Super menu's "new" dot
                     if (!entry.runInTerminal)
                         entry.execute();
                     else {
