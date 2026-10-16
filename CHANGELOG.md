@@ -1,5 +1,8 @@
 # Changelog
 
+## custom 2.303 (2026-10-15, minor)
+- Adds the session-env.sh helper that 2.302's start-up change uses (it was missing from that release)
+
 ## custom 2.302 (2026-10-15, fix)
 - Apps can open folders and files reliably after switching from KDE Plasma: the session now hands its full environment to helpers started through D-Bus/systemd (file managers, portals) and stops ones still running with Plasma's settings
 

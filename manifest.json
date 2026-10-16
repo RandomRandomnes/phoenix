@@ -6,15 +6,15 @@
   "format": "custom-fixes",
   "line": "custom",
   "version": 2.99,
-  "label": "2.302",
-  "kind": "fix",
+  "label": "2.303",
+  "kind": "minor",
   "date": "2026-10-15",
   "publisher": "RandomRandomnes",
   "notes": [
-    "Apps can open folders and files reliably after switching from KDE Plasma: the session now hands its full environment to helpers started through D-Bus/systemd (file managers, portals) and stops ones still running with Plasma's settings"
+    "Adds the session-env.sh helper that 2.302's start-up change uses (it was missing from that release)"
   ],
   "payload": "fixes.tar.gz",
-  "payloadSha256": "698d2334ccf22daf61bd0e93fbffb4d52215fd7cecae81df4f40a6f5d4ef7d91",
+  "payloadSha256": "19e3435346647b90e3cf0acee8f6a82cd9b7e1539a0e3fc0d4e74b8b25df2efb",
   "files": {
     ".config/hypr/custom/env.lua": "1902700f304ac6fc6d6c484da2bce2e14821964285f199fdd36971381b347edf",
     ".config/hypr/custom/execs.lua": "64197ff280790bc529a0dd1938985c42783a1b17f59ec709ff515f8fa0f5d6b2",
@@ -23,6 +23,7 @@
     ".config/hypr/custom/rules.lua": "75ade8ef784f5325d456673f33af4cf07ee655f2b1f4d30f2cf5254873914395",
     ".config/hypr/custom/scripts/autostart.sh": "b11644e4821066092a548629b7b3282ed7bd4349eec73ab55f36d7eed2088e1b",
     ".config/hypr/custom/scripts/hb.sh": "e0f841a85cceed0425333d8946884b684edc76a13c35a152ef8ef41fb0206675",
+    ".config/hypr/custom/scripts/session-env.sh": "5ae069e5ad330bdf0fb6c2a4c165d55c5e0e98836bff32dc578f4c25f0f28cbe",
     ".config/hypr/custom/variables.lua": "3859ea1ee32e82cdc61364c2d24248acf1d5a8063244f3dc96be9c39fb803337",
     ".config/quickshell/end4-pC/.gitignore": "6eeb5d38eeaeda8767818aa50d4fbd9eeac9a40b7d9cd34e97f6cbdfc0bdde70",
     ".config/quickshell/end4-pC/.qmlformat.ini": "4ee282a9081c4e9a6999c4b99c3a20957441dbaa9179344288b1c910e5907ae6",
@@ -1057,7 +1058,7 @@
     ".local/share/setup-profiles/stock-config.json": "5814a18a9aa1038cd74764efc268ca12b0ba8599dd7255799d8729bc5b80a9f8"
   },
   "changed": [
-    ".config/hypr/custom/execs.lua"
+    ".config/hypr/custom/scripts/session-env.sh"
   ],
   "test": false
 }
