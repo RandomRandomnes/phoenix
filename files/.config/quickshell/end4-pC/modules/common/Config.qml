@@ -887,6 +887,7 @@ Singleton {
                 property bool bottomGroup: true
                 property bool mediaPlayer: false
                 property bool deviceBatteries: true // battery levels of wireless devices, under the media player
+                property bool phoneLink: true // the phone card (Phone Link / KDE Connect), PhoneLinkCard.qml
                 property bool wallpaperEngineCard: true // Wallpaper Engine picker card (WallpaperEngineCard.qml)
                 property bool desktopSwitch: true // "switch to KDE Plasma" button in the sidebar header (DesktopSwitch.qml)
                 property string bannerImage: ""

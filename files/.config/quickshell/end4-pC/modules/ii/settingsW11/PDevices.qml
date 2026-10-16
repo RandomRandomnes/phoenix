@@ -14,7 +14,8 @@ Item {
 
     Loader {
         anchors.fill: parent
-        sourceComponent: ({ "bluetooth": bluetooth, "mouse": mouse, "keyboard": keyboard, "input": inputPage
+        sourceComponent: ({ "bluetooth": bluetooth, "mouse": mouse, "keyboard": keyboard, "input": inputPage,
+            "phone": phonePage
         })[WState.sub] ?? overview
     }
 
@@ -69,6 +70,18 @@ Item {
                     DeviceCard { required property var modelData; device: modelData }
                 }
                 WLink { icon: "devices"; title: "View more devices"; description: "Pair new devices, connect, remove"; sub: "bluetooth" }
+            }
+            WSection {
+                title: "Phone"
+                WLink {
+                    icon: "smartphone"
+                    title: PhoneLink.phone ? PhoneLink.phone.name : "Phone Link"
+                    description: !PhoneLink.installed ? "Your phone's notifications, texts, files and more on this PC (set up once)"
+                        : !PhoneLink.phone ? "No phone paired yet"
+                        : PhoneLink.phone.reachable ? `Connected` + (PhoneLink.phone.battery !== null ? ` · battery ${PhoneLink.phone.battery}%` : "")
+                        : "Paired · not connected right now"
+                    sub: "phone"
+                }
             }
             WSection {
                 title: "Batteries"
@@ -319,6 +332,147 @@ Item {
         id: inputPage
         WPage {
             SInput {}
+        }
+    }
+
+    // ── Phone (Phone Link / KDE Connect, P6 2026-10-15) ────────────
+    Component {
+        id: phonePage
+        WPage {
+            id: pp
+            readonly property var phone: PhoneLink.phone
+            readonly property bool online: phone?.reachable ?? false
+            function pluginOn(name) { return pp.phone?.plugins?.[name] ?? true }
+            function setPlugins(names, on) { names.forEach(n => PhoneLink.setPlugin(pp.phone.id, n, on)) }
+
+            WSection {
+                visible: !PhoneLink.installed || !PhoneLink.running
+                WCard {
+                    icon: "smartphone"
+                    title: !PhoneLink.installed ? "Set up Phone Link" : "Phone Link isn't running"
+                    description: !PhoneLink.installed ? "See your phone's notifications and texts, send files, ring it, share the clipboard and more. Installs KDE Connect and lets it through the firewall on your home network (asks for your password once)."
+                        : "KDE Connect is installed but its background service isn't running. Signing out and in starts it; Set up starts it now."
+                    WButton { accent: true; buttonText: "Set up"; onClicked: PhoneLink.setup() }
+                }
+            }
+
+            WSection {
+                visible: PhoneLink.installed && pp.phone !== null
+                WCard {
+                    icon: pp.online ? "smartphone" : "phonelink_off"
+                    title: pp.phone?.name ?? ""
+                    description: !pp.online ? "Paired, not connected. Open KDE Connect on the phone; on Samsung, set its battery use to Unrestricted so it stays connected."
+                        : ["Connected over Wi-Fi", pp.phone.battery !== null ? `battery ${pp.phone.battery}%${pp.phone.charging ? ", charging" : ""}` : "",
+                           pp.phone.network ? pp.phone.network : ""].filter(s => s).join(" · ")
+                    WButton { enabled: pp.online; accent: true; buttonText: "Ring"; onClicked: PhoneLink.ring(pp.phone.id) }
+                    WButton { enabled: pp.online; buttonText: "Send a file"; onClicked: PhoneLink.sendFiles(pp.phone.id) }
+                    WButton { enabled: pp.online; buttonText: "Browse files"; onClicked: PhoneLink.browse(pp.phone.id) }
+                }
+            }
+
+            WSection {
+                visible: PhoneLink.installed && pp.phone !== null
+                title: "What your phone and PC share"
+                WToggle {
+                    icon: "notifications"
+                    title: "Phone notifications on this PC"
+                    description: "With reply for messages; dismissing on one dismisses on both. Needs notification access in the phone app"
+                    checked: pp.pluginOn("kdeconnect_notifications")
+                    onToggled: v => pp.setPlugins(["kdeconnect_notifications"], v)
+                }
+                WToggle {
+                    icon: "sms"
+                    title: "Text messages"
+                    description: "Read and send texts from the PC (Messages in the phone card)"
+                    checked: pp.pluginOn("kdeconnect_sms")
+                    onToggled: v => pp.setPlugins(["kdeconnect_sms"], v)
+                }
+                WToggle {
+                    icon: "call"
+                    title: "Calls"
+                    description: "Show incoming calls and pause music while you're on the phone"
+                    checked: pp.pluginOn("kdeconnect_telephony")
+                    onToggled: v => pp.setPlugins(["kdeconnect_telephony", "kdeconnect_pausemusic"], v)
+                }
+                WToggle {
+                    icon: "content_paste"
+                    title: "Shared clipboard"
+                    description: "Copy on one, paste on the other (the Clipboard button sends it once either way)"
+                    checked: pp.pluginOn("kdeconnect_clipboard")
+                    onToggled: v => pp.setPlugins(["kdeconnect_clipboard"], v)
+                }
+                WToggle {
+                    icon: "settings_remote"
+                    title: "Use the phone as a remote"
+                    description: "Music and video controls, touchpad and keyboard from the phone"
+                    checked: pp.pluginOn("kdeconnect_mousepad")
+                    onToggled: v => pp.setPlugins(["kdeconnect_mousepad", "kdeconnect_remotekeyboard", "kdeconnect_mpriscontrol"], v)
+                }
+                WToggle {
+                    icon: "folder_open"
+                    title: "Browse the phone's files"
+                    description: "Open its storage in the file manager; recent photos in the phone card"
+                    checked: pp.pluginOn("kdeconnect_sftp")
+                    onToggled: v => pp.setPlugins(["kdeconnect_sftp"], v)
+                }
+                WToggle {
+                    icon: "right_panel_open"
+                    title: "Phone card in the sidebar"
+                    checked: Config.options.sidebar.phoneLink
+                    onToggled: v => Config.options.sidebar.phoneLink = v
+                }
+            }
+
+            WSection {
+                visible: PhoneLink.installed && PhoneLink.running
+                title: pp.phone ? "Other phones" : "Pair your phone"
+                WCard {
+                    visible: !pp.phone
+                    icon: "help"
+                    title: "How to pair"
+                    description: "1. Install KDE Connect on the phone (Galaxy Store, Google Play or F-Droid). 2. Connect it to the same Wi-Fi as this PC. 3. Press Pair below and accept on the phone; both show the same code."
+                }
+                Repeater {
+                    model: PhoneLink.devices.filter(d => !d.paired)
+                    WCard {
+                        required property var modelData
+                        icon: "smartphone"
+                        title: modelData.name
+                        description: modelData.pairRequested ? "Wants to pair with this PC" : (modelData.reachable ? "On your network · not paired" : "Not paired")
+                        WButton { visible: !modelData.pairRequested; accent: true; buttonText: "Pair"; onClicked: PhoneLink.pair(modelData.id) }
+                        WButton { visible: modelData.pairRequested; accent: true; buttonText: "Accept"; onClicked: PhoneLink.accept(modelData.id) }
+                        WButton { visible: modelData.pairRequested; buttonText: "Decline"; onClicked: PhoneLink.reject(modelData.id) }
+                    }
+                }
+                WCard {
+                    icon: "refresh"
+                    title: "Don't see your phone?"
+                    description: "Open KDE Connect on the phone and pull down to refresh, then look again here"
+                    WButton { buttonText: "Look again"; onClicked: PhoneLink.refresh() }
+                }
+            }
+
+            WSection {
+                visible: PhoneLink.installed
+                title: "More"
+                WCard {
+                    visible: pp.phone !== null
+                    icon: "link_off"
+                    title: "Unpair " + (pp.phone?.name ?? "phone")
+                    description: "The phone and PC forget each other; pair again any time"
+                    WButton { buttonText: "Unpair"; onClicked: PhoneLink.unpair(pp.phone.id) }
+                }
+                WCard {
+                    icon: "block"
+                    title: "Turn off Phone Link"
+                    description: "Stops KDE Connect and closes its firewall ports again (asks for your password)"
+                    WButton {
+                        buttonText: "Turn off"
+                        onClicked: Quickshell.execDetached(["kitty", "--class", "phoenix-setup", "--title", "Phone Link", "--hold",
+                            "bash", "-c", "phoenix phone-link remove; echo; echo 'You can close this window.'"])
+                    }
+                }
+            }
         }
     }
 }

@@ -10,6 +10,7 @@
 #   phoenix power-meter [install|remove|status]
 #                                CPU power for the system stats: a small root service that publishes a coarse reading
 #                                (1 s average, 0.5 W steps), so the energy counter itself stays root-only
+#   phoenix phone-link [setup|remove|status]   Phone Link (KDE Connect): install, firewall for the local network
 #
 # Phoenix and illogical-impulse share two things: the Hyprland user folder ~/.config/hypr/custom and the shell settings
 # ~/.config/illogical-impulse/config.json. Switching swaps those two between the active side and a copy kept in
@@ -153,6 +154,48 @@ cmd_power_meter() {
             elif [ -f "$METER_UNIT" ]; then echo "Power meter: installed, not running (systemctl status phoenix-power-meter)"
             else echo "Power meter: not installed (phoenix power-meter install)"; fi ;;
         *) die "usage: phoenix power-meter [install|remove|status]" ;;
+    esac
+}
+
+# Phone Link (P6, 2026-10-15): KDE Connect for the sidebar's phone card and Settings › Bluetooth & devices › Phone.
+# setup installs it (plus sshfs, for browsing the phone's files) and lets it through the firewall for the local
+# network only (private address ranges, ports 1714-1764); remove takes the firewall rules out again.
+PL_PORTS="1714:1764"
+PL_NETS="192.168.0.0/16 10.0.0.0/8 172.16.0.0/12"
+pl_fw() {   # add|delete: the firewall rules (ufw or firewalld, whichever is running)
+    if command -v ufw >/dev/null && sudo ufw status 2>/dev/null | grep -q "Status: active"; then
+        local net proto
+        for net in $PL_NETS; do for proto in tcp udp; do
+            if [ "$1" = add ]; then sudo ufw allow from "$net" to any port "$PL_PORTS" proto "$proto" comment "Phoenix Phone Link (KDE Connect)" >/dev/null
+            else sudo ufw delete allow from "$net" to any port "$PL_PORTS" proto "$proto" >/dev/null 2>&1; fi
+        done; done
+        echo "Firewall (ufw): $([ "$1" = add ] && echo "Phone Link allowed on the local network" || echo "Phone Link rules removed")."
+    elif command -v firewall-cmd >/dev/null && sudo firewall-cmd --state >/dev/null 2>&1; then
+        if [ "$1" = add ]; then sudo firewall-cmd --permanent --zone=home --add-service=kdeconnect >/dev/null; else sudo firewall-cmd --permanent --zone=home --remove-service=kdeconnect >/dev/null 2>&1; fi
+        sudo firewall-cmd --reload >/dev/null; echo "Firewall (firewalld, home zone): updated."
+    else
+        echo "No active firewall found: nothing to change there."
+    fi
+}
+cmd_phone_link() {
+    case "${1:-status}" in
+        setup)
+            echo "Setting up Phone Link (KDE Connect). This asks for your password."
+            sudo pacman -S --needed --noconfirm kdeconnect sshfs || die "installing KDE Connect failed"
+            pl_fw add
+            pgrep -x kdeconnectd >/dev/null || (setsid /usr/bin/kdeconnectd >/dev/null 2>&1 < /dev/null &)
+            echo "Done. Install KDE Connect on your phone (Galaxy Store, Google Play or F-Droid), connect it to the same"
+            echo "Wi-Fi, then pair it in Settings › Bluetooth & devices › Phone." ;;
+        remove)
+            pl_fw delete
+            pkill -x kdeconnectd 2>/dev/null
+            echo "Phone Link is off. KDE Connect itself stays installed (remove it with: sudo pacman -Rns kdeconnect)." ;;
+        status)
+            if ! command -v kdeconnect-cli >/dev/null; then echo "Phone Link: not set up (phoenix phone-link setup)"; return; fi
+            echo "Phone Link: KDE Connect installed, $(pgrep -x kdeconnectd >/dev/null && echo running || echo "not running")"
+            kdeconnect-cli -a --name-only 2>/dev/null | sed 's/^/  connected: /'
+            kdeconnect-cli -l 2>/dev/null | grep -c "paired" | sed 's/^/  known phones: /' ;;
+        *) die "usage: phoenix phone-link [setup|remove|status]" ;;
     esac
 }
 
@@ -317,5 +360,6 @@ case "${1:-status}" in
     uninstall) cmd_uninstall "${2:-}" ;;
     power-meter) cmd_power_meter "${2:-status}" ;;
     login-screen) cmd_login_screen "${2:-status}" "${@:3}" ;;
+    phone-link) cmd_phone_link "${2:-status}" ;;
     *) sed -n '2,17p' "$0" | sed 's/^# \{0,1\}//'; exit 2 ;;
 esac

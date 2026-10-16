@@ -169,6 +169,7 @@ Item {
         "sliders": slidersSection,
         "media": mediaSection,
         "deviceBatteries": deviceBatteriesSection,     // Phoenix: wireless device batteries
+        "phoneLink": phoneLinkSection,                 // Phoenix: your phone (KDE Connect), PhoneLinkCard.qml
         "wallpaperEngine": wallpaperEngineSection,     // Phoenix: Wallpaper Engine picker
         "notifications": notificationsSection,
         "bottom": bottomSection
@@ -185,6 +186,8 @@ Item {
             return sidebar.bottomGroup
         case "deviceBatteries":
             return sidebar.deviceBatteries
+        case "phoneLink":
+            return (sidebar.phoneLink ?? true) && PhoneLink.installed && PhoneLink.phone !== null
         case "wallpaperEngine":
             return sidebar.wallpaperEngineCard && Config.options.extras.wallpaperEngine
         default:
@@ -192,7 +195,7 @@ Item {
         }
     }
 
-    readonly property var defaultSectionOrder: ["banner", "quickToggles", "sliders", "media", "deviceBatteries", "wallpaperEngine", "notifications", "bottom"]
+    readonly property var defaultSectionOrder: ["banner", "quickToggles", "sliders", "media", "deviceBatteries", "phoneLink", "wallpaperEngine", "notifications", "bottom"]
     readonly property var sectionOrder: {
         const saved = Array.from(Config.options.sidebar.sectionOrder).filter(key => defaultSectionOrder.includes(key))
         const order = saved.filter((key, i) => saved.indexOf(key) === i)
@@ -516,6 +519,11 @@ Item {
     Component {
         id: deviceBatteriesSection
         DeviceBatteries {}             // hides itself when no wireless device reports a battery
+    }
+
+    Component {
+        id: phoneLinkSection
+        PhoneLinkCard {}
     }
 
     Component {

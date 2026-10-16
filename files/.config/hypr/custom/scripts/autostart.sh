@@ -66,6 +66,17 @@ sleep 2
 # background surface. Videos are drawn inside it; scenes run in linux-wallpaperengine with --layer background; web
 # wallpapers run in wallpaper-engine-hyprland, patched to the background layer. See ~/.local/lib/wallpaper-engine-shell/.
 
+# Phone Link (KDE Connect, set up with `phoenix phone-link setup`): its background service, like KDE Plasma starts it.
+# With lock-screen sign-in it waits for the first unlock too (phone notifications shouldn't show before the password).
+if command -v kdeconnectd >/dev/null; then
+  (
+    if [ "${PHOENIX_LOCK_FIRST:-}" = 1 ]; then
+      while [ ! -e "${XDG_RUNTIME_DIR:-/tmp}/phoenix-unlocked-once" ]; do sleep 1; done
+    fi
+    pgrep -x kdeconnectd >/dev/null || { echo "$(date +%T) starting kdeconnectd" >> "$log"; kdeconnectd >/dev/null 2>&1 & }
+  ) &
+fi
+
 if feature steamTray; then
   (
     # With lock-screen sign-in, Steam waits for the first unlock too (2026-10-15): it shouldn't be signed in and

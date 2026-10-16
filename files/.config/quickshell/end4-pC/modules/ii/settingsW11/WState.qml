@@ -60,6 +60,7 @@ Singleton {
         "system/about": "About",
         "system/report": "Report a problem",
         "devices/bluetooth": "Devices",
+        "devices/phone": "Phone",
         "devices/mouse": "Mouse",
         "devices/keyboard": "Keyboard",
         "network/wifi": "Wi-Fi",
@@ -172,6 +173,7 @@ Singleton {
         ["Work safety", "hide nsfw wallpaper clipboard", "privacy", ""],
         ["Windows Update", "updates upgrade pacman packages system update", "update", ""],
         ["Shell update", "illogical impulse end4 dotfiles shell phoenix updates", "update", ""],
+        ["Phone", "phone link kde connect android samsung galaxy notifications sms texts ring find my phone send files clipboard", "devices", "phone"],
         ["How updates install", "automatic updates ask confirm manual review update mode", "update", ""],
     ]
 

@@ -1,5 +1,9 @@
 # Changelog
 
+## custom 2.313 (2026-10-16, fix)
+- New: Phone Link (KDE Connect) — a phone card in the right sidebar (battery, Ring, Send file, Browse, Clipboard; expand for the phone's notifications with reply, newest photos and what it plays) and Settings › Bluetooth & devices › Phone (pairing, what's shared: notifications, texts, calls, clipboard, remote, files)
+- One-time setup: Settings › Bluetooth & devices › Phone › Set up, or 'phoenix phone-link setup' (installs KDE Connect, allows it through the firewall on your home network only)
+
 ## custom 2.303 (2026-10-15, minor)
 - Adds the session-env.sh helper that 2.302's start-up change uses (it was missing from that release)
 
