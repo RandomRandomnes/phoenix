@@ -351,8 +351,10 @@ Item {
                     icon: "smartphone"
                     title: !PhoneLink.installed ? "Set up Phone Link" : "Phone Link isn't running"
                     description: !PhoneLink.installed ? "See your phone's notifications and texts, send files, ring it, share the clipboard and more. Installs KDE Connect and lets it through the firewall on your home network (asks for your password once)."
-                        : "KDE Connect is installed but its background service isn't running. Signing out and in starts it; Set up starts it now."
-                    WButton { accent: true; buttonText: "Set up"; onClicked: PhoneLink.setup() }
+                        : Config.options.extras.phoneLinkStart === false
+                            ? "Its background service is switched off at sign-in (Task Manager › Startup). Start runs it until you sign out."
+                            : "KDE Connect is installed but its background service isn't running. Start runs it now."
+                    WButton { accent: true; buttonText: PhoneLink.installed ? "Start" : "Set up"; onClicked: PhoneLink.installed ? PhoneLink.start() : PhoneLink.setup() }
                 }
             }
 

@@ -870,6 +870,7 @@ Singleton {
                 property bool claudeCodeAi: true      // Claude Code as a model in the AI sidebar
                 property bool updatesScript: true     // bar updates button runs ~/.local/bin/system-update
                 property bool steamTray: true         // start Steam in the tray at login
+                property bool phoneLinkStart: true    // start Phone Link's KDE Connect service at login (when it's set up)
                 property bool workspaceGroups: true   // each screen its own workspaces: 1-10, 11-20, … (custom/execs.lua workspace-groups)
                 property bool gameModeAuto: false     // Game Mode turns on by itself while a fullscreen game has the focus (services/GameAssist.qml)
                 property bool gameModeWallpaper: true // Game Mode also stops Wallpaper Engine

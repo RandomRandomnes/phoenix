@@ -779,101 +779,51 @@ ApplicationWindow {
     function openSettings(page, sub) { Quickshell.execDetached(["qs", "-c", "end4-pC", "ipc", "call", "settings", "go", page, sub]) }
     Component {
         id: startupPage
+        // One list, a switch each, like Windows (2026-10-16): services/StartupItems.qml (shared with Settings)
         WPage {
             id: sp
             maxContentWidth: 4000
-            property var scriptApps: []
-            property var plasmaApps: []
-            property bool phoneLink: false
-            // what really starts at sign-in (2026-10-16): the same helper as Settings › Apps › Startup
-            Process {
-                running: true
-                command: ["python3", Quickshell.shellPath("scripts/startup/startup-items.py")]
-                stdout: StdioCollector {
-                    onStreamFinished: {
-                        try { const d = JSON.parse(text); sp.scriptApps = d.script.programs ?? []; sp.plasmaApps = d.plasma ?? [] } catch (e) {}
-                    }
-                }
-            }
-            Process {
-                running: true
-                command: ["sh", "-c", "command -v kdeconnectd || test -x /usr/bin/kdeconnectd"]
-                onExited: code => sp.phoneLink = code === 0
-            }
+            Component.onCompleted: StartupItems.refresh()
+            readonly property int onCount: StartupItems.items.filter(i => i.on).length
             WSection {
-                title: "Your startup apps"
-                WToggle {
-                    icon: "rocket_launch"
-                    title: "Start apps when I sign in"
-                    description: "The apps listed below open by themselves after you sign in"
-                    checked: Config.options.hyprland.autostartApps.enable
-                    onToggled: v => Config.options.hyprland.autostartApps.enable = v
-                }
+                title: `Apps that start when you sign in · ${sp.onCount} on, ${StartupItems.items.length - sp.onCount} off`
                 Repeater {
-                    model: (Config.options.hyprland.autostartApps.apps ?? []).filter(a => a.cmd && a.cmd.trim())
-                    WCard {
+                    model: StartupItems.items
+                    WToggle {
+                        id: row
                         required property var modelData
-                        icon: "apps"
-                        title: modelData.cmd
-                        description: `Workspace ${modelData.workspace ?? 1}` + ((modelData.delay ?? 0) > 0 ? ` · after ${modelData.delay} s` : "")
-                        enabled: Config.options.hyprland.autostartApps.enable
+                        minHeight: 58
+                        title: modelData.name
+                        description: modelData.source
+                        showStateText: true
+                        checked: modelData.on
+                        onToggled: v => modelData.set(v)
+                        icon: modelData.symbol
+                        leading: modelData.symbol ? null : appIcon
+                        Component { id: appIcon; IconImage { implicitSize: 28; source: Quickshell.iconPath(row.modelData.icon, "application-x-executable") } }
                     }
+                }
+                WCard {
+                    visible: StartupItems.items.length === 0
+                    icon: "inbox"
+                    title: "Nothing starts when you sign in"
                 }
                 WLink {
-                    icon: "edit"
-                    title: "Add or change startup apps"
+                    icon: "add_circle"
+                    title: "Add a startup app"
                     description: "Settings › Apps › Startup"
                     chevronIcon: "open_in_new"
                     action: () => root.openSettings("apps", "startup")
                 }
             }
             WSection {
-                title: "Started by Phoenix"
-                WToggle {
-                    icon: "sports_esports"
-                    title: "Steam in the tray"
-                    description: "Steam starts quietly in the tray (with lock-screen sign-in: after you unlock)"
-                    checked: Config.options.extras.steamTray
-                    onToggled: v => Config.options.extras.steamTray = v
-                }
-                WCard {
-                    icon: "wallpaper"
-                    title: "Wallpaper Engine background"
-                    description: Config.options.extras.wallpaperEngine ? "On: starts with the desktop (change it in Settings › Extras)" : "Off (Settings › Extras)"
-                }
-                WCard {
-                    icon: "smartphone"
-                    title: "Phone Link"
-                    description: sp.phoneLink ? "KDE Connect's background service starts after you unlock" : "Not set up, so nothing starts"
-                }
-            }
-            WSection {
-                visible: sp.scriptApps.length > 0
+                visible: StartupItems.scriptExists
                 title: "Your own startup script (runs after you unlock)"
-                Repeater {
-                    model: sp.scriptApps
-                    WCard {
-                        required property var modelData
-                        icon: "description"
-                        title: modelData
-                        description: "~/.config/hypr/custom/scripts/autostart-user.sh"
-                    }
-                }
-            }
-            WSection {
-                visible: sp.plasmaApps.length > 0
-                title: "Only in KDE Plasma (not started in Phoenix)"
-                Repeater {
-                    model: sp.plasmaApps
-                    WCard {
-                        required property var modelData
-                        icon: "desktop_windows"
-                        title: modelData.name
-                        description: modelData.covered === "script" ? "Phoenix does this too: your startup script"
-                            : modelData.covered === "phoenix" ? "Phoenix does this too: Wallpaper Engine"
-                            : (Config.options.hyprland.autostartApps.apps ?? []).some(a => a.cmd === modelData.exec) ? "Also in your startup apps"
-                            : "Doesn't start in Phoenix (Settings › Apps › Startup can add it)"
-                    }
+                WCard {
+                    icon: "description"
+                    title: StartupItems.scriptPrograms.length > 0 ? StartupItems.scriptPrograms.join(", ") : "Nothing"
+                    description: "Commands in ~/.config/hypr/custom/scripts/autostart-user.sh. Edit the script to change them"
+                    WButton { buttonText: "Edit script"; onClicked: Quickshell.execDetached([`${Quickshell.env("HOME")}/.local/bin/phoenix-open`, "editor", StartupItems.scriptPath]) }
                 }
             }
         }

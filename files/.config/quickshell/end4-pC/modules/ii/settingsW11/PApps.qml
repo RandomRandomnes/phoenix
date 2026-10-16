@@ -197,76 +197,41 @@ Item {
     }
 
     // ── Startup ────────────────────────────────────────────────────
+    // One list with a switch each (2026-10-16), the same as the Task Manager's Startup page: services/StartupItems.qml
     Component {
         id: startup
         WPage {
             id: sp
-            // what really starts at sign-in besides the list below (2026-10-16): scripts/startup/startup-items.py
-            property var scriptApps: []
-            property string scriptPath: `${FileUtils.trimFileProtocol(Directories.config)}/hypr/custom/scripts/autostart-user.sh`
-            property bool scriptExists: false
-            property var plasmaApps: []
-            Component.onCompleted: itemsProc.running = true
-            Process {
-                id: itemsProc
-                command: ["python3", Quickshell.shellPath("scripts/startup/startup-items.py")]
-                stdout: StdioCollector {
-                    onStreamFinished: {
-                        try {
-                            const d = JSON.parse(text);
-                            sp.scriptApps = d.script.programs ?? [];
-                            sp.scriptExists = d.script.exists ?? false;
-                            sp.plasmaApps = d.plasma ?? [];
-                        } catch (e) {}
-                    }
-                }
-            }
-            function inList(cmd) { return sp.apps.some(a => a.cmd === cmd) }
-            readonly property var apps: Config.options.hyprland.autostartApps.apps.filter(a => a.cmd && a.cmd.trim().length > 0)
-            function setApps(l) {
-                Config.options.hyprland.autostartApps.apps = l;
-            }
-            function nameFor(cmd) {
-                const m = cmd.match(/^gtk-launch\s+(\S+)/);
-                const id = m ? m[1] : cmd.split(/\s+/)[0].split("/").pop();
-                const e = AppSearch.list.find(x => x.id === id) ?? DesktopEntries.heuristicLookup(id);
-                return { name: e?.name ?? id, icon: e?.icon ?? AppSearch.guessIcon(id) };
-            }
+            Component.onCompleted: StartupItems.refresh()
 
             WSection {
-                WToggle {
-                    icon: "rocket_launch"
-                    title: "Start apps when I sign in"
-                    description: "Turns the startup apps list below on or off"
-                    checked: Config.options.hyprland.autostartApps.enable
-                    onToggled: v => Config.options.hyprland.autostartApps.enable = v
-                }
-            }
-
-            WSection {
-                title: "Startup apps"
-                enabled: Config.options.hyprland.autostartApps.enable
+                title: "Apps that start when you sign in"
                 Repeater {
-                    model: sp.apps
-                    WCard {
+                    model: StartupItems.items
+                    WToggle {
                         id: su
                         required property var modelData
-                        required property int index
-                        readonly property var info: sp.nameFor(modelData.cmd)
                         minHeight: 58
-                        title: info.name
-                        description: `Workspace ${modelData.workspace ?? 1}` + ((modelData.delay ?? 0) > 0 ? ` · then wait ${modelData.delay}s` : "")
-                        leading: Component { AppIconImage { iconName: su.info.icon } }
+                        title: modelData.name
+                        description: modelData.source
+                        showStateText: true
+                        checked: modelData.on
+                        onToggled: v => modelData.set(v)
+                        icon: modelData.symbol
+                        leading: modelData.symbol ? null : suIcon
+                        Component { id: suIcon; AppIconImage { iconName: su.modelData.icon } }
+                        // your own startup apps can also be taken off the list
                         WButton {
+                            visible: su.modelData.key.startsWith("user:")
                             buttonText: "Remove"
-                            onClicked: sp.setApps(sp.apps.filter((_, k) => k !== su.index))
+                            onClicked: Config.options.hyprland.autostartApps.apps = StartupItems.userApps.filter(a => "user:" + a.cmd !== su.modelData.key)
                         }
                     }
                 }
                 WCard {
-                    visible: sp.apps.length === 0
+                    visible: StartupItems.items.length === 0
                     icon: "inbox"
-                    title: "No startup apps yet"
+                    title: "Nothing starts when you sign in"
                 }
                 WCard {
                     icon: "add_circle"
@@ -301,7 +266,7 @@ Item {
                         title: modelData.name
                         leading: Component { AppIconImage { iconName: cand.modelData.icon; implicitSize: 24 } }
                         onClicked: {
-                            sp.setApps(sp.apps.concat([{ cmd: `gtk-launch ${modelData.id}`, delay: 0, workspace: 1 }]));
+                            StartupItems.addUserApp(`gtk-launch ${modelData.id}`);
                             addSearch.text = "";
                         }
                         MaterialSymbol { text: "add"; iconSize: 20; color: Appearance.colors.colPrimary }
@@ -310,72 +275,13 @@ Item {
             }
 
             WSection {
-                title: "Started by Phoenix"
-                WToggle {
-                    icon: "sports_esports"
-                    title: "Steam"
-                    description: "Starts in the system tray after you unlock (Settings › Extras)"
-                    checked: Config.options.extras.steamTray
-                    onToggled: v => Config.options.extras.steamTray = v
-                }
-                WToggle {
-                    icon: "animated_images"
-                    title: "Wallpaper Engine"
-                    description: "Animated wallpapers start with the desktop (Settings › Extras). Off: a picture wallpaper"
-                    checked: Config.options.extras.wallpaperEngine
-                    onToggled: v => Config.options.extras.wallpaperEngine = v
-                }
-                WCard {
-                    icon: "smartphone"
-                    title: "Phone Link"
-                    description: PhoneLink.installed
-                        ? "KDE Connect's background service starts after you unlock" + (PhoneLink.running ? " · running now" : " · not running now")
-                        : "Not set up, so nothing starts"
-                    WButton { buttonText: "Open"; onClicked: WState.go("devices", "phone") }
-                }
-            }
-
-            WSection {
                 title: "Your startup script"
-                visible: sp.scriptExists
+                visible: StartupItems.scriptExists
                 WCard {
                     icon: "description"
-                    title: sp.scriptApps.length > 0 ? sp.scriptApps.join(", ") : "Nothing"
+                    title: StartupItems.scriptPrograms.length > 0 ? StartupItems.scriptPrograms.join(", ") : "Nothing"
                     description: "Runs after you unlock: ~/.config/hypr/custom/scripts/autostart-user.sh"
-                    WButton { buttonText: "Edit script"; onClicked: Quickshell.execDetached([`${Quickshell.env("HOME")}/.local/bin/phoenix-open`, "editor", sp.scriptPath]) }
-                }
-            }
-
-            WSection {
-                title: "Only in KDE Plasma"
-                visible: sp.plasmaApps.length > 0
-                WCard {
-                    icon: "info"
-                    title: "These start when you sign in to KDE Plasma, not in Phoenix"
-                    description: "They come from ~/.config/autostart"
-                }
-                Repeater {
-                    model: sp.plasmaApps
-                    WCard {
-                        id: pa
-                        required property var modelData
-                        readonly property bool added: sp.inList(modelData.exec)
-                        minHeight: 58
-                        title: modelData.name
-                        description: modelData.covered === "script" ? "Phoenix does this too: your startup script"
-                            : modelData.covered === "phoenix" ? "Phoenix does this too: Wallpaper Engine above"
-                            : pa.added ? "Also starts in Phoenix (your startup apps)"
-                            : "Doesn't start in Phoenix"
-                        leading: Component { AppIconImage { iconName: pa.modelData.icon || "application-x-executable" } }
-                        WButton {
-                            visible: pa.modelData.covered === "" && !pa.added
-                            buttonText: "Start in Phoenix too"
-                            onClicked: {
-                                sp.setApps(sp.apps.concat([{ cmd: pa.modelData.exec, delay: 0, workspace: 1 }]));
-                                Config.options.hyprland.autostartApps.enable = true;
-                            }
-                        }
-                    }
+                    WButton { buttonText: "Edit script"; onClicked: Quickshell.execDetached([`${Quickshell.env("HOME")}/.local/bin/phoenix-open`, "editor", StartupItems.scriptPath]) }
                 }
             }
             WSection {

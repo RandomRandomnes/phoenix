@@ -44,7 +44,7 @@ for app in autostart.get("apps", []):
     command = str(app.get("cmd", "")).strip()
     workspace = int(app.get("workspace", 1) or 1)
     delay = float(app.get("delay", 0) or 0)
-    if not command:
+    if not command or app.get("off"):   # "off": switched off in the Task Manager / Settings, kept in the list
         continue
 
     dispatch(f"hl.dsp.focus({{workspace = {workspace}}})")

@@ -2,7 +2,8 @@
 """What really starts when you sign in, for Settings › Apps › Startup and the Task Manager (Phoenix, 2026-10-16).
 
 Prints JSON: {"script": {"path", "exists", "programs": [names]},
-              "plasma": [{"id", "name", "exec", "icon", "covered": "script"|"phoenix"|""}]}
+              "plasma": [{"id", "name", "exec", "icon", "covered": "script"|"phoenix"|""}],
+              "installed": {"steam", "wallpaperEngine", "phoneLink": bool}}
 script = your own startup script (~/.config/hypr/custom/scripts/autostart-user.sh), the programs it runs.
 plasma = ~/.config/autostart entries: KDE Plasma starts these, Phoenix (Hyprland) does not. "covered" tells when
 Phoenix already does the same thing another way (your script mounts that drive; Phoenix starts Wallpaper Engine).
@@ -14,6 +15,7 @@ import json
 import os
 import re
 import shlex
+import shutil
 
 HOME = os.path.expanduser("~")
 SCRIPT = os.path.join(HOME, ".config/hypr/custom/scripts/autostart-user.sh")
@@ -90,8 +92,12 @@ def main():
     if os.path.isfile(SCRIPT):
         with open(SCRIPT, errors="ignore") as fh:
             text = fh.read()
+    # which of Phoenix's own startup programs are installed (the Task Manager only lists those)
+    have = {"steam": shutil.which("steam") is not None,
+            "wallpaperEngine": shutil.which("linux-wallpaper-engine-ux") is not None,
+            "phoneLink": shutil.which("kdeconnectd") is not None or os.path.exists("/usr/bin/kdeconnectd")}
     print(json.dumps({"script": {"path": SCRIPT, "exists": os.path.isfile(SCRIPT), "programs": script_programs(text)},
-                      "plasma": plasma_entries(text)}))
+                      "plasma": plasma_entries(text), "installed": have}))
 
 
 if __name__ == "__main__":

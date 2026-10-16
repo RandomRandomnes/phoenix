@@ -32,6 +32,8 @@ Singleton {
     function accept(id) { run(["accept", id]) }
     function reject(id) { run(["reject", id]) }
     function refresh() { run(["refresh"]) }
+    // start KDE Connect's service now (when it's switched off at sign-in in Task Manager › Startup)
+    function start() { Quickshell.execDetached(["bash", "-c", "pgrep -x kdeconnectd >/dev/null || exec kdeconnectd"]) }
     function setPlugin(id, plugin, on) { run(["plugin", id, plugin, on ? "on" : "off"]) }
     // pick files, then send them (the same file picker the rest of Phoenix uses)
     function sendFiles(id) {

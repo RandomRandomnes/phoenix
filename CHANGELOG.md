@@ -1,5 +1,9 @@
 # Changelog
 
+## custom 2.383 (2026-10-16, fix)
+- Task Manager › Startup works like Windows: one list of everything that starts when you sign in, each with an on/off switch; switching an app off keeps it in the list
+- Covers your startup apps, Steam, Wallpaper Engine, Phone Link (new switch) and KDE Plasma's startup entries (switch one on to start it in Phoenix too); Settings › Apps › Startup shows the same list
+
 ## custom 2.373 (2026-10-16, fix)
 - Super menu app grid: newly installed apps (packages, Flatpaks, Steam games) are added automatically with a dot until you open them; switch in Settings › Personalization › Super menu apps
 - Right-click an app in the grid: Open, the app's own actions (e.g. New Private Window), Pin to taskbar, Start when I sign in, Remove from Super menu, App settings, Uninstall (Steam games through Steam)

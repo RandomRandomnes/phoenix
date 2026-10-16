@@ -68,7 +68,7 @@ sleep 2
 
 # Phone Link (KDE Connect, set up with `phoenix phone-link setup`): its background service, like KDE Plasma starts it.
 # With lock-screen sign-in it waits for the first unlock too (phone notifications shouldn't show before the password).
-if command -v kdeconnectd >/dev/null; then
+if command -v kdeconnectd >/dev/null && feature phoneLinkStart; then
   (
     if [ "${PHOENIX_LOCK_FIRST:-}" = 1 ]; then
       while [ ! -e "${XDG_RUNTIME_DIR:-/tmp}/phoenix-unlocked-once" ]; do sleep 1; done

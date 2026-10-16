@@ -138,6 +138,10 @@ def state():
         s["ok"] = False
         return s
     try:
+        # only look when it's running: a call would start it through D-Bus, even with Phone Link switched off at
+        # sign-in (Task Manager › Startup, 2026-10-16); the card's buttons and Settings start it when used
+        if not bus().name_has_owner(BUS):
+            return s
         ids = call(ROOT, "org.kde.kdeconnect.daemon", "devices", False, False)
         s["running"] = True
     except Exception:

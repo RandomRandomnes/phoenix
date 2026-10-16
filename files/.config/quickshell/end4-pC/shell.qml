@@ -40,7 +40,7 @@ ShellRoot {
             }
 
             if (Config.options.hyprland.autostartApps.enable &&
-                Config.options.hyprland.autostartApps.apps.length > 0) {
+                Config.options.hyprland.autostartApps.apps.some(a => a.cmd && !a.off)) {
                 autostartProc.running = true
             }
         }

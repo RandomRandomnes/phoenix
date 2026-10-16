@@ -18,7 +18,7 @@ Singleton {
     readonly property var extras: Config.options.extras
     readonly property string signature: [extras.windowsStyle, extras.minimizeToDock, extras.wallpaperEngine,
         extras.resourceGraphs, extras.appGrid, extras.powerMenuKde, extras.claudeCodeAi, extras.updatesScript,
-        extras.steamTray, extras.workspaceGroups].join(",")
+        extras.steamTray, extras.workspaceGroups, extras.phoneLinkStart].join(",")
     property string appliedSignature: ""
 
     function apply() {
