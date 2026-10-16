@@ -1,5 +1,8 @@
 # Changelog
 
+## custom 2.302 (2026-10-15, fix)
+- Apps can open folders and files reliably after switching from KDE Plasma: the session now hands its full environment to helpers started through D-Bus/systemd (file managers, portals) and stops ones still running with Plasma's settings
+
 ## custom 2.292 (2026-10-15, fix)
 - Shortcuts follow Settings › Apps: Super+Enter/Super+T/Ctrl+Alt+T (terminal), Super+E (file manager), Super+W (browser), Super+X (text editor), Ctrl+Super+V (volume mixer) and Ctrl+Shift+Esc (Task Manager) now open the same apps as the taskbar, power menu and Settings (new helper: phoenix-open)
 - Sidebar: the Bluetooth, Wi-Fi and volume Details buttons open Phoenix Settings (Bluetooth & devices, Network, Sound) instead of KDE's pages; Open in Terminal and Open file manager use your default apps

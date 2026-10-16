@@ -6,20 +6,18 @@
   "format": "custom-fixes",
   "line": "custom",
   "version": 2.99,
-  "label": "2.292",
+  "label": "2.302",
   "kind": "fix",
   "date": "2026-10-15",
   "publisher": "RandomRandomnes",
   "notes": [
-    "Shortcuts follow Settings \u203a Apps: Super+Enter/Super+T/Ctrl+Alt+T (terminal), Super+E (file manager), Super+W (browser), Super+X (text editor), Ctrl+Super+V (volume mixer) and Ctrl+Shift+Esc (Task Manager) now open the same apps as the taskbar, power menu and Settings (new helper: phoenix-open)",
-    "Sidebar: the Bluetooth, Wi-Fi and volume Details buttons open Phoenix Settings (Bluetooth & devices, Network, Sound) instead of KDE's pages; Open in Terminal and Open file manager use your default apps",
-    "App menu: 'Settings' opens Phoenix Settings; KDE's System Settings no longer shows up in Phoenix (entries meant only for other desktops are hidden)"
+    "Apps can open folders and files reliably after switching from KDE Plasma: the session now hands its full environment to helpers started through D-Bus/systemd (file managers, portals) and stops ones still running with Plasma's settings"
   ],
   "payload": "fixes.tar.gz",
-  "payloadSha256": "a0b5068227cffda8c7b750da07f96e50f61cc6776aa7e61f91e34b62281b94c7",
+  "payloadSha256": "698d2334ccf22daf61bd0e93fbffb4d52215fd7cecae81df4f40a6f5d4ef7d91",
   "files": {
     ".config/hypr/custom/env.lua": "1902700f304ac6fc6d6c484da2bce2e14821964285f199fdd36971381b347edf",
-    ".config/hypr/custom/execs.lua": "b6269e10c73bb9e93f07ec5fc4d992c215f85dc9199ad4bedc9233b15dc496d1",
+    ".config/hypr/custom/execs.lua": "64197ff280790bc529a0dd1938985c42783a1b17f59ec709ff515f8fa0f5d6b2",
     ".config/hypr/custom/general.lua": "e5622221a80a5b98e4f6a85845149150ddbcd29f1481880d960f3805edcf93aa",
     ".config/hypr/custom/keybinds.lua": "cc0b7b224b6a06b9e1fe37b8cbb51fd654f450b2bff24cd0c14ff24d8578ef86",
     ".config/hypr/custom/rules.lua": "75ade8ef784f5325d456673f33af4cf07ee655f2b1f4d30f2cf5254873914395",
@@ -1059,19 +1057,7 @@
     ".local/share/setup-profiles/stock-config.json": "5814a18a9aa1038cd74764efc268ca12b0ba8599dd7255799d8729bc5b80a9f8"
   },
   "changed": [
-    ".config/hypr/custom/keybinds.lua",
-    ".config/quickshell/end4-pC/modules/ii/bar/AvatarPopup.qml",
-    ".config/quickshell/end4-pC/modules/ii/desktopMenu/DesktopMenu.qml",
-    ".config/quickshell/end4-pC/modules/ii/settingsW11/PSystem.qml",
-    ".config/quickshell/end4-pC/modules/ii/sidebarRight/bluetoothDevices/BluetoothDialog.qml",
-    ".config/quickshell/end4-pC/modules/ii/sidebarRight/quickToggles/classicStyle/BluetoothToggle.qml",
-    ".config/quickshell/end4-pC/modules/ii/sidebarRight/quickToggles/classicStyle/NetworkToggle.qml",
-    ".config/quickshell/end4-pC/modules/ii/sidebarRight/volumeMixer/VolumeDialog.qml",
-    ".config/quickshell/end4-pC/modules/ii/sidebarRight/wifiNetworks/WifiDialog.qml",
-    ".config/quickshell/end4-pC/services/AppSearch.qml",
-    ".local/bin/phoenix-open",
-    ".local/share/applications/kdesystemsettings.desktop",
-    ".local/share/applications/phoenix-settings.desktop"
+    ".config/hypr/custom/execs.lua"
   ],
   "test": false
 }

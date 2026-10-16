@@ -141,6 +141,9 @@ hl.on("hyprland.start", function()
     if os.getenv("PHOENIX_LOCK_FIRST") == "1" then
         hl.dispatch(hl.dsp.submap("phoenix-boot"))
     end
+    -- the full session environment for D-Bus/systemd-started helpers, before anything opens files or folders
+    -- (custom/scripts/session-env.sh; after a Plasma session they kept Plasma's display, 2026-10-15)
+    hl.exec_cmd("$HOME/.config/hypr/custom/scripts/session-env.sh")
     hl.exec_cmd("$HOME/.config/hypr/custom/scripts/autostart.sh")
 end)
 -- autostart-end
