@@ -1,0 +1,19 @@
+#!/bin/bash
+# Phoenix Task Manager (2026-10-15): opens ~/.config/quickshell/end4-pC/task-manager.qml, or brings the open one to the
+# front (Ctrl+Shift+Esc, the session menu, Settings › Apps › Task manager and the app menu all run this).
+#   phoenix-task-manager [page]     page: processes | performance | startup | services | users
+#   phoenix-task-manager --configured   the task manager chosen in Settings › Apps (Ctrl+Shift+Esc runs this)
+if [ "${1:-}" = "--configured" ]; then
+    cmd=$(python3 -c 'import json,os
+try: print(json.load(open(os.path.expanduser("~/.config/illogical-impulse/config.json")))["apps"]["taskManager"])
+except Exception: print("")' 2>/dev/null)
+    case "$cmd" in ""|phoenix-task-manager|*/phoenix-task-manager) set -- ;; *) exec bash -c "$cmd" ;; esac
+fi
+addr=$(hyprctl clients -j 2>/dev/null | python3 -c 'import json,sys
+for c in json.load(sys.stdin):
+    if c.get("title") == "Task Manager" and "quickshell" in c.get("class", ""): print(c["address"]); break' 2>/dev/null)
+if [ -n "$addr" ]; then
+    hyprctl dispatch "hl.dsp.focus({ window = \"address:$addr\" })" >/dev/null
+    exit 0
+fi
+TASK_MANAGER_PAGE="${1:-}" exec qs -p "$HOME/.config/quickshell/end4-pC/task-manager.qml"

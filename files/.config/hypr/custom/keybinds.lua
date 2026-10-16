@@ -9,6 +9,11 @@ hl.bind("CTRL+SUPER+ALT+Slash", hl.dsp.exec_cmd("xdg-open ~/.config/hypr/custom/
 hl.unbind("SUPER + I")
 hl.bind("SUPER + I", hl.dsp.exec_cmd("qs -c end4-pC ipc call settings toggle"), { description = "App: Settings app" })
 
+-- Ctrl+Shift+Esc: the Task Manager chosen in Settings › Apps (Phoenix's own by default, 2026-10-15); the stock bind
+-- tried gnome-system-monitor / KDE System Monitor / btop and ignored that setting.
+hl.unbind("CTRL + SHIFT + Escape")
+hl.bind("CTRL + SHIFT + Escape", hl.dsp.exec_cmd("phoenix-task-manager --configured"), { description = "App: Task manager" })
+
 -- Shift+Super+Alt+/: the stock bind opens the upstream welcome window (welcome.qml); this desktop uses the setup
 -- assistant instead (the same as Settings › Extras › Run the first-time setup again).
 hl.unbind("SHIFT + SUPER + ALT + Slash")

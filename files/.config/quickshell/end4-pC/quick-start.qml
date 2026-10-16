@@ -56,6 +56,7 @@ ApplicationWindow {
             { keys: ["Super", "E"], what: "Files" },
             { keys: ["Super", "Enter"], what: "Terminal" },
             { keys: ["Super", "I"], what: "Settings" },
+            { keys: ["Ctrl", "Shift", "Esc"], what: "Task Manager: end apps that hang, see what uses the PC" },
             { h: "Shell" },
             { keys: ["Super", "A"], what: "Left sidebar: AI chat, translator" },
             { keys: ["Super", "N"], what: "Right sidebar: quick settings, notifications" },

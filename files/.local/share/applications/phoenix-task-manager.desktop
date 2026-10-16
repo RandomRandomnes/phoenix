@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Task Manager
+Comment=See what's running, end apps that hang, check CPU, memory, GPU, disk and network use
+Exec=phoenix-task-manager
+Icon=utilities-system-monitor
+Categories=System;Monitor;
+Keywords=task manager;processes;end task;kill;cpu;memory;ram;gpu;performance;services;startup;

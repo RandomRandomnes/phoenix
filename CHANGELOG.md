@@ -1,5 +1,10 @@
 # Changelog
 
+## custom 2.282 (2026-10-15, fix)
+- New: Task Manager (Ctrl+Shift+Esc, the app menu, the power menu): processes grouped into apps, background and system with live CPU, memory, GPU and disk use; End task (Force end if an app won't close); performance graphs; startup apps; services; users
+- Settings › Apps › Task manager: Phoenix's Task Manager is the default and Ctrl+Shift+Esc follows this setting
+- Quick Start lists the Task Manager shortcut
+
 ## custom 2.272 (2026-10-15, minor)
 - Lock-screen sign-in: Steam now starts after you unlock instead of behind the lock screen
 

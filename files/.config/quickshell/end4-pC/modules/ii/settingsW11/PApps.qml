@@ -195,6 +195,7 @@ esac`;
                     icon: "monitoring"
                     title: "Task manager"
                     model: [
+                        { displayName: "Task Manager (Phoenix)", value: "phoenix-task-manager" },
                         { displayName: "System Monitor (KDE)", value: "plasma-systemmonitor --page-name Processes" },
                         { displayName: "btop (in terminal)", value: "kitty -1 btop" },
                         { displayName: "htop (in terminal)", value: "kitty -1 htop" },
