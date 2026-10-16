@@ -19,7 +19,17 @@ WPage {
 
     readonly property string tool: `${Quickshell.env("HOME")}/.local/bin/window-rules`
     property var rules: []
-    property var openWindows: []
+    // open windows to pick from, live from Hyprland (2026-10-16; was read once, so apps opened later were missing)
+    readonly property var openWindows: {
+        const seen = {}, out = [];
+        for (const c of HyprlandData.windowList ?? []) {
+            const cls = c.class || c.initialClass || "";
+            if (!cls || seen[cls]) continue;
+            seen[cls] = true;
+            out.push({ class: cls, title: c.title ?? "", app: c.initialTitle || cls });
+        }
+        return out.sort((a, b) => a.class.toLowerCase().localeCompare(b.class.toLowerCase()));
+    }
     property var draft: null          // the rule being edited (a copy), null = list view
     property int draftIndex: -1       // -1 = new rule
     property string status: ""
@@ -44,7 +54,15 @@ WPage {
     readonly property var monitorOptions: [{ displayName: "Don't change", value: "" }].concat(
         Hyprland.monitors.values.map(m => ({ displayName: m.name, value: m.name })))
 
-    Component.onCompleted: { listProc.running = true; windowsProc.running = true }
+    Component.onCompleted: listProc.running = true
+    Connections { target: WState; function onRefreshTickChanged() { if (!page.saving) listProc.running = true } }
+    // rules changed outside this page (window-rules on the command line, a setup profile): reload the list
+    FileView {
+        path: `${Quickshell.env("HOME")}/.config/hypr/custom/window-rules.json`
+        watchChanges: true
+        printErrors: false
+        onFileChanged: if (!page.saving) listProc.running = true
+    }
 
     function iconFor(cls) {
         const e = AppSearch.list.find(x => x.id === cls || (x.id ?? "").toLowerCase() === (cls ?? "").toLowerCase())
@@ -69,7 +87,6 @@ WPage {
         page.draftIndex = i
         page.draft = i >= 0 ? JSON.parse(JSON.stringify(page.rules[i])) : { enabled: true, matchBy: "class", match: "", app: "" }
         page.status = ""
-        windowsProc.running = true
     }
     function setDraft(key, value) {
         const d = JSON.parse(JSON.stringify(page.draft))
@@ -95,11 +112,6 @@ WPage {
         id: listProc
         command: [page.tool, "list"]
         stdout: StdioCollector { onStreamFinished: { try { page.rules = JSON.parse(text) } catch (e) { page.rules = [] } } }
-    }
-    Process {
-        id: windowsProc
-        command: [page.tool, "windows"]
-        stdout: StdioCollector { onStreamFinished: { try { page.openWindows = JSON.parse(text) } catch (e) { page.openWindows = [] } } }
     }
     Process {
         id: saveProc

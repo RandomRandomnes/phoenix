@@ -14,6 +14,10 @@ Singleton {
     property string sub: ""
     property bool advanced: false          // showing the original illogical-impulse settings
     property var history: []
+    // Pages that read their data once (a helper, a file) reload it when this changes: whenever you come back to the
+    // Settings window (2026-10-16), so a change made elsewhere (an app installed, a window opened) shows up
+    property int refreshTick: 0
+    function refresh() { root.refreshTick++ }
 
     readonly property var categories: [
         { id: "home",            name: "Home",                 icon: "home" },

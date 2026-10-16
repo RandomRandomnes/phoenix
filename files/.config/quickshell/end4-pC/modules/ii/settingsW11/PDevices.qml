@@ -168,7 +168,9 @@ Item {
             function put(opt, v) { opt.value = v; opt.setValue(v); }
 
             property bool hasTouchpad: false
+            Connections { target: WState; function onRefreshTickChanged() { touchpadCheck.running = true } }
             Process {
+                id: touchpadCheck
                 running: true
                 command: ["bash", "-c", "hyprctl devices -j | jq '[.mice[].name | select(test(\"touchpad|trackpad\";\"i\"))] | length'"]
                 stdout: StdioCollector { onStreamFinished: mp.hasTouchpad = parseInt(text) > 0 }

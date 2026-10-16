@@ -15,7 +15,9 @@ WPage {
 
     // "Administrator" only for members of wheel (the group sudo allows); it was shown for every account
     property bool isAdmin: true
+    Connections { target: WState; function onRefreshTickChanged() { adminCheck.running = true } }
     Process {
+        id: adminCheck
         running: true
         command: ["id", "-nG"]
         stdout: StdioCollector { onStreamFinished: page.isAdmin = text.trim().split(/\s+/).includes("wheel") }

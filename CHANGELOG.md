@@ -1,5 +1,9 @@
 # Changelog
 
+## custom 2.393 (2026-10-16, fix)
+- Settings updates itself: the Window rules 'Pick an open window' list follows your open windows live, and the rules list reloads when the rules change elsewhere
+- Pages that read their data once (Default apps, Startup, Wi-Fi adapter, touchpad, account type) reload it whenever you come back to the Settings window
+
 ## custom 2.383 (2026-10-16, fix)
 - Task Manager › Startup works like Windows: one list of everything that starts when you sign in, each with an on/off switch; switching an app off keeps it in the list
 - Covers your startup apps, Steam, Wallpaper Engine, Phone Link (new switch) and KDE Plasma's startup entries (switch one on to start it in Phoenix too); Settings › Apps › Startup shows the same list

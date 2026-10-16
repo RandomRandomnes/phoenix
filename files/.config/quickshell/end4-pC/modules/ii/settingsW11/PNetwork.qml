@@ -22,7 +22,9 @@ Item {
     // Phoenix (2026-10-09): is there a Wi-Fi adapter at all? (a wired-only PC showed "Wi-Fi On – Connected to Wired
     // connection 1": the row used the general connection name)
     property bool hasWifi: true
+    Connections { target: WState; function onRefreshTickChanged() { wifiCheck.running = true } }   // a USB Wi-Fi adapter plugged in
     Process {
+        id: wifiCheck
         running: true
         command: ["nmcli", "-t", "-f", "TYPE", "device"]
         stdout: StdioCollector { onStreamFinished: root.hasWifi = /^wifi$/m.test(text) }

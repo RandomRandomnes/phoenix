@@ -43,6 +43,10 @@ Scope {
         }
         implicitWidth: Math.min(1240, monW - 40)
         implicitHeight: Math.min(820, monH - 120)
+        // back in Settings (focus returns to it): pages reload what they read once (WState.refreshTick)
+        readonly property bool focused: GlobalStates.settingsOpen && ToplevelManager.activeToplevel?.title === "Settings"
+            && ToplevelManager.activeToplevel?.appId === "org.quickshell"
+        onFocusedChanged: if (focused) WState.refresh()
         // measured while Settings is closed, so the size is right before the window appears (measuring when it became
         // visible came too late: it stayed 1240×820 on an 800 px screen; QA 2026-10-09)
         Component.onCompleted: measure()

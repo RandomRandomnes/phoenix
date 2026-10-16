@@ -114,6 +114,7 @@ Item {
             id: dp
             property var data: ({})
             Component.onCompleted: listProc.running = true
+            Connections { target: WState; function onRefreshTickChanged() { listProc.running = true } }   // e.g. a browser installed meanwhile
             Process {
                 id: listProc
                 command: ["python3", root.helper, "list"]
@@ -203,6 +204,7 @@ Item {
         WPage {
             id: sp
             Component.onCompleted: StartupItems.refresh()
+            Connections { target: WState; function onRefreshTickChanged() { StartupItems.refresh() } }
 
             WSection {
                 title: "Apps that start when you sign in"
