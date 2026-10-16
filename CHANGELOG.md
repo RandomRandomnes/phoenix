@@ -1,5 +1,9 @@
 # Changelog
 
+## custom 2.323 (2026-10-16, fix)
+- Settings › Apps › Startup now shows what really starts: Phoenix's own items (Steam, Wallpaper Engine, Phone Link), your own startup script, and KDE-Plasma-only entries (with a button to start them in Phoenix too)
+- Task Manager › Startup shows the same; Notifications: the duplicate 'Notifications' switch (same as Do not disturb, reversed) is gone
+
 ## custom 2.313 (2026-10-16, fix)
 - New: Phone Link (KDE Connect) — a phone card in the right sidebar (battery, Ring, Send file, Browse, Clipboard; expand for the phone's notifications with reply, newest photos and what it plays) and Settings › Bluetooth & devices › Phone (pairing, what's shared: notifications, texts, calls, clipboard, remote, files)
 - One-time setup: Settings › Bluetooth & devices › Phone › Set up, or 'phoenix phone-link setup' (installs KDE Connect, allows it through the firewall on your home network only)

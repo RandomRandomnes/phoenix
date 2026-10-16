@@ -432,17 +432,13 @@ Item {
         id: notifications
         WPage {
             WSection {
-                WToggle {
-                    icon: "notifications"
-                    title: "Notifications"
-                    description: "Get notifications from apps and other senders"
-                    checked: !Notifications.silent
-                    onToggled: v => Notifications.silent = !v
-                }
+                // one switch (2026-10-16): the old "Notifications" switch was this same setting, reversed
                 WToggle {
                     icon: "do_not_disturb_on"
                     title: "Do not disturb"
-                    description: "Notifications will go straight to the notification center"
+                    description: GameAssist.autoDndActive
+                        ? "On by itself while a fullscreen game or screen sharing is running. Notifications go straight to the notification center"
+                        : "Notifications go straight to the notification center, no pop-ups"
                     checked: Notifications.silent
                     onToggled: v => Notifications.silent = v
                 }

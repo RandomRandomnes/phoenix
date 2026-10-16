@@ -783,10 +783,22 @@ ApplicationWindow {
             id: sp
             maxContentWidth: 4000
             property var scriptApps: []
+            property var plasmaApps: []
+            property bool phoneLink: false
+            // what really starts at sign-in (2026-10-16): the same helper as Settings › Apps › Startup
             Process {
                 running: true
-                command: ["bash", "-c", "grep -oE '^[[:space:]]*[A-Za-z][A-Za-z0-9_.-]+[^|#]*&[[:space:]]*$' ~/.config/hypr/custom/scripts/autostart-user.sh 2>/dev/null | awk '{print $1}' | sort -u"]
-                stdout: StdioCollector { onStreamFinished: sp.scriptApps = text.split("\n").filter(l => l.trim()) }
+                command: ["python3", Quickshell.shellPath("scripts/startup/startup-items.py")]
+                stdout: StdioCollector {
+                    onStreamFinished: {
+                        try { const d = JSON.parse(text); sp.scriptApps = d.script.programs ?? []; sp.plasmaApps = d.plasma ?? [] } catch (e) {}
+                    }
+                }
+            }
+            Process {
+                running: true
+                command: ["sh", "-c", "command -v kdeconnectd || test -x /usr/bin/kdeconnectd"]
+                onExited: code => sp.phoneLink = code === 0
             }
             WSection {
                 title: "Your startup apps"
@@ -829,10 +841,15 @@ ApplicationWindow {
                     title: "Wallpaper Engine background"
                     description: Config.options.extras.wallpaperEngine ? "On: starts with the desktop (change it in Settings › Extras)" : "Off (Settings › Extras)"
                 }
+                WCard {
+                    icon: "smartphone"
+                    title: "Phone Link"
+                    description: sp.phoneLink ? "KDE Connect's background service starts after you unlock" : "Not set up, so nothing starts"
+                }
             }
             WSection {
                 visible: sp.scriptApps.length > 0
-                title: "Also started by your own autostart script"
+                title: "Your own startup script (runs after you unlock)"
                 Repeater {
                     model: sp.scriptApps
                     WCard {
@@ -840,6 +857,22 @@ ApplicationWindow {
                         icon: "description"
                         title: modelData
                         description: "~/.config/hypr/custom/scripts/autostart-user.sh"
+                    }
+                }
+            }
+            WSection {
+                visible: sp.plasmaApps.length > 0
+                title: "Only in KDE Plasma (not started in Phoenix)"
+                Repeater {
+                    model: sp.plasmaApps
+                    WCard {
+                        required property var modelData
+                        icon: "desktop_windows"
+                        title: modelData.name
+                        description: modelData.covered === "script" ? "Phoenix does this too: your startup script"
+                            : modelData.covered === "phoenix" ? "Phoenix does this too: Wallpaper Engine"
+                            : (Config.options.hyprland.autostartApps.apps ?? []).some(a => a.cmd === modelData.exec) ? "Also in your startup apps"
+                            : "Doesn't start in Phoenix (Settings › Apps › Startup can add it)"
                     }
                 }
             }

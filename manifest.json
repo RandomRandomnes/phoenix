@@ -6,16 +6,16 @@
   "format": "custom-fixes",
   "line": "custom",
   "version": 2.99,
-  "label": "2.313",
+  "label": "2.323",
   "kind": "fix",
   "date": "2026-10-16",
   "publisher": "RandomRandomnes",
   "notes": [
-    "New: Phone Link (KDE Connect) \u2014 a phone card in the right sidebar (battery, Ring, Send file, Browse, Clipboard; expand for the phone's notifications with reply, newest photos and what it plays) and Settings \u203a Bluetooth & devices \u203a Phone (pairing, what's shared: notifications, texts, calls, clipboard, remote, files)",
-    "One-time setup: Settings \u203a Bluetooth & devices \u203a Phone \u203a Set up, or 'phoenix phone-link setup' (installs KDE Connect, allows it through the firewall on your home network only)"
+    "Settings \u203a Apps \u203a Startup now shows what really starts: Phoenix's own items (Steam, Wallpaper Engine, Phone Link), your own startup script, and KDE-Plasma-only entries (with a button to start them in Phoenix too)",
+    "Task Manager \u203a Startup shows the same; Notifications: the duplicate 'Notifications' switch (same as Do not disturb, reversed) is gone"
   ],
   "payload": "fixes.tar.gz",
-  "payloadSha256": "ba33e60cc0d230e9eba77ae1daaacb81ad42b6d6eadeeedb5e4fa22528bddfa4",
+  "payloadSha256": "286733eb292530b8e4cd441558730a4d091be8de1b047c01d940a663f6b12c5e",
   "files": {
     ".config/hypr/custom/env.lua": "1902700f304ac6fc6d6c484da2bce2e14821964285f199fdd36971381b347edf",
     ".config/hypr/custom/execs.lua": "64197ff280790bc529a0dd1938985c42783a1b17f59ec709ff515f8fa0f5d6b2",
@@ -593,7 +593,7 @@
     ".config/quickshell/end4-pC/modules/ii/settings/pages/ServicesConfig.qml": "05c652220b1f9c04cee27323e6f74cebf3f0a92c240506bf320fae833934ef6d",
     ".config/quickshell/end4-pC/modules/ii/settingsW11/PAccessibility.qml": "a8713fddea50bc7f75127c745fcccf34044a90cd17532a8d48ee743201e682f9",
     ".config/quickshell/end4-pC/modules/ii/settingsW11/PAccounts.qml": "94c9405ac5cc3594e7215cb3214515cb7a83078e4405b85fcda9baccf9dbb0af",
-    ".config/quickshell/end4-pC/modules/ii/settingsW11/PApps.qml": "66965224b30dc3b7148317c97a923c34d14d2ac3f6b363b0f881c04a2ac1b6a4",
+    ".config/quickshell/end4-pC/modules/ii/settingsW11/PApps.qml": "c6e5479d34fce52347af46b7b744f32ab466ffebfc61401b066aadaf37611d15",
     ".config/quickshell/end4-pC/modules/ii/settingsW11/PDevices.qml": "18af8ef8eed315203e1914ee83a0c439c8121043ec0bf2c356aba33305631ede",
     ".config/quickshell/end4-pC/modules/ii/settingsW11/PExtras.qml": "780ebeb10c255853ee6d21ab8e755726f4c82e84dee11a9756edf37d6d0c1f02",
     ".config/quickshell/end4-pC/modules/ii/settingsW11/PGaming.qml": "efb7b5378c3dd08825674dd2ef6a4cdefbe260701b84b53e6eaf1456b3e7d807",
@@ -601,7 +601,7 @@
     ".config/quickshell/end4-pC/modules/ii/settingsW11/PNetwork.qml": "e9a4e6218e7a12332ffa50b01903d4b264db3b7784999029f04bbe4f86db315b",
     ".config/quickshell/end4-pC/modules/ii/settingsW11/PPersonalization.qml": "464a706e872e6332ebc1c1be3c79c89870f77eacc9ab800aff9c10249f6b57ed",
     ".config/quickshell/end4-pC/modules/ii/settingsW11/PPrivacy.qml": "2ce09baa7f9bf457c99356fac2c1353bf59af300fcc0d045453d4e8da5091fe8",
-    ".config/quickshell/end4-pC/modules/ii/settingsW11/PSystem.qml": "84c6ce33b71103afc96b9d56fddf3a33b3d071b12e4c2e466d164f38a4e0285d",
+    ".config/quickshell/end4-pC/modules/ii/settingsW11/PSystem.qml": "17ead9327ef22c6d22e4b4c8e7cee26f2bfcaa4e228dc4caff50c698feabab02",
     ".config/quickshell/end4-pC/modules/ii/settingsW11/PTime.qml": "8036344059609fb0ceac76f6d73ca812d9162834a838896727d8b5d70fc3c3b0",
     ".config/quickshell/end4-pC/modules/ii/settingsW11/PUpdate.qml": "42c772d98da9e7d1fc8c53534ae448008929a084a9368d73e688685957f85c80",
     ".config/quickshell/end4-pC/modules/ii/settingsW11/SAppearanceGeneral.qml": "f7e00b5f5084339871d8e101731bbe7449cd454f02d76b4a1c3b0b5b7d7cf258",
@@ -824,6 +824,7 @@
     ".config/quickshell/end4-pC/scripts/preset_share_setup.sh": "edc67b60cc0dffcfe3547badf6ca6897852ad8fbaff1a0fdfaf8bff246301a92",
     ".config/quickshell/end4-pC/scripts/preset_unshare.sh": "6ea3f5635d2648e97e0fc1390c8ba54d0ad5a61783a1efbb2aa1e8870807949f",
     ".config/quickshell/end4-pC/scripts/presets.sh": "9a667edc366302d1bb512adac6ef73844407fed3b9a69d072749afd82cd1c7c1",
+    ".config/quickshell/end4-pC/scripts/startup/startup-items.py": "e2bf1bf0955bdfa23b9b62d8a8e0612595ee58513de77c2caf4f32c1f5ec67ad",
     ".config/quickshell/end4-pC/scripts/sysstats/sysstats.py": "7d10761a1068d9652ef57b35c54115e341379606993970659d0f4c5df7ba46c0",
     ".config/quickshell/end4-pC/scripts/system-appearance.sh": "377e2415c38db1cf54634a35c7ae4e3f108d673c3cd4ac882421d175bd954de0",
     ".config/quickshell/end4-pC/scripts/taskmanager/procs.py": "b501d9ba9054ebe20fd17318e751f1c2bbac83e25ca7ed72493153c46a946680",
@@ -929,7 +930,7 @@
     ".config/quickshell/end4-pC/services/network/WifiAccessPoint.qml": "fd6d23acfd6b4d982470611f32112cc0e0728a4ed2869db8abad8bbb2ce3a8b4",
     ".config/quickshell/end4-pC/setup-wizard.qml": "6cff52ed84357fddef1b157da0ea9a3627f83703f5aa71ee46c48d2988543b23",
     ".config/quickshell/end4-pC/shell.qml": "461cd7350faf46884962d7e12ef85d5343f120b9837f292b1b16f265167c2dbb",
-    ".config/quickshell/end4-pC/task-manager.qml": "834c921cba768a82b84e6be568f9aede08f0965d3be387506f9351f63b1afea1",
+    ".config/quickshell/end4-pC/task-manager.qml": "a56282d5b547a2530e4a647d34b130ae10ae5272b9c49bcc9ec65b7e8d4c6aac",
     ".config/quickshell/end4-pC/translations/README.ja.md": "33cb7ef078336a5aecc73777c760b40e9bdc465ba0aac61b566c8585ab0352ba",
     ".config/quickshell/end4-pC/translations/README.md": "9c9a030eec56a34d20a8c358c0583ef5d36115a482f215b9d29fc12c45545a46",
     ".config/quickshell/end4-pC/translations/README.zh-CN.md": "9c1f51396b39aa9c6f3e592662efb4ea4c6fc4a9cb91a5161369671a508e72fd",
@@ -1062,15 +1063,10 @@
     ".local/share/setup-profiles/stock-config.json": "5814a18a9aa1038cd74764efc268ca12b0ba8599dd7255799d8729bc5b80a9f8"
   },
   "changed": [
-    ".config/hypr/custom/scripts/autostart.sh",
-    ".config/quickshell/end4-pC/modules/common/Config.qml",
-    ".config/quickshell/end4-pC/modules/ii/settingsW11/PDevices.qml",
-    ".config/quickshell/end4-pC/modules/ii/settingsW11/WState.qml",
-    ".config/quickshell/end4-pC/modules/ii/sidebarRight/PhoneLinkCard.qml",
-    ".config/quickshell/end4-pC/modules/ii/sidebarRight/SidebarRightContent.qml",
-    ".config/quickshell/end4-pC/scripts/phonelink/phonelink.py",
-    ".config/quickshell/end4-pC/services/PhoneLink.qml",
-    ".local/bin/phoenix"
+    ".config/quickshell/end4-pC/modules/ii/settingsW11/PApps.qml",
+    ".config/quickshell/end4-pC/modules/ii/settingsW11/PSystem.qml",
+    ".config/quickshell/end4-pC/scripts/startup/startup-items.py",
+    ".config/quickshell/end4-pC/task-manager.qml"
   ],
   "test": false
 }
