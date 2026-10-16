@@ -1,5 +1,10 @@
 # Changelog
 
+## custom 2.271 (2026-10-15, fix)
+- Login screen: it starts again on PCs whose keyboard layout was never set (a fresh Arch install); run 'phoenix login-screen install' or press Update in Settings › Accounts to repair it
+- Lock screen: 'Switch user' button (top right) when the login screen is on: signs out so another account or desktop can sign in; asks for the password first if 'Require a password to shut down' is on
+- Lock screen: Bluetooth pairing and discoverability are switched off while the screen is locked and come back on unlock
+
 ## custom 2.261 (2026-10-15, minor)
 - Night light: Settings no longer shows it as on when the screen isn't tinted
 

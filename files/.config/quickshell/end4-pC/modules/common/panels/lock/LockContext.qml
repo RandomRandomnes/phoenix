@@ -9,7 +9,7 @@ import Quickshell.Services.Pam
 Scope {
     id: root
 
-    enum ActionEnum { Unlock, Poweroff, Reboot }
+    enum ActionEnum { Unlock, Poweroff, Reboot, SwitchUser }   // SwitchUser: Phoenix 2026-10-15 (sign out to the login screen)
 
     signal shouldReFocus()
     signal unlocked(targetAction: var)

@@ -6,15 +6,17 @@
   "format": "custom-fixes",
   "line": "custom",
   "version": 2.99,
-  "label": "2.261",
-  "kind": "minor",
+  "label": "2.271",
+  "kind": "fix",
   "date": "2026-10-15",
   "publisher": "RandomRandomnes",
   "notes": [
-    "Night light: Settings no longer shows it as on when the screen isn't tinted"
+    "Login screen: it starts again on PCs whose keyboard layout was never set (a fresh Arch install); run 'phoenix login-screen install' or press Update in Settings \u203a Accounts to repair it",
+    "Lock screen: 'Switch user' button (top right) when the login screen is on: signs out so another account or desktop can sign in; asks for the password first if 'Require a password to shut down' is on",
+    "Lock screen: Bluetooth pairing and discoverability are switched off while the screen is locked and come back on unlock"
   ],
   "payload": "fixes.tar.gz",
-  "payloadSha256": "a2af858fa86185b8fa7502e816588586d3958ad60ab35c0f725ff0c9a59338a7",
+  "payloadSha256": "b8078edc5be4d11d6fedf4d7de98aa30fdfc50b5b8b01cef4c3a519e334304eb",
   "files": {
     ".config/hypr/custom/env.lua": "1902700f304ac6fc6d6c484da2bce2e14821964285f199fdd36971381b347edf",
     ".config/hypr/custom/execs.lua": "b6269e10c73bb9e93f07ec5fc4d992c215f85dc9199ad4bedc9233b15dc496d1",
@@ -136,8 +138,8 @@
     ".config/quickshell/end4-pC/modules/common/models/quickToggles/QuickToggleModel.qml": "7dc6c9dd6aaca30e0a6b3a589aa3b189eb07ce0a0577b21218f1972fd036d7f5",
     ".config/quickshell/end4-pC/modules/common/models/quickToggles/ScreenSnipToggle.qml": "dedf3eac61f9e309997f6057610350c64673f80f3f18110355698c1dad0a4e4e",
     ".config/quickshell/end4-pC/modules/common/models/quickToggles/VpnToggle.qml": "0cc447d2994887c7c9595a7666ac23f3498ff7965227b2485e41ccfab6faec90",
-    ".config/quickshell/end4-pC/modules/common/panels/lock/LockContext.qml": "34ea448cbb605511d8c848390aa67b9507d6b6d84234fdf7ed1d19f3dbadb6fb",
-    ".config/quickshell/end4-pC/modules/common/panels/lock/LockScreen.qml": "7a4ad64852e2c81fda868b2d383d770143d50e6c0c7dd4cce8652d6c91a7a7d9",
+    ".config/quickshell/end4-pC/modules/common/panels/lock/LockContext.qml": "af7822548e27a91d582991acdcf42f4e117d5cf2ccfb7e49e070590487f30e6b",
+    ".config/quickshell/end4-pC/modules/common/panels/lock/LockScreen.qml": "a8a7c4c8f817d8cad27d64d5e97f2f29c7bd429bfe5dd355a3c6b0f00985a68d",
     ".config/quickshell/end4-pC/modules/common/panels/lock/pam/fprintd.conf": "4bfb14c180faf94ff4f9e060562d16c46c0d66a74f3b371c8271fa73583ece4e",
     ".config/quickshell/end4-pC/modules/common/utils/ImageDownloaderProcess.qml": "fbb3022a58230bf3502912d93321d3ec360cc50cd932fa4552c7ffed603d0d22",
     ".config/quickshell/end4-pC/modules/common/utils/MultiTurnProcess.qml": "f4a95586adb22d4218187739b9639e91d8226b4e6d6a74e680a5af6b4f1dfa71",
@@ -473,11 +475,11 @@
     ".config/quickshell/end4-pC/modules/ii/equalizer/EqualizerView.qml": "b21f7d1b7aa8e8747a09586e7ad518b990b903b583992f7d35460247cc28af01",
     ".config/quickshell/end4-pC/modules/ii/frame/ScreenFrame.qml": "2bf19378bf8c787f2e476ab9405f67e0a67685e4beeeaa2614fa91365e2f4331",
     ".config/quickshell/end4-pC/modules/ii/lock/Lock.qml": "91b18a3e5f094cc6b44b34ee40e610c4341ccddaa79f9f525a55a28c0667b6d8",
-    ".config/quickshell/end4-pC/modules/ii/lock/LockSurface.qml": "6f18528b6328eee31b2ba77737e6b91091d6eb61b51a3ed884715a1cacdfe864",
+    ".config/quickshell/end4-pC/modules/ii/lock/LockSurface.qml": "f914564643437795baf4ae281a7f0100b9a6be1155c10962d4cc213bbf4fc79e",
     ".config/quickshell/end4-pC/modules/ii/lock/PasswordChars.qml": "a30d5790c858c0d2084e12f52ffe5c01176b1f1a7f2f011e2e52b54e8fbccf65",
     ".config/quickshell/end4-pC/modules/ii/lock/styles/LockIconButton.qml": "dbfe122840f115f11cd9b6a276fcbf3e9e7c31d6b023c4c6b4f907d8b092254a",
     ".config/quickshell/end4-pC/modules/ii/lock/styles/LockMediaCard.qml": "dc73520833dac3906dd0488099ea947ebfaa63cb8485b2d72b482e182249fa25",
-    ".config/quickshell/end4-pC/modules/ii/lock/styles/LockPasswordInput.qml": "2178b1af547fe757034a7b64ef7f03ba494bacac7ec17385acb6bb8fc8274f23",
+    ".config/quickshell/end4-pC/modules/ii/lock/styles/LockPasswordInput.qml": "9ea69394a897a81eb3524f6a6f2c0edb427236ca22d19b52f4182bc769b9c254",
     ".config/quickshell/end4-pC/modules/ii/lock/styles/LockStyleBar.qml": "da5e89ce5eb5d66929814a8e62759479a8586f0eb21fafd9ff6aa9681868d80d",
     ".config/quickshell/end4-pC/modules/ii/lock/styles/LockStyleBase.qml": "cdd67960ca1922b7cfa2e8bd95b6c9c241b57f74b8d62f071234c2d4669952bc",
     ".config/quickshell/end4-pC/modules/ii/lock/styles/LockStyleClock.qml": "6e009503603297ef8a401125047c7b66b3f406f00a3ec58676c875180250a95b",
@@ -486,7 +488,7 @@
     ".config/quickshell/end4-pC/modules/ii/lock/styles/LockStyleFrosted.qml": "561cef77305bb26a2ea37292c7cd950a848bca8e6b2d22fcdda373d69cf49d6e",
     ".config/quickshell/end4-pC/modules/ii/lock/styles/LockStyleHello.qml": "370796c705edb4f359f4bec526950a867a8aab2730cd3be56eccea11050d437b",
     ".config/quickshell/end4-pC/modules/ii/lock/styles/LockStyleIslands.qml": "b0a37e96693f7dcdd406367038e40eb1fdb87dd4dfacca646758e7ebef4515cc",
-    ".config/quickshell/end4-pC/modules/ii/lock/styles/LockStyleLoader.qml": "5520599ead3b1bcae4ce71b627348285679fbd39c3d9940cea74d7e4fa471530",
+    ".config/quickshell/end4-pC/modules/ii/lock/styles/LockStyleLoader.qml": "527f0babd83e1a4870d6f08f5cf21d145e8fed0a090562f415566571e505b0bf",
     ".config/quickshell/end4-pC/modules/ii/lock/styles/LockStylePlain.qml": "8f87c9680d46add51bd6d0a91076100ed01ea4c12335672b7c8e961b91284170",
     ".config/quickshell/end4-pC/modules/ii/lock/styles/LockStyleUser.qml": "3c43f5d0305ac229dc0cea3aa568b464e2fbb312f5080b95b05b819a84990e50",
     ".config/quickshell/end4-pC/modules/ii/mediaControls/MediaControls.qml": "44cd2102d27917046f7bc3a81c7b3de5a92376171f3c7bef537f20377553902d",
@@ -952,7 +954,7 @@
     ".local/bin/display-profiles": "35d27019115b69495daa5a897b146256e2a34aefe017940ede12b199f1551da3",
     ".local/bin/linux-wallpaper-engine": "42fad852f27ed5c452a1742d4b7053ba8cf85a6c19e1b927350f8ee4f6711813",
     ".local/bin/linux-wallpaper-engine-ux": "dee95f03a345c6a6c54f75d79cf9e343939ce27c9b2d094d1d21b37e2cf69fd6",
-    ".local/bin/phoenix": "243e64bcda11e5ce14c73004392fcc7904293e3e82408c8a464b20490b6aa611",
+    ".local/bin/phoenix": "d8b6a6bb34faae5d6212cb5cb04762931b5a06e52d9314ac443fb57c1efbef48",
     ".local/bin/phoenix-check": "faa410cb4b904d8952375d2cc5e8c879c800538778c70f95f0cfba15cc50aeb2",
     ".local/bin/phoenix-file-picker": "0721de431105a9c401a2784b47da7f9780068da6f6def76a5d234ccdbf7470ac",
     ".local/bin/phoenix-greeter-theme": "b22756525eae2ece3b45deca4b2d71e2cfd2f643a4b8c3344305f424b2a0e959",
@@ -1050,7 +1052,12 @@
     ".local/share/setup-profiles/stock-config.json": "ba83849d539a915adf655ea127ec2550993927a01f69efa0ea05a8f16cb76328"
   },
   "changed": [
-    ".config/quickshell/end4-pC/services/Hyprsunset.qml"
+    ".config/quickshell/end4-pC/modules/common/panels/lock/LockContext.qml",
+    ".config/quickshell/end4-pC/modules/common/panels/lock/LockScreen.qml",
+    ".config/quickshell/end4-pC/modules/ii/lock/LockSurface.qml",
+    ".config/quickshell/end4-pC/modules/ii/lock/styles/LockPasswordInput.qml",
+    ".config/quickshell/end4-pC/modules/ii/lock/styles/LockStyleLoader.qml",
+    ".local/bin/phoenix"
   ],
   "test": false
 }

@@ -80,6 +80,7 @@ Item {
             : GlobalStates.screenUnlockFailed ? (root.context.failureMessage || Translation.tr("Incorrect password"))
             : root.context.targetAction === LockContext.ActionEnum.Poweroff ? Translation.tr("Password to shut down")
             : root.context.targetAction === LockContext.ActionEnum.Reboot ? Translation.tr("Password to restart")
+            : root.context.targetAction === LockContext.ActionEnum.SwitchUser ? Translation.tr("Password to switch user")
             : root.placeholder
     }
 

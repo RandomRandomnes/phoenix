@@ -290,6 +290,8 @@ MouseArea {
                         return "power_settings_new";
                     } else if (root.context.targetAction === LockContext.ActionEnum.Reboot) {
                         return "restart_alt";
+                    } else if (root.context.targetAction === LockContext.ActionEnum.SwitchUser) {
+                        return "switch_account";
                     }
                 }
                 color: confirmButton.enabled ? Appearance.colors.colOnPrimary : Appearance.colors.colSubtext

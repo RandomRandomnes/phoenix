@@ -176,7 +176,9 @@ greeter_xkb_env() {
         if [ -z "$v" ] && [ "$o" != model ]; then
             v=$(localectl status 2>/dev/null | sed -n "s/^ *X11 ${o^}: *//p")
         fi
-        v=$(printf '%s' "$v" | tr -cd 'A-Za-z0-9_,:+().-')   # nothing that could break the quoted command
+        case "$v" in "(unset)"|"n/a") v="" ;; esac          # localectl's "not set" (fresh installs): no setting
+        v=$(printf '%s' "$v" | tr -cd 'A-Za-z0-9_,:+.-')   # nothing that could break the quoted command (2026-10-15: no
+                                                           # parentheses; "(unset)" made the greeter's sh -c fail)
         [ -n "$v" ] && out+=" XKB_DEFAULT_${o^^}=$v"
     done
     printf '%s' "$out"
@@ -285,7 +287,7 @@ cmd_login_screen() {
                 # the running copies are root's: a Phoenix update only changes the ones in your home (QA 2026-10-08)
                 if ! cmp -s "$GREETER_SRC/greeter.qml" "$GREETER_DIR/greeter.qml" || ! cmp -s "$GREETER_SRC/phoenix-session" /usr/local/bin/phoenix-session \
                     || { [ -f "$GREETER_SRC/phoenix-greeter-blank.service" ] && ! cmp -s "$GREETER_SRC/phoenix-greeter-blank.service" /etc/systemd/system/phoenix-greeter-blank.service; } \
-                    || ! grep -q "greeter.log" /etc/greetd/config.toml; then
+                    || ! grep -q "greeter.log" /etc/greetd/config.toml || grep -q "=(unset)" /etc/greetd/config.toml; then
                     echo "Login screen: on (asks for the password at startup)$how; an update is ready: phoenix login-screen install"
                 else
                     echo "Login screen: on (asks for the password at startup)$how"

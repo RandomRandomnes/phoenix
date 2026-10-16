@@ -66,6 +66,10 @@ Scope {
             } else if (targetAction == LockContext.ActionEnum.Reboot) {
                 Session.reboot();
                 return;
+            } else if (targetAction == LockContext.ActionEnum.SwitchUser) {
+                // Phoenix (2026-10-15): sign out; greetd then shows the login screen, where another account signs in
+                Session.logout();
+                return;
             }
 
             // Unlock the keyring if configured to do so
@@ -95,6 +99,27 @@ Scope {
             if (lock.secure && GlobalStates.lockFirst && !GlobalStates.startupGateOpen) root.startupLockIsUp();
         }
     }
+
+    // ---- Phoenix (2026-10-15): no Bluetooth pairing while the screen is locked -------------------------------------
+    // Pairable/discoverable (if you had them on) are switched off on lock and put back on unlock, so nobody can pair a
+    // keyboard or other device to a locked PC. The states are kept in $XDG_RUNTIME_DIR/phoenix-bt-locked, so a shell
+    // restarted while locked still puts them back.
+    Connections {
+        target: GlobalStates
+        function onScreenLockedChanged() {
+            btLock.command = GlobalStates.screenLocked
+                ? ["bash", "-c", "f=\"$XDG_RUNTIME_DIR/phoenix-bt-locked\"; [ -e \"$f\" ] && exit 0; "
+                    + "s=$(bluetoothctl show 2>/dev/null) || exit 0; [ -n \"$s\" ] || exit 0; : > \"$f\"; "
+                    + "grep -q 'Pairable: yes' <<< \"$s\" && echo pairable >> \"$f\"; "
+                    + "grep -q 'Discoverable: yes' <<< \"$s\" && echo discoverable >> \"$f\"; "
+                    + "bluetoothctl pairable off >/dev/null; bluetoothctl discoverable off >/dev/null; true"]
+                : ["bash", "-c", "f=\"$XDG_RUNTIME_DIR/phoenix-bt-locked\"; [ -e \"$f\" ] || exit 0; "
+                    + "grep -qx pairable \"$f\" && bluetoothctl pairable on >/dev/null; "
+                    + "grep -qx discoverable \"$f\" && bluetoothctl discoverable on >/dev/null; rm -f \"$f\"; true"];
+            btLock.running = true;
+        }
+    }
+    Process { id: btLock }
 
     // ---- Phoenix lock-screen sign-in (2026-10-15) -------------------------------------------------------------------
     // phoenix-session starts the desktop without a password (greetd autologin) and sets PHOENIX_LOCK_FIRST=1. Then the
