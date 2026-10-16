@@ -17,6 +17,7 @@ StyledPopup {
     property var gpu: SystemStats.gpu
     // fixed card width: the popup keeps one size; longer values are shortened with … inside the card
     readonly property int cardWidth: 440
+    readonly property int barGlide: 800   // ms; stats update every second, so each bar glides to the new value (2026-10-16)
     readonly property var mem: SystemStats.mem
     readonly property var sys: SystemStats.sys
     readonly property var sample: SystemStats.sample
@@ -146,8 +147,12 @@ StyledPopup {
             height: parent.height
             radius: 3
             color: meter.value >= 0.9 ? Appearance.colors.colError : Appearance.colors.colTertiary
+            // glides to each new reading over most of the update interval instead of jumping (2026-10-16)
             Behavior on width {
-                animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
+                NumberAnimation { duration: root.barGlide; easing.type: Easing.OutCubic }
+            }
+            Behavior on color {
+                ColorAnimation { duration: root.barGlide }
             }
         }
     }
@@ -230,19 +235,22 @@ StyledPopup {
                     Layout.preferredHeight: 40
                     spacing: 3
                     Repeater {
-                        model: root.cpu?.freqs ?? []
+                        // by count, not by the array: a new array every update rebuilt the bars, so they jumped
+                        model: root.cpu?.freqs?.length ?? 0
                         Item {
-                            required property real modelData
+                            id: threadBar
+                            required property int index
+                            readonly property real freq: root.cpu?.freqs?.[index] ?? 0
                             Layout.fillWidth: true
                             Layout.fillHeight: true
                             Rectangle {
                                 anchors.bottom: parent.bottom
                                 width: parent.width
-                                height: Math.max(3, parent.height * Math.min(1, modelData / Math.max(1, (root.cpu?.freqMax > 0 ? root.cpu.freqMax : Math.max(...(root.cpu?.freqs ?? [1]))))))
+                                height: Math.max(3, parent.height * Math.min(1, threadBar.freq / Math.max(1, (root.cpu?.freqMax > 0 ? root.cpu.freqMax : Math.max(...(root.cpu?.freqs ?? [1]))))))
                                 radius: 2
                                 color: Appearance.colors.colTertiary
                                 Behavior on height {
-                                    animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
+                                    NumberAnimation { duration: root.barGlide; easing.type: Easing.OutCubic }
                                 }
                             }
                         }
@@ -364,9 +372,10 @@ StyledPopup {
                 subtitle: root.sample ? `${root.sample.nvme.length} NVMe drives` : ""
 
                 Repeater {
-                    model: root.sample?.disks ?? []
+                    model: root.sample?.disks?.length ?? 0   // by count, so the bars glide instead of being rebuilt
                     ColumnLayout {
-                        required property var modelData
+                        required property int index
+                        readonly property var modelData: root.sample?.disks?.[index] ?? ({ path: "", used: 0, total: 0 })
                         Layout.fillWidth: true
                         spacing: 4
                         InfoRow {

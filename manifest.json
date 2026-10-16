@@ -6,15 +6,15 @@
   "format": "custom-fixes",
   "line": "custom",
   "version": 2.99,
-  "label": "2.353",
+  "label": "2.363",
   "kind": "fix",
   "date": "2026-10-16",
   "publisher": "RandomRandomnes",
   "notes": [
-    "Super menu: closes with an animation (shrinks and fades, the opening animation in reverse) instead of vanishing"
+    "Resource popup: usage bars glide smoothly to each new reading instead of jumping (clock-per-thread and storage bars were rebuilt on every update)"
   ],
   "payload": "fixes.tar.gz",
-  "payloadSha256": "83896d5d035f502cac4c08709e66cd3b07f5b4750e11c2c4fbb0905b75ef2717",
+  "payloadSha256": "d3f2cc321f91445b8735d2706412706676223921304cbe4a5db3e505432e2e80",
   "files": {
     ".config/hypr/custom/env.lua": "1902700f304ac6fc6d6c484da2bce2e14821964285f199fdd36971381b347edf",
     ".config/hypr/custom/execs.lua": "64197ff280790bc529a0dd1938985c42783a1b17f59ec709ff515f8fa0f5d6b2",
@@ -441,7 +441,7 @@
     ".config/quickshell/end4-pC/modules/ii/bar/Resource.qml": "438df67c2606ae16ee7c10ffd82c5a8cb7e0cdf90011ae10eaeb4105c584d52e",
     ".config/quickshell/end4-pC/modules/ii/bar/ResourceGraph.qml": "57d6d7b216a2c96a22b6b70daf25179b05b1a856c7472c6b26e3a431a119901f",
     ".config/quickshell/end4-pC/modules/ii/bar/Resources.qml": "4904f827afcaac68e6b2b4b4087c2c23790d3aa37a9e70e9b5957a469b7dadc2",
-    ".config/quickshell/end4-pC/modules/ii/bar/ResourcesPopup.qml": "d3a2ccd3b1b34e8d4e69a71367c5b237b9d02091d3f134cb93a165f7bcccf2b8",
+    ".config/quickshell/end4-pC/modules/ii/bar/ResourcesPopup.qml": "cff4b71c3d21ef3e384974f41e30196a70d60182c27a5da48ec0eb27e0732401",
     ".config/quickshell/end4-pC/modules/ii/bar/ResourcesPopupClassic.qml": "2a01d23b08856d5b48bae4482e45fe4b6c6e0b47cc28961f287ca5473dfc2a2f",
     ".config/quickshell/end4-pC/modules/ii/bar/StyledPopupValueRow.qml": "390bb04b1cd4912c40f06f4630f5bd03c6cddc14e61ab2776da5bec1983ab7ef",
     ".config/quickshell/end4-pC/modules/ii/bar/SysTray.qml": "c7392e07807113fed8a9afc7f47d9b5ebb04e1b62763eaa9fa25812abf8a5069",
@@ -1063,8 +1063,7 @@
     ".local/share/setup-profiles/stock-config.json": "5814a18a9aa1038cd74764efc268ca12b0ba8599dd7255799d8729bc5b80a9f8"
   },
   "changed": [
-    ".config/quickshell/end4-pC/modules/ii/overview/Overview.qml",
-    ".config/quickshell/end4-pC/modules/ii/overview/OverviewWindow.qml"
+    ".config/quickshell/end4-pC/modules/ii/bar/ResourcesPopup.qml"
   ],
   "test": false
 }

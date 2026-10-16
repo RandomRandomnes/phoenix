@@ -1,5 +1,8 @@
 # Changelog
 
+## custom 2.363 (2026-10-16, fix)
+- Resource popup: usage bars glide smoothly to each new reading instead of jumping (clock-per-thread and storage bars were rebuilt on every update)
+
 ## custom 2.353 (2026-10-16, fix)
 - Super menu: closes with an animation (shrinks and fades, the opening animation in reverse) instead of vanishing
 
