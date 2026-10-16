@@ -67,7 +67,15 @@ sleep 2
 # wallpapers run in wallpaper-engine-hyprland, patched to the background layer. See ~/.local/lib/wallpaper-engine-shell/.
 
 if feature steamTray; then
-  echo "$(date +%T) starting steam" >> "$log"
-  steam -silent > /dev/null 2>&1 &   # -silent: start in the tray, no window
+  (
+    # With lock-screen sign-in, Steam waits for the first unlock too (2026-10-15): it shouldn't be signed in and
+    # reachable (Remote Play / Steam Link) while the PC still sits at the lock screen.
+    if [ "${PHOENIX_LOCK_FIRST:-}" = 1 ]; then
+      echo "$(date +%T) steam waits for the first unlock" >> "$log"
+      while [ ! -e "${XDG_RUNTIME_DIR:-/tmp}/phoenix-unlocked-once" ]; do sleep 1; done
+    fi
+    echo "$(date +%T) starting steam" >> "$log"
+    steam -silent > /dev/null 2>&1 &   # -silent: start in the tray, no window
+  ) &
 fi
 echo "$(date +%T) done" >> "$log"

@@ -1,5 +1,8 @@
 # Changelog
 
+## custom 2.272 (2026-10-15, minor)
+- Lock-screen sign-in: Steam now starts after you unlock instead of behind the lock screen
+
 ## custom 2.271 (2026-10-15, fix)
 - Login screen: it starts again on PCs whose keyboard layout was never set (a fresh Arch install); run 'phoenix login-screen install' or press Update in Settings › Accounts to repair it
 - Lock screen: 'Switch user' button (top right) when the login screen is on: signs out so another account or desktop can sign in; asks for the password first if 'Require a password to shut down' is on

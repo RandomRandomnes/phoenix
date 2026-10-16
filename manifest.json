@@ -6,24 +6,22 @@
   "format": "custom-fixes",
   "line": "custom",
   "version": 2.99,
-  "label": "2.271",
-  "kind": "fix",
+  "label": "2.272",
+  "kind": "minor",
   "date": "2026-10-15",
   "publisher": "RandomRandomnes",
   "notes": [
-    "Login screen: it starts again on PCs whose keyboard layout was never set (a fresh Arch install); run 'phoenix login-screen install' or press Update in Settings \u203a Accounts to repair it",
-    "Lock screen: 'Switch user' button (top right) when the login screen is on: signs out so another account or desktop can sign in; asks for the password first if 'Require a password to shut down' is on",
-    "Lock screen: Bluetooth pairing and discoverability are switched off while the screen is locked and come back on unlock"
+    "Lock-screen sign-in: Steam now starts after you unlock instead of behind the lock screen"
   ],
   "payload": "fixes.tar.gz",
-  "payloadSha256": "b8078edc5be4d11d6fedf4d7de98aa30fdfc50b5b8b01cef4c3a519e334304eb",
+  "payloadSha256": "1bfd95baee9a19466e4435b387afa04cf38d46582022f101bf23381553afc680",
   "files": {
     ".config/hypr/custom/env.lua": "1902700f304ac6fc6d6c484da2bce2e14821964285f199fdd36971381b347edf",
     ".config/hypr/custom/execs.lua": "b6269e10c73bb9e93f07ec5fc4d992c215f85dc9199ad4bedc9233b15dc496d1",
     ".config/hypr/custom/general.lua": "e5622221a80a5b98e4f6a85845149150ddbcd29f1481880d960f3805edcf93aa",
     ".config/hypr/custom/keybinds.lua": "39f7dc4bda71a0b6d9bc70d045b042fe788b9a3b749030e49a2690324ac9fb27",
     ".config/hypr/custom/rules.lua": "75ade8ef784f5325d456673f33af4cf07ee655f2b1f4d30f2cf5254873914395",
-    ".config/hypr/custom/scripts/autostart.sh": "0db8972267633fcefd9cfbcbe9625dcb88fa226267aee87930e209341f9d5663",
+    ".config/hypr/custom/scripts/autostart.sh": "b11644e4821066092a548629b7b3282ed7bd4349eec73ab55f36d7eed2088e1b",
     ".config/hypr/custom/scripts/hb.sh": "e0f841a85cceed0425333d8946884b684edc76a13c35a152ef8ef41fb0206675",
     ".config/hypr/custom/variables.lua": "3859ea1ee32e82cdc61364c2d24248acf1d5a8063244f3dc96be9c39fb803337",
     ".config/quickshell/end4-pC/.gitignore": "6eeb5d38eeaeda8767818aa50d4fbd9eeac9a40b7d9cd34e97f6cbdfc0bdde70",
@@ -1052,12 +1050,7 @@
     ".local/share/setup-profiles/stock-config.json": "ba83849d539a915adf655ea127ec2550993927a01f69efa0ea05a8f16cb76328"
   },
   "changed": [
-    ".config/quickshell/end4-pC/modules/common/panels/lock/LockContext.qml",
-    ".config/quickshell/end4-pC/modules/common/panels/lock/LockScreen.qml",
-    ".config/quickshell/end4-pC/modules/ii/lock/LockSurface.qml",
-    ".config/quickshell/end4-pC/modules/ii/lock/styles/LockPasswordInput.qml",
-    ".config/quickshell/end4-pC/modules/ii/lock/styles/LockStyleLoader.qml",
-    ".local/bin/phoenix"
+    ".config/hypr/custom/scripts/autostart.sh"
   ],
   "test": false
 }
