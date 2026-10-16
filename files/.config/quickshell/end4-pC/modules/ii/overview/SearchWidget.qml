@@ -241,6 +241,61 @@ Item { // Wrapper
                 color: Appearance.colors.colOutlineVariant
             }
 
+            // Search modes (Phoenix P13, 2026-10-16): All / Apps / Files / Windows / Settings / Commands.
+            // Tab / Shift+Tab cycle them; hidden while a symbol mode (clipboard, emoji, …) is typed.
+            Flow {
+                id: modeChips
+                visible: root.showResults && (searchBar.searchPrefixType === SearchBar.SearchPrefixType.DefaultSearch
+                    || searchBar.searchPrefixType === SearchBar.SearchPrefixType.App)
+                Layout.fillWidth: true
+                Layout.leftMargin: 12
+                Layout.rightMargin: 12
+                Layout.topMargin: 8
+                spacing: 6
+                Repeater {
+                    model: LauncherSearch.modes
+                    RippleButton {
+                        id: chip
+                        required property var modelData
+                        toggled: LauncherSearch.mode === modelData.id
+                        implicitHeight: 32
+                        horizontalPadding: 12
+                        buttonRadius: 16
+                        border: !toggled
+                        colBackground: "transparent"
+                        colBackgroundHover: Appearance.colors.colLayer2Hover
+                        onClicked: {
+                            LauncherSearch.mode = modelData.id;
+                            root.focusSearchInput();
+                        }
+                        contentItem: RowLayout {
+                            spacing: 6
+                            MaterialSymbol {
+                                text: chip.modelData.icon
+                                iconSize: Appearance.font.pixelSize.normal
+                                color: chip.toggled ? Appearance.colors.colOnPrimary : Appearance.colors.colOnSurfaceVariant
+                            }
+                            StyledText {
+                                text: chip.modelData.name
+                                font.pixelSize: Appearance.font.pixelSize.small
+                                color: chip.toggled ? Appearance.colors.colOnPrimary : Appearance.colors.colOnSurface
+                            }
+                        }
+                    }
+                }
+            }
+
+            StyledText {
+                // a mode with no matches (e.g. no open window has that name)
+                visible: modeChips.visible && appResults.count === 0 && LauncherSearch.mode !== "all"
+                Layout.fillWidth: true
+                Layout.margins: 16
+                horizontalAlignment: Text.AlignHCenter
+                color: Appearance.colors.colSubtext
+                font.pixelSize: Appearance.font.pixelSize.small
+                text: Translation.tr("Nothing found in %1. Tab: next kind").arg(LauncherSearch.modes.find(m => m.id === LauncherSearch.mode)?.name ?? "")
+            }
+
             ListView { // App results
                 id: appResults
                 visible: root.showResults
@@ -301,12 +356,9 @@ Item { // Wrapper
                     query: StringUtils.cleanOnePrefix(root.searchingText, [Config.options.search.prefix.action, Config.options.search.prefix.app, Config.options.search.prefix.clipboard, Config.options.search.prefix.emojis, Config.options.search.prefix.symbols, Config.options.search.prefix.math, Config.options.search.prefix.shellCommand, Config.options.search.prefix.webSearch])
 
                     Keys.onPressed: event => {
-                        if (event.key === Qt.Key_Tab) {
-                            if (LauncherSearch.results.length === 0)
-                                return;
-                            const tabbedText = searchItem.modelData.name;
-                            LauncherSearch.query = tabbedText;
-                            searchBar.searchInput.text = tabbedText;
+                        // Tab / Shift+Tab: next / previous search mode (P13; it used to copy the result's name)
+                        if (event.key === Qt.Key_Tab || event.key === Qt.Key_Backtab) {
+                            LauncherSearch.cycleMode(event.key === Qt.Key_Backtab ? -1 : 1);
                             event.accepted = true;
                             root.focusSearchInput();
                         }

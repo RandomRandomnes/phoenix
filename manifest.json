@@ -6,16 +6,16 @@
   "format": "custom-fixes",
   "line": "custom",
   "version": 2.99,
-  "label": "2.323",
+  "label": "2.333",
   "kind": "fix",
   "date": "2026-10-16",
   "publisher": "RandomRandomnes",
   "notes": [
-    "Settings \u203a Apps \u203a Startup now shows what really starts: Phoenix's own items (Steam, Wallpaper Engine, Phone Link), your own startup script, and KDE-Plasma-only entries (with a button to start them in Phoenix too)",
-    "Task Manager \u203a Startup shows the same; Notifications: the duplicate 'Notifications' switch (same as Do not disturb, reversed) is gone"
+    "Super search modes: chips under the search bar (All, Apps, Files, Windows, Settings, Commands); Tab / Shift+Tab switch between them",
+    "New: finds your files (recently opened first) and open windows; Settings results now open the exact Phoenix Settings page"
   ],
   "payload": "fixes.tar.gz",
-  "payloadSha256": "286733eb292530b8e4cd441558730a4d091be8de1b047c01d940a663f6b12c5e",
+  "payloadSha256": "ab3dab3e8b324f94e975d6f42a8951fe453443f909312f8be4397f86d8a7c0d4",
   "files": {
     ".config/hypr/custom/env.lua": "1902700f304ac6fc6d6c484da2bce2e14821964285f199fdd36971381b347edf",
     ".config/hypr/custom/execs.lua": "64197ff280790bc529a0dd1938985c42783a1b17f59ec709ff515f8fa0f5d6b2",
@@ -525,9 +525,9 @@
     ".config/quickshell/end4-pC/modules/ii/overview/Overview.qml": "347ad208afb2aefd6dc5d55cc8efadf519625ca26de06caf3589028a302e0572",
     ".config/quickshell/end4-pC/modules/ii/overview/OverviewWidget.qml": "6f632b1c4cd35a96eeb946a79b5f8032c6b4dcb9919a58c839e17f1481887734",
     ".config/quickshell/end4-pC/modules/ii/overview/OverviewWindow.qml": "515d3bbbcd872090408bb81dac56f1beadff23018c1530af66e7485fa77e9517",
-    ".config/quickshell/end4-pC/modules/ii/overview/SearchBar.qml": "dbbfc92aa45132be3d064e1ea201ee0fc119b700846867689ad2f6b16b3a7d7e",
+    ".config/quickshell/end4-pC/modules/ii/overview/SearchBar.qml": "2bae24a34cd37fa3d3d97db2024d2fe1e4a51c1911686f2cc51499e2b638fb4c",
     ".config/quickshell/end4-pC/modules/ii/overview/SearchItem.qml": "797e7e635e1b4c4faa81f843a30ab0484b83973371c8664da8eddc701e1a0aa4",
-    ".config/quickshell/end4-pC/modules/ii/overview/SearchWidget.qml": "3db398dc9bc567107fb767ea91ce8904aa41e09982d4da08d209fdc71af0189e",
+    ".config/quickshell/end4-pC/modules/ii/overview/SearchWidget.qml": "f45864010711f9aa30c9bf734a7a213ead01ad60a438e8f3ce226e0732ffb2c4",
     ".config/quickshell/end4-pC/modules/ii/polkit/Polkit.qml": "79a943987fb849396462e016fa33555ad8b3611f6a98f947a32e10d2f973d721",
     ".config/quickshell/end4-pC/modules/ii/polkit/PolkitContent.qml": "0eee5f9593f9f54b2081da67378924c797c101c53f72fd200ac6de02696f8565",
     ".config/quickshell/end4-pC/modules/ii/regionSelector/CircleSelectionDetails.qml": "ed798c90bf46ce61e451aba8beccfad31f0a9af44808e8526f1e859c3cd05d53",
@@ -824,6 +824,7 @@
     ".config/quickshell/end4-pC/scripts/preset_share_setup.sh": "edc67b60cc0dffcfe3547badf6ca6897852ad8fbaff1a0fdfaf8bff246301a92",
     ".config/quickshell/end4-pC/scripts/preset_unshare.sh": "6ea3f5635d2648e97e0fc1390c8ba54d0ad5a61783a1efbb2aa1e8870807949f",
     ".config/quickshell/end4-pC/scripts/presets.sh": "9a667edc366302d1bb512adac6ef73844407fed3b9a69d072749afd82cd1c7c1",
+    ".config/quickshell/end4-pC/scripts/search/files.py": "49e9c25448d85e5403a291a79a909e6ebac7a4b15d07c8fc160f296c22427c01",
     ".config/quickshell/end4-pC/scripts/startup/startup-items.py": "e2bf1bf0955bdfa23b9b62d8a8e0612595ee58513de77c2caf4f32c1f5ec67ad",
     ".config/quickshell/end4-pC/scripts/sysstats/sysstats.py": "7d10761a1068d9652ef57b35c54115e341379606993970659d0f4c5df7ba46c0",
     ".config/quickshell/end4-pC/scripts/system-appearance.sh": "377e2415c38db1cf54634a35c7ae4e3f108d673c3cd4ac882421d175bd954de0",
@@ -873,7 +874,7 @@
     ".config/quickshell/end4-pC/services/Idle.qml": "ac0411839a12a88433b66db6426c72aace12f4361331fcbc9d4ffeed7bc223f5",
     ".config/quickshell/end4-pC/services/KeyringStorage.qml": "ab9e904f411c701152d005c679c45c8047967cefd260da99d95381adc1aef4be",
     ".config/quickshell/end4-pC/services/LatexRenderer.qml": "60fd8eb7245bb7eaa51e423dfc25326eed0508cbcc3ca02d1705d89bb8f6b3d3",
-    ".config/quickshell/end4-pC/services/LauncherSearch.qml": "97bf4025a9070351d97e1944f584619f72c2277fed09aa3ca8781bbe7e38de32",
+    ".config/quickshell/end4-pC/services/LauncherSearch.qml": "b762565353327cd1f76823cc7fe5043aa5dbb8f732a4bd5473e59c2fecd981df",
     ".config/quickshell/end4-pC/services/LyricsService.qml": "703d7bd4790ee5d394a2965644555b1cd22d7c5671b98ef6862257a2bdf1b6c9",
     ".config/quickshell/end4-pC/services/MaterialSymbolsSearch.qml": "b7609ab09f0dad0eac963703c02f5385a63343d7dc7783a71e83b85c33432337",
     ".config/quickshell/end4-pC/services/MaterialThemeLoader.qml": "798442289357c9b71cd839b95501079b6fba6d86287a2164d866d06720bf7149",
@@ -1063,10 +1064,10 @@
     ".local/share/setup-profiles/stock-config.json": "5814a18a9aa1038cd74764efc268ca12b0ba8599dd7255799d8729bc5b80a9f8"
   },
   "changed": [
-    ".config/quickshell/end4-pC/modules/ii/settingsW11/PApps.qml",
-    ".config/quickshell/end4-pC/modules/ii/settingsW11/PSystem.qml",
-    ".config/quickshell/end4-pC/scripts/startup/startup-items.py",
-    ".config/quickshell/end4-pC/task-manager.qml"
+    ".config/quickshell/end4-pC/modules/ii/overview/SearchBar.qml",
+    ".config/quickshell/end4-pC/modules/ii/overview/SearchWidget.qml",
+    ".config/quickshell/end4-pC/scripts/search/files.py",
+    ".config/quickshell/end4-pC/services/LauncherSearch.qml"
   ],
   "test": false
 }

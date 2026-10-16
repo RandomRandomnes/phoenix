@@ -97,11 +97,9 @@ RowLayout {
         }
 
         Keys.onPressed: event => {
-            if (event.key === Qt.Key_Tab) {
-                if (LauncherSearch.results.length === 0) return;
-                const tabbedText = LauncherSearch.results[0].name;
-                LauncherSearch.query = tabbedText;
-                searchInput.text = tabbedText;
+            // Tab / Shift+Tab: next / previous search mode (Phoenix P13, 2026-10-16)
+            if ((event.key === Qt.Key_Tab || event.key === Qt.Key_Backtab) && root.searchingText !== "") {
+                LauncherSearch.cycleMode(event.key === Qt.Key_Backtab ? -1 : 1);
                 event.accepted = true;
             }
         }

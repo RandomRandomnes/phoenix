@@ -9,12 +9,67 @@ import Qt.labs.folderlistmodel
 import Quickshell
 import Quickshell.Io
 import Quickshell.Hyprland
+import qs.modules.ii.settingsW11
 import ".."
 
 Singleton {
     id: root
 
     property string query: ""
+
+    // ── Search modes (Phoenix P13, 2026-10-16): chips under the search bar, Tab / Shift+Tab cycle them ──
+    // all = the best few of each kind; the others show one kind only. Symbol prefixes ($ ? = ; : < .) still work.
+    readonly property var modes: [
+        { id: "all", name: Translation.tr("All"), icon: "apps" },
+        { id: "apps", name: Translation.tr("Apps"), icon: "grid_view" },
+        { id: "files", name: Translation.tr("Files"), icon: "description" },
+        { id: "windows", name: Translation.tr("Windows"), icon: "select_window" },
+        { id: "settings", name: Translation.tr("Settings"), icon: "settings" },
+        { id: "commands", name: Translation.tr("Commands"), icon: "terminal" },
+    ]
+    property string mode: "all"
+    function cycleMode(step) {
+        const i = root.modes.findIndex(m => m.id === root.mode);
+        root.mode = root.modes[(i + step + root.modes.length) % root.modes.length].id;
+    }
+    onQueryChanged: {
+        if (root.query === "") root.mode = "all";
+        fileQueryTimer.restart();
+    }
+    onModeChanged: fileQueryTimer.restart()
+    Connections {
+        target: GlobalStates
+        function onOverviewOpenChanged() { if (!GlobalStates.overviewOpen) root.mode = "all"; }
+    }
+
+    // files: scripts/search/files.py keeps an in-memory index of the home folder and answers one JSON line per query
+    property var fileResults: []
+    property string fileResultsFor: ""
+    readonly property bool wantsFiles: (root.mode === "all" || root.mode === "files") && root.plainQuery.trim().length >= 2
+    readonly property string plainQuery: StringUtils.cleanPrefix(root.query, Config.options.search.prefix.app)
+    Timer {
+        id: fileQueryTimer
+        interval: 120
+        onTriggered: {
+            if (!root.wantsFiles) { root.fileResults = []; root.fileResultsFor = ""; return; }
+            if (!fileProc.running) fileProc.running = true;
+            fileProc.write(root.plainQuery.replace(/\n/g, " ") + "\n");
+        }
+    }
+    Process {
+        id: fileProc
+        command: ["python3", Quickshell.shellPath("scripts/search/files.py"), "serve"]
+        stdinEnabled: true
+        stdout: SplitParser {
+            onRead: line => {
+                let d;
+                try { d = JSON.parse(line); } catch (e) { return; }
+                if (d.q !== root.plainQuery) return;    // an older query
+                root.fileResultsFor = d.q;
+                root.fileResults = d.results ?? [];
+            }
+        }
+    }
 
     function ensurePrefix(prefix) {
         if ([Config.options.search.prefix.action, Config.options.search.prefix.app, Config.options.search.prefix.clipboard, Config.options.search.prefix.emojis, Config.options.search.prefix.symbols, Config.options.search.prefix.math, Config.options.search.prefix.shellCommand, Config.options.search.prefix.webSearch,].some(i => root.query.startsWith(i))) {
@@ -378,23 +433,64 @@ Singleton {
             });
         });
         ////////////////// Settings search //////////////////
-        const settingsEntries = Config.options.settings.style === "dashboard" ? [] : SettingsSearchIndex.search(root.query, 8);
-        const settingsResults = settingsEntries.map(entry => {
-            const breadcrumb = entry.kind === "page" ? Translation.tr("Settings") : [entry.pageName, entry.kind === "option" ? entry.section : "", entry.kind === "option" ? entry.subsection : ""].filter(part => part).join(" › ");
+        // Phoenix's own Settings pages (settingsW11 WState.index), so a result opens the exact page
+        const settingsResults = WState.search(StringUtils.cleanPrefix(root.query, Config.options.search.prefix.app)).map(entry => {
+            const where = [WState.categoryName(entry.page), entry.sub ? WState.subTitle(entry.page, entry.sub) : ""].filter(part => part && part !== entry.title).join(" › ");
             return resultComp.createObject(null, {
-                control: entry.kind === "option" ? SettingsQuickControls.find(entry.pageId, entry.rawSection, entry.rawSubsection, entry.rawLabel) : null,
-                name: entry.label,
-                comment: breadcrumb,
+                name: entry.title,
+                comment: where,
                 verb: Translation.tr("Go"),
-                type: [Translation.tr("Settings"), entry.pageName, entry.kind === "option" ? entry.section : "", entry.kind === "option" ? entry.subsection : ""].filter(part => part).join(" • "),
-                iconName: entry.icon,
+                type: Translation.tr("Settings") + (where ? ` • ${where}` : ""),
+                iconName: WState.categories.find(c => c.id === entry.page)?.icon ?? "settings",
                 iconType: LauncherSearchResult.IconType.Material,
                 execute: () => {
                     root.query = "";
-                    GlobalStates.openSettingsAt(entry.pageId, entry.kind === "page" ? "" : entry.label, entry.section, entry.subsection);
+                    GlobalStates.overviewOpen = false;
+                    GlobalStates.settingsOpen = true;
+                    WState.go(entry.page, entry.sub);
                 }
             });
         });
+        ////////////////// Open windows //////////////////
+        const winWords = root.plainQuery.toLowerCase().split(/\s+/).filter(w => w);
+        const windowResults = (HyprlandData.windowList ?? []).filter(w => {
+            const hay = `${w.title ?? ""} ${w.class ?? ""} ${w.initialTitle ?? ""}`.toLowerCase();
+            return winWords.length > 0 && winWords.every(word => hay.indexOf(word) !== -1);
+        }).map(w => resultComp.createObject(null, {
+            name: w.title || w.class,
+            comment: Translation.tr("Workspace %1").arg(w.workspace?.name ?? w.workspace?.id ?? "?") + (w.class ? ` · ${w.class}` : ""),
+            verb: Translation.tr("Switch to"),
+            type: Translation.tr("Open window"),
+            iconName: AppSearch.guessIcon(w.class ?? ""),
+            iconType: LauncherSearchResult.IconType.System,
+            execute: () => {
+                GlobalStates.overviewOpen = false;
+                Hyprland.dispatch(`hl.dsp.focus({ window = "address:${w.address}" })`);
+            }
+        }));
+        ////////////////// Files //////////////////
+        const fileResultObjects = (root.fileResultsFor === root.plainQuery ? root.fileResults : []).map(f => resultComp.createObject(null, {
+            name: f.name,
+            comment: f.dir + (f.recent ? ` · ${Translation.tr("opened recently")}` : ""),
+            verb: f.isDir ? Translation.tr("Open folder") : Translation.tr("Open"),
+            type: (f.isDir ? Translation.tr("Folder") : Translation.tr("File")) + ` • ${f.dir}` + (f.recent ? ` • ${Translation.tr("opened recently")}` : ""),
+            iconName: f.isDir ? "folder" : "description",
+            iconType: LauncherSearchResult.IconType.Material,
+            execute: () => {
+                GlobalStates.overviewOpen = false;
+                if (f.isDir) Quickshell.execDetached([`${Quickshell.env("HOME")}/.local/bin/phoenix-open`, "files", f.path]);
+                else Quickshell.execDetached(["xdg-open", f.path]);
+            },
+            actions: f.isDir ? [] : [resultComp.createObject(null, {
+                name: Translation.tr("Open the folder"),
+                iconName: "folder_open",
+                iconType: LauncherSearchResult.IconType.Material,
+                execute: () => {
+                    GlobalStates.overviewOpen = false;
+                    Quickshell.execDetached([`${Quickshell.env("HOME")}/.local/bin/phoenix-open`, "files", f.path.substring(0, f.path.lastIndexOf("/"))]);
+                }
+            })]
+        }));
         const commandResultObject = resultComp.createObject(null, {
             name: StringUtils.cleanPrefix(root.query, Config.options.search.prefix.shellCommand).replace("file://", ""),
             verb: Translation.tr("Run"),
@@ -457,10 +553,24 @@ Singleton {
             result.push(webSearchResultObject);
         }
 
-        //////////////// Apps //////////////////
-        result = result.concat(appResultObjects);
-        ////////////// Settings ////////////////
-        result = result.concat(settingsResults);
+        //////// One kind only (search modes) ////////
+        if (root.mode === "apps") return result.concat(appResultObjects);
+        if (root.mode === "files") return result.concat(fileResultObjects);
+        if (root.mode === "windows") return result.concat(windowResults);
+        if (root.mode === "settings") return result.concat(settingsResults);
+        if (root.mode === "commands") {
+            result = result.concat(launcherActionObjects);
+            if (!startsWithShellCommandPrefix) result.push(commandResultObject);
+            if (!startsWithNumber && !startsWithMathPrefix) result.push(mathResultObject);
+            if (!startsWithWebSearchPrefix) result.push(webSearchResultObject);
+            return result;
+        }
+
+        //////// All: the best few of each kind ////////
+        result = result.concat(appResultObjects.slice(0, 5));
+        result = result.concat(windowResults.slice(0, 2));
+        result = result.concat(settingsResults.slice(0, 3));
+        result = result.concat(fileResultObjects.slice(0, 3));
         ////////// Launcher actions ////////////
         result = result.concat(launcherActionObjects);
 

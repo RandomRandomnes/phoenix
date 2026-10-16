@@ -1,5 +1,9 @@
 # Changelog
 
+## custom 2.333 (2026-10-16, fix)
+- Super search modes: chips under the search bar (All, Apps, Files, Windows, Settings, Commands); Tab / Shift+Tab switch between them
+- New: finds your files (recently opened first) and open windows; Settings results now open the exact Phoenix Settings page
+
 ## custom 2.323 (2026-10-16, fix)
 - Settings › Apps › Startup now shows what really starts: Phoenix's own items (Steam, Wallpaper Engine, Phone Link), your own startup script, and KDE-Plasma-only entries (with a button to start them in Phoenix too)
 - Task Manager › Startup shows the same; Notifications: the duplicate 'Notifications' switch (same as Do not disturb, reversed) is gone
