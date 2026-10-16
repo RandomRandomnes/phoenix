@@ -124,7 +124,8 @@ Item { // Window
     ScreencopyView {
         id: windowPreview
         anchors.fill: parent
-        captureSource: GlobalStates.overviewOpen ? root.toplevel : null
+        // kept while the menu plays its closing animation (2026-10-16), so the previews fade out with it
+        captureSource: (GlobalStates.overviewOpen || root.visible) ? root.toplevel : null
         live: true
 
         // Color overlay for interactions

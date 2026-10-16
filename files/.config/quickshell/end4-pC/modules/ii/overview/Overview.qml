@@ -28,7 +28,17 @@ Scope {
             && !Config.options.bar.bottom
             && !Config.options.bar.autoHide.enable
         property bool monitorIsFocused: (Hyprland.focusedMonitor?.id == monitor?.id)
-        visible: GlobalStates.overviewOpen
+        // Stays up a moment after closing so the menu can shrink and fade out, the opening animation in reverse
+        // (2026-10-16). Input (mask) and keyboard focus still go away at once, so clicks pass straight through.
+        // (its own switch: binding visible to "open or timer running" hid it for an instant before the timer started,
+        // which rebuilt the app grid and window previews mid-animation)
+        property bool shown: false
+        visible: shown
+        Timer {
+            id: closeAnimation
+            interval: 240
+            onTriggered: if (!GlobalStates.overviewOpen) panelWindow.shown = false
+        }
 
         WlrLayershell.namespace: "quickshell:overview"
         WlrLayershell.layer: WlrLayer.Top
@@ -52,7 +62,12 @@ Scope {
         Connections {
             target: GlobalStates
             function onOverviewOpenChanged() {
+                if (GlobalStates.overviewOpen) {
+                    closeAnimation.stop();
+                    panelWindow.shown = true;
+                }
                 if (!GlobalStates.overviewOpen) {
+                    closeAnimation.restart();
                     searchWidget.disableExpandAnimation();
                     overviewScope.dontAutoCancelSearch = false;
                     GlobalFocusGrab.dismiss();
@@ -117,7 +132,7 @@ Scope {
 
         Column {
             id: columnLayout
-            visible: GlobalStates.overviewOpen
+            visible: panelWindow.visible
             opacity: GlobalStates.overviewOpen ? 1 : 0
             scale: GlobalStates.overviewOpen ? 1 : 0.85
             transformOrigin: Item.Top
@@ -131,10 +146,17 @@ Scope {
             spacing: -8
 
             Behavior on opacity {
-                NumberAnimation { duration: 300; easing.type: Easing.OutCubic }
+                NumberAnimation {
+                    duration: GlobalStates.overviewOpen ? 300 : 200
+                    easing.type: GlobalStates.overviewOpen ? Easing.OutCubic : Easing.InCubic
+                }
             }
             Behavior on scale {
-                NumberAnimation { duration: 400; easing.type: Easing.BezierSpline; easing.bezierCurve: Appearance.animationCurves.expressiveDefaultSpatial }
+                NumberAnimation {
+                    duration: GlobalStates.overviewOpen ? 400 : 220
+                    easing.type: GlobalStates.overviewOpen ? Easing.BezierSpline : Easing.InCubic
+                    easing.bezierCurve: Appearance.animationCurves.expressiveDefaultSpatial
+                }
             }
 
             Keys.onPressed: event => {
@@ -159,7 +181,7 @@ Scope {
 
             Loader {
                 id: overviewLoader
-                active: GlobalStates.overviewOpen && (Config?.options.overview.enable ?? true)
+                active: panelWindow.visible && (Config?.options.overview.enable ?? true)
                 sourceComponent: (Config?.options.overview.style ?? "default") === "niri" ? niriComponent : defaultComponent
 
                 Component {

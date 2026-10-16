@@ -6,15 +6,15 @@
   "format": "custom-fixes",
   "line": "custom",
   "version": 2.99,
-  "label": "2.343",
+  "label": "2.353",
   "kind": "fix",
   "date": "2026-10-16",
   "publisher": "RandomRandomnes",
   "notes": [
-    "Super menu: clicking anywhere off the menu closes it (the empty space beside the search bar and the app grid used to swallow the click)"
+    "Super menu: closes with an animation (shrinks and fades, the opening animation in reverse) instead of vanishing"
   ],
   "payload": "fixes.tar.gz",
-  "payloadSha256": "b00bc4094e8e0e3b2ffa45f302289dc3b8e8982a9f862e568857c4fe9f05121c",
+  "payloadSha256": "83896d5d035f502cac4c08709e66cd3b07f5b4750e11c2c4fbb0905b75ef2717",
   "files": {
     ".config/hypr/custom/env.lua": "1902700f304ac6fc6d6c484da2bce2e14821964285f199fdd36971381b347edf",
     ".config/hypr/custom/execs.lua": "64197ff280790bc529a0dd1938985c42783a1b17f59ec709ff515f8fa0f5d6b2",
@@ -521,9 +521,9 @@
     ".config/quickshell/end4-pC/modules/ii/overview/AppGridWidget.qml": "dce95ae64732ff8685f5c937f7d44e1d95d511c43a392e2ae1e6b7314fc9cbb1",
     ".config/quickshell/end4-pC/modules/ii/overview/ClipboardPopover.qml": "59dccbbcbcd9034ca31868dd029c74243ee09d8b4dabda761cb3c0c497dfad3b",
     ".config/quickshell/end4-pC/modules/ii/overview/NiriOverview.qml": "3be38247cdf22c6ea1cc55e97d19ddc5e90ab4d586ff36fdfe545e70353ec29b",
-    ".config/quickshell/end4-pC/modules/ii/overview/Overview.qml": "c71fadf6f4424e17a9583da991314a04356d788ffa20a9154e4a3d86f30ebb2d",
+    ".config/quickshell/end4-pC/modules/ii/overview/Overview.qml": "a0516a7e5f424b2e94e04afc3ad918d1d4b1dfbd0d79e167cc54aad79440f60b",
     ".config/quickshell/end4-pC/modules/ii/overview/OverviewWidget.qml": "6f632b1c4cd35a96eeb946a79b5f8032c6b4dcb9919a58c839e17f1481887734",
-    ".config/quickshell/end4-pC/modules/ii/overview/OverviewWindow.qml": "515d3bbbcd872090408bb81dac56f1beadff23018c1530af66e7485fa77e9517",
+    ".config/quickshell/end4-pC/modules/ii/overview/OverviewWindow.qml": "9af7c922fb3d1019f4930690e468b240ec441ccc8abb441f1610993436a15f41",
     ".config/quickshell/end4-pC/modules/ii/overview/SearchBar.qml": "2bae24a34cd37fa3d3d97db2024d2fe1e4a51c1911686f2cc51499e2b638fb4c",
     ".config/quickshell/end4-pC/modules/ii/overview/SearchItem.qml": "797e7e635e1b4c4faa81f843a30ab0484b83973371c8664da8eddc701e1a0aa4",
     ".config/quickshell/end4-pC/modules/ii/overview/SearchWidget.qml": "7e243f98b42802e9b5ad36212a952abdcf20bea22d5bae92e6a02b4afe285f30",
@@ -1064,7 +1064,7 @@
   },
   "changed": [
     ".config/quickshell/end4-pC/modules/ii/overview/Overview.qml",
-    ".config/quickshell/end4-pC/modules/ii/overview/SearchWidget.qml"
+    ".config/quickshell/end4-pC/modules/ii/overview/OverviewWindow.qml"
   ],
   "test": false
 }

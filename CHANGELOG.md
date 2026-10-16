@@ -1,5 +1,8 @@
 # Changelog
 
+## custom 2.353 (2026-10-16, fix)
+- Super menu: closes with an animation (shrinks and fades, the opening animation in reverse) instead of vanishing
+
 ## custom 2.343 (2026-10-16, fix)
 - Super menu: clicking anywhere off the menu closes it (the empty space beside the search bar and the app grid used to swallow the click)
 
