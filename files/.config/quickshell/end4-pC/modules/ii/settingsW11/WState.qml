@@ -66,6 +66,7 @@ Singleton {
         "personalization/widgets-more": "More widget settings",
         "personalization/background-more": "More background settings",
         "personalization/dock-more": "More dock settings",
+        "devices/shortcuts": "Keyboard shortcuts",
         "personalization/taskbar-more": "More taskbar settings",
         "system/display": "Display",
         "system/sound": "Sound",
@@ -190,6 +191,7 @@ Singleton {
         ["Work safety", "hide nsfw wallpaper clipboard", "privacy", ""],
         ["Windows Update", "updates upgrade pacman packages system update", "update", ""],
         ["Shell update", "illogical impulse end4 dotfiles shell phoenix updates", "update", ""],
+        ["Keyboard shortcuts", "keybinds hotkeys shortcut keys change edit add super", "devices", "shortcuts"],
         ["Phone", "phone link kde connect android samsung galaxy notifications sms texts ring find my phone send files clipboard", "devices", "phone"],
         ["How updates install", "automatic updates ask confirm manual review update mode", "update", ""],
     ]

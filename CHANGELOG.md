@@ -1,5 +1,9 @@
 # Changelog
 
+## custom 2.423 (2026-10-16, fix)
+- Keyboard shortcuts in Settings › Bluetooth & devices › Keyboard › Shortcuts: see and search every shortcut, change one by pressing new keys (with a warning when they're taken), switch one off, reset it, or add your own command
+- Super+/ opens a shortcut sheet again, with search and a button to edit in Settings; your changes stay when Phoenix updates
+
 ## custom 2.413 (2026-10-16, fix)
 - Super menu: Apps, Recent and Pinned tabs in the app grid; recent files and pinned files and folders open with one click
 - Right-click a file there: open, open its folder, pin or unpin, remove from the list, copy the path; file search results can be pinned too

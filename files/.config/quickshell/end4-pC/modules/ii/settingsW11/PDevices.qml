@@ -14,7 +14,7 @@ Item {
 
     Loader {
         anchors.fill: parent
-        sourceComponent: ({ "bluetooth": bluetooth, "mouse": mouse, "keyboard": keyboard, "input": inputPage,
+        sourceComponent: ({ "bluetooth": bluetooth, "mouse": mouse, "keyboard": keyboard, "input": inputPage, "shortcuts": shortcutsPage,
             "phone": phonePage
         })[WState.sub] ?? overview
     }
@@ -324,7 +324,7 @@ Item {
             }
             WSection {
                 title: "Related"
-                WLink { icon: "keyboard_command_key"; title: "Keyboard shortcuts"; description: "Edit your Hyprland keybinds file"; chevronIcon: "open_in_new"; action: () => Quickshell.execDetached(["xdg-open", `${Directories.config}/hypr/custom/keybinds.lua`.replace("file://", "")]) }
+                WLink { icon: "keyboard_command_key"; title: "Keyboard shortcuts"; description: "See, search and change every shortcut, or add your own"; sub: "shortcuts" }
             }
         }
     }
@@ -479,5 +479,11 @@ Item {
                 }
             }
         }
+    }
+
+    // ── Keyboard shortcuts (P15, 2026-10-16): WShortcuts.qml ──
+    Component {
+        id: shortcutsPage
+        WShortcuts {}
     }
 }

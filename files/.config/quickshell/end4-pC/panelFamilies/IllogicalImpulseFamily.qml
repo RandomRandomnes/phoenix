@@ -18,6 +18,7 @@ import qs.modules.ii.polkit
 import qs.modules.ii.settingsW11
 import qs.modules.ii.taskManager
 import qs.modules.ii.quickStart
+import qs.modules.ii.cheatsheet
 import qs.modules.ii.regionSelector
 import qs.modules.ii.screenCorners
 import qs.modules.ii.screenTranslator
@@ -47,6 +48,7 @@ Scope {
     PanelLoader { component: TaskManager {} }   // Phoenix: the Task Manager window (2026-10-16)
     PanelLoader { component: QuickStart {} }    // Phoenix: the Quick Start guide window (2026-10-16)
     PanelLoader { component: LockPreview {} }   // Phoenix: lock screen style preview window (2026-10-16)
+    PanelLoader { component: Cheatsheet {} }    // Phoenix: Super+/ shortcut sheet (P15, 2026-10-16)
     PanelLoader { component: RegionSelector {} }
     PanelLoader { component: ScreenCorners {} }
     PanelLoader { component: ScreenTranslator {} }

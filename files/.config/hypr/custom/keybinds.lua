@@ -55,3 +55,11 @@ do
     ), { non_consuming = true, description = "Utilities: Screenshot >> clipboard & file" })
     hl.bind("CTRL + Print", hl.dsp.exec_cmd(grimhyprctl .. " - | wl-copy"), { non_consuming = true })
 end
+
+-- Your own commands on shortcuts (Settings › Bluetooth & devices › Keyboard › Shortcuts; custom/user-keybinds.lua, see
+-- custom/env.lua). Last, so nothing above takes their keys away.
+for _, a in ipairs((USER_KEYBINDS or {}).added or {}) do
+    if type(a) == "table" and type(a.keys) == "string" and type(a.command) == "string" then
+        pcall(hl.bind, a.keys, hl.dsp.exec_cmd(a.command), { description = "Yours: " .. (a.description or a.command) })
+    end
+end
