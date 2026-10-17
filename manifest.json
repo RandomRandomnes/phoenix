@@ -59,18 +59,15 @@
   "format": "custom-fixes",
   "line": "custom",
   "version": 2.99,
-  "label": "2.453",
+  "label": "2.463",
   "kind": "fix",
   "date": "2026-10-17",
   "publisher": "RandomRandomnes",
   "notes": [
-    "Wine/X11 tray icons (RSI Launcher) come back after the shell restarts",
-    "Icons picked by name show again (Settings \u203a Taskbar \u203a Left sidebar button, sidebar)",
-    "Wallpaper Engine watcher no longer keeps running after the shell stops",
-    "Bar colour layers fixed (StyledRectangle)"
+    "Task Manager \u203a Performance shows every disk with a mounted drive (Disk 0, Disk 1\u2026): model, type, temperature, read/write speed, busy, and space per drive with a fill bar"
   ],
   "payload": "fixes.tar.gz",
-  "payloadSha256": "f3934f9d4b98dbba9f6c42d571f5a7201b94877852e5576916dfe2adb6d8ddd9",
+  "payloadSha256": "8b89d507028eb08facf7931288c2c132b4a0fdc93ea8b68d4da42d70a650cf8a",
   "files": {
     ".config/hypr/custom/env.lua": "b97ee35362ed653cec2880f9adfdf81698e2f55577aef1dffcb321e4d713794f",
     ".config/hypr/custom/execs.lua": "64197ff280790bc529a0dd1938985c42783a1b17f59ec709ff515f8fa0f5d6b2",
@@ -762,7 +759,7 @@
     ".config/quickshell/end4-pC/modules/ii/sidebarRight/wifiNetworks/WifiDialog.qml": "33a1ace71c307972bf11fdcfb9b71d28ecf06d08fe5634244826b4d4796b8583",
     ".config/quickshell/end4-pC/modules/ii/sidebarRight/wifiNetworks/WifiNetworkItem.qml": "f2254462962a72b2522148919e17cf204bd80151ea6a284f7070cdc6e6a32367",
     ".config/quickshell/end4-pC/modules/ii/taskManager/TaskManager.qml": "c13a442dedd6eac089649881db8f9beb81dc42675d6a10a6b6d161f91fa35cc3",
-    ".config/quickshell/end4-pC/modules/ii/taskManager/TaskManagerContent.qml": "c395e35827303b30887c2a509e84f5c3550808e2f3762df1f080d522ba5c027c",
+    ".config/quickshell/end4-pC/modules/ii/taskManager/TaskManagerContent.qml": "255d6394a443bb0945a32cb9af306d034874ce299e9428734bfef4bad91daab2",
     ".config/quickshell/end4-pC/modules/ii/verticalBar/VerticalBar.qml": "6cfdc0ea7878e398537624b10649481bdf45ff3b53824b1b80b085c24f19cfe7",
     ".config/quickshell/end4-pC/modules/ii/verticalBar/VerticalBarContent.qml": "732221da9c5bb6951db867f9f54e54e243287987fe1589c3156fcdd37c96bb16",
     ".config/quickshell/end4-pC/modules/ii/wallpaperSelector/LocalWallpaperGrid.qml": "5073ff191d29dc86173cc770dce28c6fda61bb4c47f1100c713f6167d9d5544f",
@@ -848,7 +845,7 @@
     ".config/quickshell/end4-pC/scripts/startup/startup-items.py": "1d4b6759de0080a8466eeebe2bfe6b1b0c7666396ee74d8c82353f5a68596efb",
     ".config/quickshell/end4-pC/scripts/sysstats/sysstats.py": "7d10761a1068d9652ef57b35c54115e341379606993970659d0f4c5df7ba46c0",
     ".config/quickshell/end4-pC/scripts/system-appearance.sh": "377e2415c38db1cf54634a35c7ae4e3f108d673c3cd4ac882421d175bd954de0",
-    ".config/quickshell/end4-pC/scripts/taskmanager/procs.py": "83051c3d672845453d8c287eb967b9d63eccf357f1ddab9c094adc4ebd7d11c0",
+    ".config/quickshell/end4-pC/scripts/taskmanager/procs.py": "6a5f1badb35a9492b0c4003f810a09a9a484fe363701bd2cd969fee02ba7b245",
     ".config/quickshell/end4-pC/scripts/theming/set-cursor-theme.sh": "7c5d850b32680a257bc7ff406b29ad61508d43dc40279f3e1ca43ab5973b9c68",
     ".config/quickshell/end4-pC/scripts/theming/set-gtk-theme.sh": "c01ac98676f85d36f2d74354fb2d33e518412cd0f4ac11ac8cb419d96b405f84",
     ".config/quickshell/end4-pC/scripts/theming/set-icon-theme.sh": "471da41c6fb11d88d8eb547260e2bf7d0ac065818d09e4ba2c6d768c44b69d8d",
@@ -1087,11 +1084,8 @@
     ".local/share/setup-profiles/stock-config.json": "5814a18a9aa1038cd74764efc268ca12b0ba8599dd7255799d8729bc5b80a9f8"
   },
   "changed": [
-    ".config/quickshell/end4-pC/modules/common/widgets/CustomIcon.qml",
-    ".config/quickshell/end4-pC/modules/common/widgets/StyledRectangle.qml",
-    ".config/quickshell/end4-pC/scripts/tray/reregister.py",
-    ".config/quickshell/end4-pC/scripts/wallpapers/we-watch.py",
-    ".config/quickshell/end4-pC/services/TrayService.qml"
+    ".config/quickshell/end4-pC/modules/ii/taskManager/TaskManagerContent.qml",
+    ".config/quickshell/end4-pC/scripts/taskmanager/procs.py"
   ],
   "test": false
 }

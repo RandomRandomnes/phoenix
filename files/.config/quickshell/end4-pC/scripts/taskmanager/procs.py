@@ -3,6 +3,8 @@
 
 Prints one JSON line per interval (default 1.5 s):
   {"totals": {cpu, mem, memUsed, memTotal, gpu, diskRead, diskWrite, diskBusy, procs, threads},
+   "drives": [{dev, model, kind ("NVMe SSD"|"SSD"|"HDD", " (USB)" when on USB), size, read, write, busy,
+               mounts: [{path, label, fs, used, total}]}]   every disk with a mounted drive on it (2026-10-17)
    "groups": [{kind: "app"|"background"|"system", key, name, cls, title, pid, user, own,
                cpu, mem, gpu, disk, count, pids}]}
 cpu = share of the whole machine in % (like Windows), mem = resident bytes (RSS), gpu = % of one GPU engine
@@ -92,6 +94,101 @@ def disk_sectors():
             w += int(p[9])
             busy = max(busy, int(p[12]))
     return r * 512, w * 512, busy
+
+
+REAL_FS = {"ext4", "ext3", "ext2", "btrfs", "xfs", "f2fs", "vfat", "exfat", "ntfs", "ntfs3", "fuseblk", "zfs", "bcachefs"}
+
+
+def unescape(path):
+    return path.replace("\\040", " ").replace("\\011", "\t").replace("\\134", "\\")
+
+
+def whole_disks(dev):
+    """whole disk(s) a block device lives on: nvme0n1p2 -> nvme0n1; dm-1 (LVM, LUKS) -> the disks under it"""
+    if os.path.exists(f"/sys/block/{dev}") and not dev.startswith("dm-"):
+        return {dev}
+    if dev.startswith("dm-"):
+        out = set()
+        for s in os.listdir(f"/sys/block/{dev}/slaves") if os.path.isdir(f"/sys/block/{dev}/slaves") else []:
+            out |= whole_disks(s)
+        return out
+    link = os.path.realpath(f"/sys/class/block/{dev}")
+    parent = os.path.basename(os.path.dirname(link))
+    return {parent} if os.path.exists(f"/sys/block/{parent}") else set()
+
+
+def udev_model(dev):
+    try:
+        majmin = read(f"/sys/block/{dev}/dev").strip()
+        for line in (read(f"/run/udev/data/b{majmin}") or "").splitlines():
+            if line.startswith("E:ID_MODEL="):
+                return line.split("=", 1)[1].replace("_", " ").strip()
+    except AttributeError:
+        pass
+    return (read(f"/sys/block/{dev}/device/model") or dev).strip()
+
+
+def mount_label(path):
+    home = os.path.expanduser("~")
+    if path == "/":
+        return "System"
+    if path == home or path == "/home":
+        return "Home"
+    if path == "/boot" or path == "/efi" or path == "/boot/efi":
+        return "Boot"
+    return os.path.basename(path) or path
+
+
+def drives(stats, prev, dt):
+    """every disk with a mounted drive on it: model, type, size, read/write speed, busy, and space per drive"""
+    found = {}
+    seen = set()
+    for line in (read("/proc/mounts") or "").splitlines():
+        p = line.split()
+        if len(p) < 3 or not p[0].startswith("/dev/") or p[2] not in REAL_FS:
+            continue
+        path = unescape(p[1])
+        try:
+            st = os.statvfs(path)
+            dev_id = os.stat(path).st_dev
+        except OSError:
+            continue
+        if dev_id in seen:   # the same drive mounted twice (bind mounts)
+            continue
+        seen.add(dev_id)
+        blk = os.path.basename(os.path.realpath(p[0]))
+        m = {"path": path, "label": mount_label(path), "fs": p[2],
+             "used": (st.f_blocks - st.f_bfree) * st.f_frsize, "total": st.f_blocks * st.f_frsize}
+        for d in sorted(whole_disks(blk)):
+            found.setdefault(d, []).append(m)
+    out = []
+    for d, mounts in found.items():
+        f = stats.get(d)
+        r = w = busy = 0
+        if f and prev.get(d) and dt:
+            r = round((f[0] - prev[d][0]) / dt)
+            w = round((f[1] - prev[d][1]) / dt)
+            busy = round(min(100.0, (f[2] - prev[d][2]) / (dt * 10)), 1)
+        rota = (read(f"/sys/block/{d}/queue/rotational") or "0").strip() == "1"
+        kind = "NVMe SSD" if d.startswith("nvme") else ("HDD" if rota else "SSD")
+        if "/usb" in os.path.realpath(f"/sys/block/{d}"):
+            kind += " (USB)"
+        size = int((read(f"/sys/block/{d}/size") or "0").strip() or 0) * 512
+        order = 0 if any(m["path"] == "/" for m in mounts) else 1
+        out.append({"dev": d, "model": udev_model(d), "kind": kind, "size": size, "read": r, "write": w,
+                    "busy": busy, "mounts": sorted(mounts, key=lambda m: (m["path"] != "/", m["path"])), "_o": order})
+    out.sort(key=lambda x: (x.pop("_o"), x["dev"]))
+    return out
+
+
+def disk_stats():
+    """per whole disk: read bytes, written bytes, busy ms"""
+    out = {}
+    for line in (read("/proc/diskstats") or "").splitlines():
+        p = line.split()
+        if len(p) >= 14 and os.path.exists(f"/sys/block/{p[2]}"):
+            out[p[2]] = (int(p[5]) * 512, int(p[9]) * 512, int(p[12]))
+    return out
 
 
 def windows():
@@ -262,6 +359,7 @@ def sample():
 
     total, used = meminfo()
     dr, dw, busy = disk_sectors()
+    dstats = disk_stats()
     totals = {"cpu": round((1 - (idle - prev["jiff"][1]) / djiff) * 100, 1) if djiff else 0.0,
               "memUsed": used, "memTotal": total, "mem": round(used * 100 / total, 1),
               "gpu": gpu_busy(), "diskRead": 0, "diskWrite": 0, "diskBusy": 0.0,
@@ -270,8 +368,9 @@ def sample():
         totals["diskRead"] = round((dr - prev["disk"][0]) / dt)
         totals["diskWrite"] = round((dw - prev["disk"][1]) / dt)
         totals["diskBusy"] = round(min(100.0, (busy - prev["disk"][2]) / (dt * 10)), 1)
-    prev.update({"t": now, "jiff": (jiff, idle), "procs": procs, "disk": (dr, dw, busy)})
-    return {"totals": totals, "groups": groups}
+    drv = drives(dstats, prev.get("dstats") or {}, dt if prev["disk"] else 0)
+    prev.update({"t": now, "jiff": (jiff, idle), "procs": procs, "disk": (dr, dw, busy), "dstats": dstats})
+    return {"totals": totals, "groups": groups, "drives": drv}
 
 
 if __name__ == "__main__":

@@ -44,6 +44,9 @@ Item {
     property var netHist: []
     property real netPeak: 1
     property real diskPeak: 1
+    // one entry per disk with a mounted drive on it, like Windows' Disk 0, Disk 1… (procs.py "drives", 2026-10-17)
+    property var drives: []
+    property var driveHists: ({})
 
     function push(arr, v) { const a = arr.concat([Math.max(0, Math.min(1, v))]); return a.length > root.histLen ? a.slice(a.length - root.histLen) : a }
 
@@ -60,6 +63,10 @@ Item {
                 const disk = (d.totals.diskRead ?? 0) + (d.totals.diskWrite ?? 0)
                 root.diskPeak = Math.max(root.diskPeak * 0.98, disk, 1)
                 root.diskHist = root.push(root.diskHist, (d.totals.diskBusy ?? 0) / 100)
+                const hists = {}
+                for (const dr of (d.drives ?? [])) hists[dr.dev] = root.push(root.driveHists[dr.dev] ?? [], (dr.busy ?? 0) / 100)
+                root.driveHists = hists
+                root.drives = d.drives ?? []
                 root.checkPending()
             }
         }
@@ -600,6 +607,7 @@ Item {
 
     // ── Performance ─────────────────────────────────────────────────────────────────────────────────────────────────
     property string perf: "cpu"
+    onPerfItemsChanged: if (!root.perfItems.some(p => p.id === root.perf)) root.perf = root.perfItems.some(p => p.id === "disk") ? "disk" : "cpu"
     readonly property var perfItems: [
         { id: "cpu", name: "CPU", hist: root.cpuHist,
           value: root.pct((root.stats.cpu?.usage ?? 0) * 100) + "  " + ((root.stats.cpu?.freqAvg ?? 0) / 1000).toFixed(2) + " GHz" },
@@ -607,8 +615,11 @@ Item {
           value: root.bytes(root.totals.memUsed) + " / " + root.bytes(root.totals.memTotal) + "  (" + Math.round(root.totals.mem ?? 0) + "%)" },
         { id: "gpu", name: "GPU", hist: root.gpuHist,
           value: Math.round((root.stats.gpu?.busy ?? 0) * 100) + "%  " + ((root.stats.gpu?.temp ?? 0) ? Math.round(root.stats.gpu.temp) + " °C" : "") },
-        { id: "disk", name: "Disk", hist: root.diskHist,
-          value: "R " + root.rate(root.totals.diskRead) + "  W " + root.rate(root.totals.diskWrite) },
+        ...(root.drives.length ? root.drives.map((dr, i) => ({ id: "disk:" + dr.dev,
+              name: "Disk " + i + " (" + dr.mounts.map(m => m.label).join(", ") + ")", hist: root.driveHists[dr.dev] ?? [],
+              value: dr.kind + "  R " + root.rate(dr.read) + "  W " + root.rate(dr.write) }))
+            : [{ id: "disk", name: "Disk", hist: root.diskHist,
+                 value: "R " + root.rate(root.totals.diskRead) + "  W " + root.rate(root.totals.diskWrite) }]),
         { id: "net", name: "Network", hist: root.netHist,
           value: "↓ " + root.rate(root.stats.net?.rx) + "  ↑ " + root.rate(root.stats.net?.tx) },
     ]
@@ -636,6 +647,17 @@ Item {
             ["Reading", root.rate(t.diskRead)], ["Writing", root.rate(t.diskWrite)], ["Busy", root.pct(t.diskBusy)]]
             .concat((s.disks ?? []).map(d => ["Space on " + d.path, root.bytes(d.used) + " of " + root.bytes(d.total)]))
             .concat((s.nvme ?? []).map(n => [n.model, Math.round(n.temp) + " °C"]))
+        if (id.startsWith("disk:")) {
+            const dr = root.drives.find(x => "disk:" + x.dev === id)
+            if (!dr) return []
+            const temp = (s.nvme ?? []).find(n => n.model && dr.model && (n.model.includes(dr.model) || dr.model.includes(n.model)))
+            return [["Model", dr.model], ["Type", dr.kind + (temp ? "  ·  " + Math.round(temp.temp) + " °C" : "")],
+                    ["Reading", root.rate(dr.read)], ["Writing", root.rate(dr.write)],
+                    ["Busy", root.pct(dr.busy)], ["Capacity", root.bytes(dr.size)]]
+                .concat(dr.mounts.map(m => [m.label + "  (" + m.path + ", " + m.fs + ")",
+                    root.bytes(m.used) + " of " + root.bytes(m.total) + "  ·  " + Math.round(m.total ? m.used * 100 / m.total : 0) + "% used",
+                    m.total ? m.used / m.total : 0]))
+        }
         if (id === "net") return [["Receiving", root.rate(s.net?.rx)], ["Sending", root.rate(s.net?.tx)]]
         return []
     }
@@ -657,7 +679,7 @@ Item {
                         required property int index
                         readonly property bool cur: root.perf === modelData.id
                         Layout.fillWidth: true
-                        implicitHeight: 96
+                        implicitHeight: root.perfItems.length > 5 ? 84 : 96
                         buttonRadius: index === 0 ? Appearance.rounding.large : (index === root.perfItems.length - 1 ? Appearance.rounding.large : 6)
                         colBackground: cur ? Appearance.colors.colSecondaryContainer : Appearance.colors.colLayer3
                         colBackgroundHover: cur ? Appearance.colors.colSecondaryContainerHover : Appearance.colors.colLayer3Hover
@@ -708,7 +730,7 @@ Item {
                     }
                     Item { Layout.fillWidth: true }
                     StyledText {
-                        text: root.perf === "net" || root.perf === "disk" ? "last 90 seconds, auto scale" : "last 90 seconds, 0–100%"
+                        text: root.perf === "net" ? "last 90 seconds, auto scale" : "last 90 seconds, 0–100%"
                         font.pixelSize: Appearance.font.pixelSize.smaller
                         color: Appearance.colors.colSubtext
                     }
@@ -740,11 +762,11 @@ Item {
                             required property var modelData
                             Layout.fillWidth: true
                             Layout.preferredWidth: 100
-                            implicitHeight: 52
+                            implicitHeight: modelData.length > 2 ? 64 : 52
                             radius: 14
                             color: Appearance.colors.colLayer3
                             ColumnLayout {
-                                anchors { fill: parent; leftMargin: 16; rightMargin: 12 }
+                                anchors { fill: parent; leftMargin: 16; rightMargin: 12; bottomMargin: modelData.length > 2 ? 12 : 0 }
                                 spacing: 0
                                 StyledText {
                                     Layout.fillWidth: true
@@ -759,6 +781,19 @@ Item {
                                     font.pixelSize: Appearance.font.pixelSize.small
                                     color: Appearance.colors.colOnLayer3
                                     elide: Text.ElideRight
+                                }
+                            }
+                            Rectangle {   // how full a drive is
+                                visible: modelData.length > 2
+                                anchors { left: parent.left; right: parent.right; bottom: parent.bottom; leftMargin: 16; rightMargin: 16; bottomMargin: 9 }
+                                height: 4
+                                radius: 2
+                                color: Appearance.colors.colLayer1
+                                Rectangle {
+                                    width: parent.width * Math.max(0, Math.min(1, modelData[2] ?? 0))
+                                    height: parent.height
+                                    radius: 2
+                                    color: (modelData[2] ?? 0) > 0.9 ? Appearance.m3colors.m3error : Appearance.colors.colPrimary
                                 }
                             }
                         }
