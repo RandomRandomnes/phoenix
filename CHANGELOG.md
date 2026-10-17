@@ -1,5 +1,9 @@
 # Changelog
 
+## custom 2.433 (2026-10-17, fix)
+- RSI Launcher / Wine tray icons work on Hyprland: no stray window, app name shown, Open/Quit menu, minimize button, no title bar
+- Installer uses the tested illogical-impulse version and stops on an unknown Quickshell
+
 ## custom 2.423 (2026-10-16, fix)
 - Keyboard shortcuts in Settings › Bluetooth & devices › Keyboard › Shortcuts: see and search every shortcut, change one by pressing new keys (with a warning when they're taken), switch one off, reset it, or add your own command
 - Super+/ opens a shortcut sheet again, with search and a button to edit in Settings; your changes stay when Phoenix updates

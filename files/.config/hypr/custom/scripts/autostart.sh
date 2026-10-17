@@ -31,6 +31,20 @@ feature() { ! grep -q "^ *$1 = false" "$HOME/.config/hypr/custom/features.lua" 2
 # Wallpaper Engine is off unless switched on in Settings › Extras (missing = off)
 feature_on() { grep -q "^ *$1 = true" "$HOME/.config/hypr/custom/features.lua" 2>/dev/null; }
 
+# Tray icons of Windows programs run through Wine/Proton (RSI Launcher, game launchers…) use the old X11 tray. KDE has
+# one built in; Hyprland doesn't, so Wine showed its own little "Wine System Tray" window in the top left corner
+# (2026-10-17). KDE's xembedsniproxy (plasma-workspace) turns those icons into normal tray icons in the shell's tray:
+# started before any program, only here (KDE starts its own).
+if command -v xembedsniproxy >/dev/null && ! pgrep -x xembedsniproxy >/dev/null; then
+  QT_QPA_PLATFORM=xcb xembedsniproxy >/dev/null 2>&1 &
+fi
+
+# Minimize buttons of X11 programs (Wine/Proton launchers, custom title bars): Hyprland ignores their "iconify" request;
+# this watcher minimizes them with Phoenix's own minimize (needs python-xlib; does nothing without it).
+if python3 -c "import Xlib" 2>/dev/null && ! pgrep -f "[x]minimize.py" >/dev/null; then
+  python3 "$HOME/.config/quickshell/end4-pC/scripts/hyprland/xminimize.py" >/dev/null 2>&1 &
+fi
+
 i=0
 while [ $i -lt 60 ]; do
   hyprctl layers | grep -q "quickshell:background" && break

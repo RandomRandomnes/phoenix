@@ -12,6 +12,7 @@ PopupWindow {
     id: root
     required property QsMenuHandle trayItemMenuHandle
     property string trayItemId: ""
+    property var extraActions: []   // [{ label, icon, run }]: icons that bring no menu of their own (bridged Wine/X11 icons)
     property real popupBackgroundMargin: 0
 
     signal menuClosed
@@ -217,6 +218,26 @@ PopupWindow {
             color: Appearance.colors.colSubtext
             Layout.topMargin: 4
             Layout.bottomMargin: 4
+        }
+
+        Repeater {
+            model: root.extraActions
+            delegate: RippleButton {
+                id: extraEntry
+                required property var modelData
+                Layout.fillWidth: true
+                buttonRadius: popupBackground.radius - popupBackground.padding
+                horizontalPadding: 12
+                implicitWidth: contentItem.implicitWidth + horizontalPadding * 2
+                implicitHeight: 36
+                releaseAction: () => { extraEntry.modelData.run(); root.close(); }
+                contentItem: RowLayout {
+                    anchors { verticalCenter: parent.verticalCenter; left: parent.left; right: parent.right; leftMargin: extraEntry.horizontalPadding; rightMargin: extraEntry.horizontalPadding }
+                    spacing: 8
+                    MaterialSymbol { iconSize: 18; text: extraEntry.modelData.icon }
+                    StyledText { Layout.fillWidth: true; text: extraEntry.modelData.label }
+                }
+            }
         }
 
         Repeater {

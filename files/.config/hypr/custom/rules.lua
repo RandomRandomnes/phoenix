@@ -67,3 +67,27 @@ do
         if not ok then print("user-rules.lua: " .. tostring(err)) end
     end
 end
+
+-- Wine's own tray window (2026-10-17): when no tray bridge is running (xembedsniproxy, started by autostart.sh), Wine
+-- shows its tray as a small window that landed in the top left. Keep it out of sight in a hidden workspace; its icons
+-- are then simply not shown (with the bridge running there is no such window at all).
+hl.window_rule({
+    name = "wine-system-tray",
+    match = { class = "^(explorer.exe)$", title = "^(Wine System Tray)$" },
+    float = true,
+    no_focus = true,
+    workspace = "special:wine-tray silent",
+})
+
+-- The tray bridge's own helper window (xembedsniproxy, 32x32): it only owns the tray, nothing to show (2026-10-17).
+hl.window_rule({
+    name = "xembedsniproxy-window",
+    match = { class = "^(xembedsniproxy)$" },
+    float = true,
+    no_focus = true,
+    no_anim = true,
+    no_shadow = true,
+    no_blur = true,
+    opacity = "0.0 override 0.0 override",
+    workspace = "special:wine-tray silent",
+})

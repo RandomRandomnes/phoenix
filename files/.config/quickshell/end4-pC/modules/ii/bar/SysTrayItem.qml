@@ -31,7 +31,7 @@ MouseArea {
         event.accepted = true;
     }
     onClicked: (event) => {
-        if (event.button !== Qt.RightButton || !item.hasMenu) return;
+        if (event.button !== Qt.RightButton) return;
         if (menu.active && menu.item && typeof menu.item.close === "function")
             menu.item.close();
         else
@@ -42,6 +42,11 @@ MouseArea {
     }
     onEntered: {
         tooltip.text = TrayService.getTooltipForItem(root.item);
+    }
+    // the name of a bridged X11 icon arrives a moment after the first hover
+    Connections {
+        target: TrayService
+        function onXembedNamesChanged() { if (root.containsMouse) tooltip.text = TrayService.getTooltipForItem(root.item); }
     }
 
     Loader {
@@ -54,6 +59,10 @@ MouseArea {
             Component.onCompleted: this.open();
             trayItemMenuHandle: root.item.menu
             trayItemId: root.item.id
+            extraActions: root.item.hasMenu ? [] : [
+                { label: Translation.tr("Open"), icon: "open_in_new", run: () => root.item.activate() },
+                { label: Translation.tr("Quit"), icon: "close", run: () => Quickshell.execDetached(["bash", Quickshell.shellPath("scripts/tray/context-menu.sh"), "quit", String(root.item.id)]) }
+            ]
             anchor {
                 window: root.QsWindow.window
                 item: root

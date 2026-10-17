@@ -55,13 +55,22 @@ else
     info "It shows every command before running it and asks questions of its own."
     ask "Run the illogical-impulse installer now?" y || die "install illogical-impulse first, then run this installer again"
     II_DIR="$HOME/.cache/dots-hyprland"
+    # The illogical-impulse version Phoenix was tested with (2026-10-17). Phoenix no longer follows illogical-impulse's
+    # updates, so the newest upstream could change something Phoenix's frozen shell can't cope with (Quickshell, the
+    # Hyprland config format, packages). This is raised only after a newer one was tested. PHOENIX_II_REF=main (or
+    # another commit) overrides it, at your own risk.
+    II_REF="${PHOENIX_II_REF:-2f2a376fdb2ad738bf55f693dd0b474b64bb0ab8}"
     if [ -d "$II_DIR/.git" ]; then
         # an interrupted earlier run may have left the choice hook below in place
         git -C "$II_DIR" checkout -q -- sdata/subcmd-install/0.greeting.sh sdata/subcmd-install/3.files.sh 2>/dev/null || true
-        git -C "$II_DIR" pull -q --ff-only origin main || die "couldn't update $II_DIR; fix or remove it, then run this installer again"
+        git -C "$II_DIR" fetch -q origin || die "couldn't update $II_DIR; fix or remove it, then run this installer again"
     else
         git clone -q https://github.com/end-4/dots-hyprland "$II_DIR" || die "couldn't download illogical-impulse"
     fi
+    if [ "$II_REF" = main ]; then II_REF=origin/main; fi
+    git -C "$II_DIR" checkout -q --detach "$II_REF" 2>/dev/null || git -C "$II_DIR" checkout -q --detach "origin/$II_REF" \
+        || die "couldn't switch illogical-impulse to the version Phoenix was tested with ($II_REF)"
+    info "illogical-impulse version: $(git -C "$II_DIR" log -1 --format='%h (%cs)')"
     git -C "$II_DIR" submodule update -q --init --recursive
     # Quickshell pins that don't build with Qt 6.12 or newer get the upstream fix (quickshell 5d5d498) for that pin.
     # The patch is put next to illogical-impulse's own recipe only for this build and removed afterwards.
@@ -71,6 +80,12 @@ else
         [41651d7dcd62a9400eb6f4f8a8580efe00901efb]=6832746827da49eea7c77f546e90732ad1ef71f1fd194050621a57122429d597
         [7511545ee20664e3b8b8d3322c0ffe7567c56f7a]=0dbc7190d66467633fb9edd416051267367ccade0ef59906bcd3d44d6ca22384
     )
+    # the Quickshell versions Phoenix is known to run on (builds with the Qt fix below where needed)
+    case "$qs_pin" in
+        4f508be500dea6e5732cc3d50382a0048b17e7b1|41651d7dcd62a9400eb6f4f8a8580efe00901efb|7511545ee20664e3b8b8d3322c0ffe7567c56f7a) ;;
+        *) [ -z "$qs_pin" ] || warn "this illogical-impulse uses a Quickshell version Phoenix wasn't tested with (${qs_pin:0:7}); the desktop may not start."
+           ask "Continue anyway?" n || die "stopped before installing; use the default version (unset PHOENIX_II_REF)";;
+    esac
     # the Qt it will be built with: the installed one, or the repositories' one if newer (the installer updates to it)
     qt=$(pacman -Q qt6-base 2>/dev/null | awk '{print $2}' || true); qt_repo=$(LC_ALL=C pacman -Si qt6-base 2>/dev/null | awk '/^Version/ {print $3; exit}' || true)
     [ -z "$qt" ] || { [ -n "$qt_repo" ] && [ "$(vercmp "$qt_repo" "$qt")" -gt 0 ]; } && qt="$qt_repo"; qs_patched=""
