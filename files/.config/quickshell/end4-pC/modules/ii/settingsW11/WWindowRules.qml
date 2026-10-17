@@ -64,11 +64,7 @@ WPage {
         onFileChanged: if (!page.saving) listProc.running = true
     }
 
-    function iconFor(cls) {
-        const e = AppSearch.list.find(x => x.id === cls || (x.id ?? "").toLowerCase() === (cls ?? "").toLowerCase())
-            ?? DesktopEntries.heuristicLookup(cls)
-        return e?.icon ?? AppSearch.guessIcon(cls)
-    }
+    function iconFor(cls) { return AppSearch.iconFor(cls) }
     function summary(r) {
         const s = []
         if (r.fullscreen) s.push("fullscreen"); else if (r.maximize) s.push("maximized")
@@ -172,7 +168,7 @@ WPage {
                 title: modelData.app || modelData.match
                 description: (modelData.enabled === false ? "Off · " : "") + page.summary(modelData)
                 leading: Component {
-                    IconImage { implicitSize: 28; source: Quickshell.iconPath(page.iconFor(ruleCard.modelData.match), "application-x-executable") }
+                    IconImage { implicitSize: 28; source: AppSearch.iconPath(page.iconFor(ruleCard.modelData.match), "application-x-executable") }
                 }
                 StyledSwitch {
                     checked: ruleCard.modelData.enabled !== false
@@ -206,7 +202,7 @@ WPage {
                 : "Pick an open window, or type the app below"
             fieldWidth: 260
             model: [{ displayName: "Pick an open window…", value: "" }].concat(page.openWindows.map(w => {
-                const name = DesktopEntries.heuristicLookup(w.class)?.name
+                const name = AppSearch.entryFor(w.class)?.name
                 return { displayName: name && name !== w.class ? `${name} (${w.class})` : w.class, value: w.class }
             }))
             currentValue: page.draft && page.draft.matchBy !== "title" && page.openWindows.some(w => w.class === page.draft.match) ? page.draft.match : ""
@@ -215,7 +211,7 @@ WPage {
                 const w = page.openWindows.find(x => x.class === v)
                 const d = JSON.parse(JSON.stringify(page.draft))
                 d.matchBy = "class"; d.match = v
-                d.app = (DesktopEntries.heuristicLookup(v)?.name) || v
+                d.app = (AppSearch.entryFor(v)?.name) || v
                 page.draft = d
             }
         }

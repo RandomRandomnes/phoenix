@@ -15,7 +15,7 @@ MouseArea {
     id: root
     required property LockContext context
     property Item passwordField: null            // the style's LockPasswordInput: gets the keyboard focus
-    property bool preview: false                 // lock-preview.qml: no password check, no power actions
+    property bool preview: false                 // the preview (modules/ii/lock/LockPreview.qml): no password check, no power actions
 
     readonly property bool requirePasswordToPower: Config.options.lock.security.requirePasswordToPower
     readonly property MprisPlayer player: MprisController.activePlayer

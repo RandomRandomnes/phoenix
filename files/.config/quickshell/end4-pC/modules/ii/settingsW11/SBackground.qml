@@ -181,7 +181,7 @@ ColumnLayout {
                     buttonIcon: "sync"
                     text: Translation.tr("Use same wallpaper for both")
                     checked: Config.options.background.lockWall === ""
-                    onCheckedChanged: {
+                    onToggled: checked => {
                         if (checked) {
                             Config.options.background.lockWall = "";
                         }
@@ -192,7 +192,7 @@ ColumnLayout {
                     buttonIcon: "preview"
                     text: Translation.tr("Preview wallpaper")
                     checked: Config.options.background.enableWallpaperPreview
-                    onCheckedChanged: {
+                    onToggled: checked => {
                         Config.options.background.enableWallpaperPreview = checked;
                     }
                 }
@@ -201,7 +201,7 @@ ColumnLayout {
                     buttonIcon: "blur_on"
                     text: Translation.tr("Blur wall")
                     checked: Config.options.background.showBlur
-                    onCheckedChanged: {
+                    onToggled: checked => {
                         Config.options.background.showBlur = checked;
                     }
                 }
@@ -215,7 +215,7 @@ ColumnLayout {
                     from: 1
                     to: 64
                     stopIndicatorValues: [32]
-                    onValueChanged: Config.options.background.blurRadius = value
+                    onEdited: value => Config.options.background.blurRadius = value
                 }
 
                 WCSelection {
@@ -252,7 +252,7 @@ ColumnLayout {
                     from: 0
                     to: 1440
                     stepSize: 5
-                    onValueChanged: {
+                    onEdited: value => {
                         Config.options.wallpaperSelector.changeInterval = value * 60000;
                     }
                 }
@@ -312,7 +312,7 @@ ColumnLayout {
                         buttonIcon: "lock"
                         text: Translation.tr("Show only when locked")
                         checked: Config.options.background.centeredWallpaperOnlyWhenLocked
-                        onCheckedChanged: {
+                        onToggled: checked => {
                             Config.options.background.centeredWallpaperOnlyWhenLocked = checked;
                         }
                         enabled: Config.options.background.centeredWallpaper && WM.compositor !== "niri"
@@ -355,7 +355,7 @@ ColumnLayout {
                         from: 400
                         to: 800
                         stopIndicatorValues: [400]
-                        onValueChanged: {
+                        onEdited: value => {
                             Config.options.background.centeredWallpaperSize = value;
                         }
                     }
@@ -373,7 +373,7 @@ ColumnLayout {
                     buttonIcon: "dashboard"
                     text: Translation.tr("Enable")
                     checked: Config.options.background.collage.enable
-                    onCheckedChanged: {
+                    onToggled: checked => {
                         if (checked && !Config.options.background.collage.enable) Collage.reset()
                         Config.options.background.collage.enable = checked
                     }
@@ -395,7 +395,7 @@ ColumnLayout {
                     from: 0
                     to: 80
                     stepSize: 2
-                    onValueChanged: Config.options.background.collage.gap = value
+                    onEdited: value => Config.options.background.collage.gap = value
                 }
                 WCSpin {
                     icon: "crop_free"
@@ -404,7 +404,7 @@ ColumnLayout {
                     from: 0
                     to: 120
                     stepSize: 2
-                    onValueChanged: Config.options.background.collage.margin = value
+                    onEdited: value => Config.options.background.collage.margin = value
                 }
                 WCSpin {
                     icon: "rounded_corner"
@@ -413,7 +413,7 @@ ColumnLayout {
                     from: 0
                     to: 80
                     stepSize: 2
-                    onValueChanged: Config.options.background.collage.radius = value
+                    onEdited: value => Config.options.background.collage.radius = value
                 }
                 RowLayout {
                     Layout.fillWidth: true

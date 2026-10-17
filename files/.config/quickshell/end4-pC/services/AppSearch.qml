@@ -23,12 +23,42 @@ if [ -z "$f" ]; then echo "Couldn't find its desktop file."; exit 1; fi
 gid=$(grep -oP 'steam://rungameid/\\K[0-9]+' "$f" | head -1)
 if [ -n "$gid" ]; then echo "A Steam game: Steam asks to confirm."; steam "steam://uninstall/$gid" >/dev/null 2>&1 & disown; exit 0; fi
 case "$f" in
-  *flatpak*) flatpak uninstall "$id" ;;
-  "$HOME"/*) echo "This is a user app (not from a package). Delete $f to remove it from menus."; ;;
-  *) pkg=$(pacman -Qqo "$f") && sudo pacman -Rns "$pkg" ;;
+  *flatpak*) flatpak uninstall -y --noninteractive "$id" ;;
+  "$HOME"/*) echo "@@msg This is a user app (not from a package): delete $f to remove it from menus."; exit 1 ;;
+  *) pkg=$(pacman -Qqo "$f") && sudo pacman -Rns --noconfirm "$pkg" ;;
 esac`;
-        Quickshell.execDetached(["kitty", "-1", "--hold", "bash", "-c", script]);
+        // a background job (2026-10-16; was a terminal window): the caller asks to confirm first; the password in the
+        // shell's own dialog; a notification when it's done
+        Tasks.run("uninstall", ["bash", "-c", script], { title: `Uninstalling ${entry.name}`,
+            doneText: `${entry.name} was uninstalled.`, askpassMessage: `Enter your password to uninstall ${entry.name}` });
     }
+    // ── One app/icon lookup for all of Phoenix (2026-10-16) ──
+    // The desktop entry for an id: exact desktop id, then window class (StartupWMClass), then a reverse-domain id
+    // ending in it (org.kde.dolphin for "dolphin"), then Quickshell's heuristic. Used by the app grid, Settings, the
+    // Task Manager, window rules and startup apps (they each had their own matcher).
+    function entryFor(id) {
+        if (!id) return null;
+        const l = id.toLowerCase();
+        const apps = root.list;
+        return apps.find(e => e.id.toLowerCase() === l)
+            ?? apps.find(e => (e.startupClass ?? "").toLowerCase() === l)
+            ?? apps.find(e => e.id.toLowerCase().endsWith("." + l))
+            ?? DesktopEntries.heuristicLookup(id)
+            ?? null;
+    }
+    // Icon name for an app id or window class (its desktop entry's icon, else a guess)
+    function iconFor(id) {
+        return root.entryFor(id)?.icon || root.guessIcon(id ?? "");
+    }
+    // Icon file for an icon name, following the icon theme chosen in Settings (SystemAppearance), like the dock and
+    // taskbar do: Quickshell.iconPath alone kept showing the old theme's icons after a theme change.
+    function iconPath(name, fallback) {
+        if (!name) return SystemAppearance.iconPath(fallback ?? "application-x-executable", "image-missing");
+        if (name.startsWith("/")) return "file://" + name;
+        if (name.startsWith("file:") || name.startsWith("image:")) return name;
+        return SystemAppearance.iconPath(name, fallback ?? "application-x-executable");
+    }
+
     property bool sloppySearch: Config.options?.search.sloppy ?? false
     property real scoreThreshold: 0.2
     property var substitutions: ({

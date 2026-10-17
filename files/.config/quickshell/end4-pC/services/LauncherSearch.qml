@@ -39,7 +39,11 @@ Singleton {
     onModeChanged: fileQueryTimer.restart()
     Connections {
         target: GlobalStates
-        function onOverviewOpenChanged() { if (!GlobalStates.overviewOpen) root.mode = "all"; }
+        function onOverviewOpenChanged() {
+            if (!GlobalStates.overviewOpen) root.mode = "all";
+            // warm the file index as soon as the menu opens, so the first file search doesn't wait (2026-10-16)
+            else if (!fileProc.running) fileProc.running = true;
+        }
     }
 
     // files: scripts/search/files.py keeps an in-memory index of the home folder and answers one JSON line per query
@@ -448,7 +452,7 @@ Singleton {
                     root.query = "";
                     GlobalStates.overviewOpen = false;
                     GlobalStates.settingsOpen = true;
-                    WState.go(entry.page, entry.sub);
+                    WState.go(entry.page, entry.sub, entry.highlight ?? "");
                 }
             });
         });
@@ -571,7 +575,6 @@ Singleton {
         result = result.concat(appResultObjects.slice(0, 5));
         result = result.concat(windowResults.slice(0, 2));
         result = result.concat(settingsResults.slice(0, 3));
-        result = result.concat(fileResultObjects.slice(0, 3));
         ////////// Launcher actions ////////////
         result = result.concat(launcherActionObjects);
 
@@ -584,6 +587,9 @@ Singleton {
             if (!startsWithWebSearchPrefix)
                 result.push(webSearchResultObject);
         }
+        // files arrive a moment later (scripts/search/files.py): at the end, so the rows above don't move under the
+        // pointer when they come in (2026-10-16)
+        result = result.concat(fileResultObjects.slice(0, 3));
         
         return result;
     }

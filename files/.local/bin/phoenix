@@ -11,6 +11,8 @@
 #                                CPU power for the system stats: a small root service that publishes a coarse reading
 #                                (1 s average, 0.5 W steps), so the energy counter itself stays root-only
 #   phoenix phone-link [setup|remove|status]   Phone Link (KDE Connect): install, firewall for the local network
+#   phoenix update               install all updates: in the desktop, the same background update as the taskbar
+#                                button and Settings › Update (progress there); without it, system-update here
 #
 # Phoenix and illogical-impulse share two things: the Hyprland user folder ~/.config/hypr/custom and the shell settings
 # ~/.config/illogical-impulse/config.json. Switching swaps those two between the active side and a copy kept in
@@ -181,7 +183,7 @@ cmd_phone_link() {
     case "${1:-status}" in
         setup)
             echo "Setting up Phone Link (KDE Connect). This asks for your password."
-            sudo pacman -S --needed --noconfirm kdeconnect sshfs || die "installing KDE Connect failed"
+            sudo pacman -S --needed --noconfirm kdeconnect sshfs python-dbus python-gobject || die "installing KDE Connect failed"
             pl_fw add
             pgrep -x kdeconnectd >/dev/null || (setsid /usr/bin/kdeconnectd >/dev/null 2>&1 < /dev/null &)
             echo "Done. Install KDE Connect on your phone (Galaxy Store, Google Play or F-Droid), connect it to the same"
@@ -361,5 +363,11 @@ case "${1:-status}" in
     power-meter) cmd_power_meter "${2:-status}" ;;
     login-screen) cmd_login_screen "${2:-status}" "${@:3}" ;;
     phone-link) cmd_phone_link "${2:-status}" ;;
+    update)
+        if qs list -c end4-pC 2>/dev/null | grep -q '^Instance'; then
+            qs -c end4-pC ipc call updates install && echo "Updating in the background: see Settings › Update."
+        else
+            exec "$HOME/.local/bin/system-update"
+        fi ;;
     *) sed -n '2,17p' "$0" | sed 's/^# \{0,1\}//'; exit 2 ;;
 esac

@@ -14,10 +14,7 @@ Item {
     id: root
     required property var screen
 
-    function matches(e, id) {
-        const l = id.toLowerCase();
-        return e.id.toLowerCase() === l || (e.startupClass ?? "").toLowerCase() === l || e.id.toLowerCase().endsWith("." + l);
-    }
+    function matches(e, id) { return AppSearch.entryFor(id) === e; }
     // Which apps to show: Settings > Personalization > Super menu apps (Config.options.overview.appGrid*)
     // Each entry: { app, key }; key is what gets saved when the apps are dragged into a new order.
     readonly property var entries: {
@@ -109,6 +106,8 @@ Item {
 
     // ── Right-click menu (2026-10-16) ──
     property var menuApp: null       // DesktopEntry the menu is for
+    property bool uninstallArmed: false
+    onMenuAppChanged: uninstallArmed = false
     property string menuKey: ""
     function launch(app) {
         NewApps.opened(app.id);
@@ -157,7 +156,13 @@ Item {
             GlobalStates.overviewOpen = false;
             Quickshell.execDetached([`${Quickshell.env("HOME")}/.local/bin/phoenix-open`, "settings", "apps", "installed"]);
         } });
-        l.push({ icon: "delete", text: Translation.tr("Uninstall"), danger: true, act: () => { GlobalStates.overviewOpen = false; AppSearch.uninstall(app); } });
+        // two clicks: the first asks, the second uninstalls (a background job with a notification)
+        l.push({ icon: "delete", danger: true, keepOpen: !root.uninstallArmed,
+                 text: root.uninstallArmed ? Translation.tr("Click again to uninstall") : Translation.tr("Uninstall"),
+                 act: () => {
+                     if (!root.uninstallArmed) { root.uninstallArmed = true; return; }
+                     GlobalStates.overviewOpen = false; AppSearch.uninstall(app);
+                 } });
         return l;
     }
     Connections {
@@ -328,7 +333,7 @@ Item {
                         IconImage {
                             Layout.alignment: Qt.AlignHCenter
                             implicitSize: 52
-                            source: Quickshell.iconPath(appDelegate.app?.icon ?? "", "image-missing")
+                            source: AppSearch.iconPath(appDelegate.app?.icon ?? "", "image-missing")
                             // newly installed (services/NewApps.qml): a dot until it's opened once
                             Rectangle {
                                 visible: NewApps.isNew(appDelegate.app?.id ?? "")
@@ -420,7 +425,7 @@ Item {
                                 buttonRadius: Appearance.rounding.small
                                 colBackground: "transparent"
                                 colBackgroundHover: Appearance.colors.colLayer2Hover
-                                onClicked: { const act = row.modelData.act; root.closeMenu(); act(); }
+                                onClicked: { const act = row.modelData.act; if (!row.modelData.keepOpen) root.closeMenu(); act(); }
                                 contentItem: RowLayout {
                                     spacing: 10
                                     MaterialSymbol {

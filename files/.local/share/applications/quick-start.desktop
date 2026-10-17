@@ -2,7 +2,7 @@
 Type=Application
 Name=Phoenix Quick Start
 Comment=A short guide to Phoenix: shortcuts, windows, updates and help
-Exec=sh -c "qs -p \\$HOME/.config/quickshell/end4-pC/quick-start.qml"
+Exec=sh -c "\\$HOME/.local/bin/phoenix-open quickstart"
 Icon=help-browser
 Categories=Utility;Documentation;
 Keywords=phoenix;help;guide;shortcuts;tutorial;welcome;quick start;

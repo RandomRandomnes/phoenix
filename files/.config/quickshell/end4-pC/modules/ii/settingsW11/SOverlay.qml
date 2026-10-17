@@ -22,7 +22,7 @@ ColumnLayout {
                     buttonIcon: "high_density"
                     text: Translation.tr("Enable opening zoom animation")
                     checked: Config.options.overlay.openingZoomAnimation
-                    onCheckedChanged: {
+                    onToggled: checked => {
                         Config.options.overlay.openingZoomAnimation = checked;
                     }
                 }
@@ -30,7 +30,7 @@ ColumnLayout {
                     buttonIcon: "texture"
                     text: Translation.tr("Darken screen")
                     checked: Config.options.overlay.darkenScreen
-                    onCheckedChanged: {
+                    onToggled: checked => {
                         Config.options.overlay.darkenScreen = checked;
                     }
                 }

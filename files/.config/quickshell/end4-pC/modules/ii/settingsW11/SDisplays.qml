@@ -75,7 +75,7 @@ ColumnLayout {
                         text: Translation.tr("Enabled")
                         enabled: monitorConfig.monitors.length > 1
                         checked: !(monitorConfig.monitors[monitorCanvas.selectedIndex]?.disabled ?? false)
-                        onCheckedChanged: {
+                        onToggled: checked => {
                             if (checked === !(monitorConfig.monitors[monitorCanvas.selectedIndex]?.disabled ?? false)) return
                             monitorConfig.updateMonitor(monitorCanvas.selectedIndex, { disabled: !checked })
                             monitorConfig.applyAndSave(monitorCanvas.selectedIndex)
@@ -124,7 +124,7 @@ ColumnLayout {
                         text: Translation.tr("Scale")
                         value: Math.round((monitorConfig.monitors[monitorCanvas.selectedIndex]?.scale ?? 1.0) * 100)
                         from: 50; to: 300; stepSize: 25
-                        onValueChanged: {
+                        onEdited: value => {
                             const newVal = value / 100.0
                             if (newVal === (monitorConfig.monitors[monitorCanvas.selectedIndex]?.scale ?? 1.0)) return
                             monitorConfig.updateMonitor(monitorCanvas.selectedIndex, { scale: newVal })
@@ -137,7 +137,7 @@ ColumnLayout {
                         text: Translation.tr("Position X")
                         value: monitorConfig.monitors[monitorCanvas.selectedIndex]?.x ?? 0
                         from: 0; to: 7680; stepSize: 1
-                        onValueChanged: {
+                        onEdited: value => {
                             if (value === (monitorConfig.monitors[monitorCanvas.selectedIndex]?.x ?? 0)) return
                             monitorConfig.updateMonitor(monitorCanvas.selectedIndex, { x: value })
                             monitorConfig.applyAndSave(monitorCanvas.selectedIndex)
@@ -149,7 +149,7 @@ ColumnLayout {
                         text: Translation.tr("Position Y")
                         value: monitorConfig.monitors[monitorCanvas.selectedIndex]?.y ?? 0
                         from: 0; to: 4320; stepSize: 1
-                        onValueChanged: {
+                        onEdited: value => {
                             if (value === (monitorConfig.monitors[monitorCanvas.selectedIndex]?.y ?? 0)) return
                             monitorConfig.updateMonitor(monitorCanvas.selectedIndex, { y: value })
                             monitorConfig.applyAndSave(monitorCanvas.selectedIndex)
@@ -224,7 +224,7 @@ ColumnLayout {
                             text: Translation.tr("SDR brightness")
                             value: Math.round((monitorConfig.monitors[monitorCanvas.selectedIndex]?.sdrBrightness ?? 1.0) * 100)
                             from: 10; to: 300; stepSize: 5
-                            onValueChanged: {
+                            onEdited: value => {
                                 const newVal = value / 100.0
                                 if (newVal === (monitorConfig.monitors[monitorCanvas.selectedIndex]?.sdrBrightness ?? 1.0)) return
                                 monitorConfig.updateMonitor(monitorCanvas.selectedIndex, { sdrBrightness: newVal })
@@ -239,7 +239,7 @@ ColumnLayout {
                             text: Translation.tr("SDR saturation")
                             value: Math.round((monitorConfig.monitors[monitorCanvas.selectedIndex]?.sdrSaturation ?? 1.0) * 100)
                             from: 10; to: 200; stepSize: 5
-                            onValueChanged: {
+                            onEdited: value => {
                                 const newVal = value / 100.0
                                 if (newVal === (monitorConfig.monitors[monitorCanvas.selectedIndex]?.sdrSaturation ?? 1.0)) return
                                 monitorConfig.updateMonitor(monitorCanvas.selectedIndex, { sdrSaturation: newVal })
@@ -259,7 +259,7 @@ ColumnLayout {
                             value: monitorConfig.monitors[monitorCanvas.selectedIndex]?.sdrMinLuminance ?? 0
                             from: 0; to: 100; stepSize: 1
                             enabled: monitorConfig.monitors[monitorCanvas.selectedIndex]?.cm === "hdr" || monitorConfig.monitors[monitorCanvas.selectedIndex]?.cm === "hdredid"
-                            onValueChanged: {
+                            onEdited: value => {
                                 if (value === (monitorConfig.monitors[monitorCanvas.selectedIndex]?.sdrMinLuminance ?? 0)) return
                                 monitorConfig.updateMonitor(monitorCanvas.selectedIndex, { sdrMinLuminance: value })
                                 monitorConfig.saveHdr(monitorCanvas.selectedIndex)
@@ -273,7 +273,7 @@ ColumnLayout {
                             value: monitorConfig.monitors[monitorCanvas.selectedIndex]?.sdrMaxLuminance ?? 250
                             from: 50; to: 2000; stepSize: 10
                             enabled: monitorConfig.monitors[monitorCanvas.selectedIndex]?.cm === "hdr" || monitorConfig.monitors[monitorCanvas.selectedIndex]?.cm === "hdredid"
-                            onValueChanged: {
+                            onEdited: value => {
                                 if (value === (monitorConfig.monitors[monitorCanvas.selectedIndex]?.sdrMaxLuminance ?? 250)) return
                                 monitorConfig.updateMonitor(monitorCanvas.selectedIndex, { sdrMaxLuminance: value })
                                 monitorConfig.saveHdr(monitorCanvas.selectedIndex)
@@ -292,7 +292,7 @@ ColumnLayout {
                             value: monitorConfig.monitors[monitorCanvas.selectedIndex]?.minLuminance ?? 0
                             from: 0; to: 100; stepSize: 1
                             enabled: monitorConfig.monitors[monitorCanvas.selectedIndex]?.cm === "hdr" || monitorConfig.monitors[monitorCanvas.selectedIndex]?.cm === "hdredid"
-                            onValueChanged: {
+                            onEdited: value => {
                                 if (value === (monitorConfig.monitors[monitorCanvas.selectedIndex]?.minLuminance ?? 0)) return
                                 monitorConfig.updateMonitor(monitorCanvas.selectedIndex, { minLuminance: value })
                                 monitorConfig.saveHdr(monitorCanvas.selectedIndex)
@@ -306,7 +306,7 @@ ColumnLayout {
                             value: monitorConfig.monitors[monitorCanvas.selectedIndex]?.maxLuminance ?? 1000
                             from: 100; to: 10000; stepSize: 50
                             enabled: monitorConfig.monitors[monitorCanvas.selectedIndex]?.cm === "hdr" || monitorConfig.monitors[monitorCanvas.selectedIndex]?.cm === "hdredid"
-                            onValueChanged: {
+                            onEdited: value => {
                                 if (value === (monitorConfig.monitors[monitorCanvas.selectedIndex]?.maxLuminance ?? 1000)) return
                                 monitorConfig.updateMonitor(monitorCanvas.selectedIndex, { maxLuminance: value })
                                 monitorConfig.saveHdr(monitorCanvas.selectedIndex)
@@ -320,7 +320,7 @@ ColumnLayout {
                         value: monitorConfig.monitors[monitorCanvas.selectedIndex]?.maxAvgLuminance ?? 250
                         from: 50; to: 5000; stepSize: 10
                         enabled: monitorConfig.monitors[monitorCanvas.selectedIndex]?.cm === "hdr" || monitorConfig.monitors[monitorCanvas.selectedIndex]?.cm === "hdredid"
-                        onValueChanged: {
+                        onEdited: value => {
                             if (value === (monitorConfig.monitors[monitorCanvas.selectedIndex]?.maxAvgLuminance ?? 250)) return
                             monitorConfig.updateMonitor(monitorCanvas.selectedIndex, { maxAvgLuminance: value })
                             monitorConfig.saveHdr(monitorCanvas.selectedIndex)

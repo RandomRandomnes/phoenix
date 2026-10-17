@@ -1,15 +1,19 @@
 #!/bin/sh
 log="$HOME/.local/state/phoenix/autostart.log"; mkdir -p "$HOME/.local/state/phoenix"
 echo "$(date +%T) autostart script started" > "$log"
+# With lock-screen sign-in (PHOENIX_LOCK_FIRST=1, see phoenix-session) your things wait for the first unlock: the lock
+# screen leaves $XDG_RUNTIME_DIR/phoenix-unlocked-once (per sign-in: the runtime folder is emptied at sign-out).
+wait_unlocked() {
+  [ "${PHOENIX_LOCK_FIRST:-}" = 1 ] || return 0
+  while [ ! -e "${XDG_RUNTIME_DIR:-/tmp}/phoenix-unlocked-once" ]; do sleep 1; done
+}
 # Your own login commands (not part of Phoenix, never shipped or overwritten): custom/scripts/autostart-user.sh
 # With lock-screen sign-in (PHOENIX_LOCK_FIRST=1, see phoenix-session) they wait for the first unlock: nothing of yours
 # (drive mounts, apps) runs before the password. The lock screen leaves $XDG_RUNTIME_DIR/phoenix-unlocked-once.
 if [ -f "$HOME/.config/hypr/custom/scripts/autostart-user.sh" ]; then
   (
-    if [ "${PHOENIX_LOCK_FIRST:-}" = 1 ]; then
-      echo "$(date +%T) autostart-user.sh waits for the first unlock" >> "$log"
-      while [ ! -e "${XDG_RUNTIME_DIR:-/tmp}/phoenix-unlocked-once" ]; do sleep 1; done
-    fi
+    [ "${PHOENIX_LOCK_FIRST:-}" = 1 ] && echo "$(date +%T) autostart-user.sh waits for the first unlock" >> "$log"
+    wait_unlocked
     echo "$(date +%T) running autostart-user.sh" >> "$log"
     sh "$HOME/.config/hypr/custom/scripts/autostart-user.sh" >> "$log" 2>&1
   ) &
@@ -44,7 +48,6 @@ if [ -f "$HOME/.local/state/setup-wizard/pending" ]; then
   echo "$(date +%T) opening the first-time setup wizard" >> "$log"
   qs -p "$HOME/.config/quickshell/end4-pC/setup-wizard.qml" > /dev/null 2>&1 &
 fi
-sleep 2
 
 if feature_on wallpaperEngine; then
   echo "$(date +%T) starting wallpaper app" >> "$log"
@@ -60,7 +63,6 @@ if feature_on wallpaperEngine; then
 else
   echo "$(date +%T) Wallpaper Engine background is switched off" >> "$log"
 fi
-sleep 2
 
 # No background reload needed (since 2026-10-03): every wallpaper renderer now sits at or below the shell's
 # background surface. Videos are drawn inside it; scenes run in linux-wallpaperengine with --layer background; web
@@ -70,9 +72,7 @@ sleep 2
 # With lock-screen sign-in it waits for the first unlock too (phone notifications shouldn't show before the password).
 if command -v kdeconnectd >/dev/null && feature phoneLinkStart; then
   (
-    if [ "${PHOENIX_LOCK_FIRST:-}" = 1 ]; then
-      while [ ! -e "${XDG_RUNTIME_DIR:-/tmp}/phoenix-unlocked-once" ]; do sleep 1; done
-    fi
+    wait_unlocked
     pgrep -x kdeconnectd >/dev/null || { echo "$(date +%T) starting kdeconnectd" >> "$log"; kdeconnectd >/dev/null 2>&1 & }
   ) &
 fi
@@ -81,12 +81,17 @@ if feature steamTray; then
   (
     # With lock-screen sign-in, Steam waits for the first unlock too (2026-10-15): it shouldn't be signed in and
     # reachable (Remote Play / Steam Link) while the PC still sits at the lock screen.
-    if [ "${PHOENIX_LOCK_FIRST:-}" = 1 ]; then
-      echo "$(date +%T) steam waits for the first unlock" >> "$log"
-      while [ ! -e "${XDG_RUNTIME_DIR:-/tmp}/phoenix-unlocked-once" ]; do sleep 1; done
-    fi
+    [ "${PHOENIX_LOCK_FIRST:-}" = 1 ] && echo "$(date +%T) steam waits for the first unlock" >> "$log"
+    wait_unlocked
     echo "$(date +%T) starting steam" >> "$log"
     steam -silent > /dev/null 2>&1 &   # -silent: start in the tray, no window
   ) &
 fi
+# Your startup apps (Settings › Apps › Startup / Task Manager › Startup): after the first unlock too, each straight on
+# its workspace (the shell used to start them on its own, before the password and once per boot only; 2026-10-16)
+(
+  wait_unlocked
+  echo "$(date +%T) starting your startup apps" >> "$log"
+  python3 "$HOME/.config/quickshell/end4-pC/scripts/hyprland/autostart.py" >> "$log" 2>&1
+) &
 echo "$(date +%T) done" >> "$log"

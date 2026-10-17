@@ -69,10 +69,16 @@ date -r /var/lib/pacman/sync/core.db '+%b %-d, %-I:%M %p' 2>/dev/null`]
     property string kernelState: ""
     readonly property bool rebootPending: kernelState === "pending"
 
-    Process {
-        id: updateProc
-        command: ["kitty", "fish", "-i", "-l", "-c", "~/.local/bin/system-update"]
-        onExited: { Updates.refresh(); page.refreshInfo(); whatsNewProc.running = true; rpListProc.running = true; }
+    // Jobs started here run in the background (services/Tasks.qml) with their progress on this page (2026-10-16;
+    // they were terminal windows and the page went stale until "Check now"): refresh everything when one ends.
+    Connections {
+        target: Tasks
+        function onFinished(id, ok) {
+            if (!["update", "fixes", "restore"].includes(id)) return;
+            Updates.refresh(); page.refreshInfo(); page.refreshFixes();
+            whatsNewProc.running = true; rpListProc.running = true;
+            if (id === "restore") page.undoPoint = null;
+        }
     }
 
     // Status banner
@@ -123,14 +129,30 @@ date -r /var/lib/pacman/sync/core.db '+%b %-d, %-I:%M %p' 2>/dev/null`]
             }
             WButton {
                 accent: true
-                visible: Updates.count > 0 || updateProc.running
-                buttonText: updateProc.running ? "Installing…" : "Install all"
+                visible: Updates.count > 0 || Updates.installing
+                buttonText: Updates.installing ? "Installing…" : "Install all"
                 iconName: "download"
-                enabled: !updateProc.running && Updates.count > 0
-                onClicked: updateProc.running = true
+                enabled: !Updates.installing && Updates.count > 0
+                onClicked: Updates.install()
             }
         }
     }
+
+    // first update: how should updates install? (asked here instead of in a terminal)
+    WSection {
+        visible: Updates.needsMode
+        WCard {
+            icon: "rule"
+            title: "How should updates install?"
+            description: "Automatically: everything installs in the background, only your password is asked. "
+                + "Ask first: a window shows what will be updated and you confirm, like the installer. You can change this below at any time."
+            WButton { buttonText: "Ask first"; onClicked: { Config.options.extras.updateMode = "ask"; Updates.install() } }
+            WButton { accent: true; buttonText: "Automatically"; onClicked: { Config.options.extras.updateMode = "auto"; Updates.install() } }
+        }
+    }
+    WJob { jobId: "update" }
+    WJob { jobId: "fixes" }
+    WJob { jobId: "restore" }
 
     // ── desktop check (~/.local/bin/phoenix-check, 2026-10-09): pending updates that can break the desktop, and
     //    problems now (no title bars, config errors, shell built for an older Qt). Replaced hypr-guard's check. ──
@@ -249,10 +271,6 @@ date -r /var/lib/pacman/sync/core.db '+%b %-d, %-I:%M %p' 2>/dev/null`]
         command: [page.rpBin, "create", "--reason", "Made by hand"]
         onExited: rpListProc.running = true
     }
-    Process {
-        id: rpRestoreProc
-        onExited: { page.undoPoint = null; rpListProc.running = true; page.refreshInfo(); page.refreshFixes(); }
-    }
 
     WSection {
         title: "Restore points"
@@ -287,7 +305,7 @@ date -r /var/lib/pacman/sync/core.db '+%b %-d, %-I:%M %p' 2>/dev/null`]
             title: page.undoPoint ? `Go back to ${page.rpWhen(page.undoPoint.date)}?` : ""
             description: !page.undoPoint ? "" : [
                 "Your desktop settings and the shell go back to how they were then, including settings you changed since.",
-                page.undoPoint.reinstallPackages > 0 ? `${page.undoPoint.reinstallPackages} package(s) go back to their old version in a terminal window, where you confirm and type your password.` : "",
+                page.undoPoint.reinstallPackages > 0 ? `${page.undoPoint.reinstallPackages} package(s) go back to their old version (asks for your password).` : "",
                 page.undoPoint.customChanged ? "The Phoenix version installed since is undone too." : "",
                 (page.undoPoint.missingPackages ?? []).length ? `Not possible for ${page.undoPoint.missingPackages.join(", ")}: no longer in the package cache.` : "",
                 "The current state is saved as a restore point first, so you can come back."
@@ -295,13 +313,9 @@ date -r /var/lib/pacman/sync/core.db '+%b %-d, %-I:%M %p' 2>/dev/null`]
             WButton { buttonText: "Cancel"; onClicked: page.undoPoint = null }
             WButton {
                 accent: true
-                buttonText: rpRestoreProc.running ? "Going back…" : "Go back"
-                enabled: !rpRestoreProc.running
-                onClicked: {
-                    rpRestoreProc.command = ["kitty", "--class", "phoenix-setup", "--title", "Go back to a restore point", "--",
-                        "bash", "-c", `"$0" restore "$1" --yes; echo; read -r -p 'Press Enter to close.'`, page.rpBin, page.undoPoint.id]
-                    rpRestoreProc.running = true
-                }
+                buttonText: Tasks.isRunning("restore") ? "Going back…" : "Go back"
+                enabled: !Tasks.isRunning("restore")
+                onClicked: Tasks.run("restore", [page.rpBin, "restore", page.undoPoint.id, "--yes"], { title: "Going back to a restore point" })
             }
         }
     }
@@ -320,8 +334,9 @@ date -r /var/lib/pacman/sync/core.db '+%b %-d, %-I:%M %p' 2>/dev/null`]
         offersProc.running = true
         if (page.isPublisher) previewProc.running = true
     }
+    // Phoenix fix commands: a background job with progress above (2026-10-16; were terminal windows)
     function term(cmd, title) {
-        Quickshell.execDetached(["kitty", "--title", title, "--", "bash", "-c", `${cmd}; echo; read -r -p 'Press Enter to close.'`])
+        Tasks.run("fixes", ["bash", "-c", cmd], { title: title })
     }
 
     Process {
@@ -495,7 +510,7 @@ date -r /var/lib/pacman/sync/core.db '+%b %-d, %-I:%M %p' 2>/dev/null`]
                 buttonText: "Install fix"
                 onClicked: page.term(`${page.fixBin}/custom-update apply --yes`, "Bug fixes")
             }
-            WButton { buttonText: "Undo last"; onClicked: page.term(`${page.fixBin}/custom-update undo`, "Bug fixes") }
+            WButton { visible: page.offers.canUndo === true; buttonText: "Undo last"; onClicked: page.term(`${page.fixBin}/custom-update undo`, "Undoing the last Phoenix update") }
         }
         UpgradeCard {
             info: page.offers
@@ -562,7 +577,7 @@ date -r /var/lib/pacman/sync/core.db '+%b %-d, %-I:%M %p' 2>/dev/null`]
             title: "How updates install"
             description: Config.options.extras.updateMode === ""
                 ? "You'll be asked at the next update. Ask first: see what will be updated and confirm, like the installer"
-                : "Ask first: see what will be updated and confirm, like the installer. Automatically: only your password is asked"
+                : "Ask first: a window shows what will be updated and you confirm. Automatically: installs in the background, only your password is asked"
             model: [{ displayName: "Ask first", value: "ask" }, { displayName: "Automatically", value: "auto" }]
             currentValue: Config.options.extras.updateMode
             onSelected: v => Config.options.extras.updateMode = v

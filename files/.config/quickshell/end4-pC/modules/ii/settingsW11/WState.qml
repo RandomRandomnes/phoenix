@@ -2,6 +2,7 @@ pragma Singleton
 pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell
+import Quickshell.Io
 import qs
 import qs.services
 
@@ -12,12 +13,24 @@ Singleton {
 
     property string page: "home"
     property string sub: ""
-    property bool advanced: false          // showing the original illogical-impulse settings
     property var history: []
     // Pages that read their data once (a helper, a file) reload it when this changes: whenever you come back to the
     // Settings window (2026-10-16), so a change made elsewhere (an app installed, a window opened) shows up
     property int refreshTick: 0
     function refresh() { root.refreshTick++ }
+
+    // ── Search (2026-10-16) ──
+    // Every setting, read from the pages themselves (scripts/settings/index.py: card titles, descriptions, sections),
+    // plus the hand-written entries below as extra keywords. A result opens its page and highlights the setting.
+    property var generated: []          // [{ title, page, sub, keywords }]
+    property string highlight: ""       // title of the setting to scroll to and flash once its page is shown
+    Process {
+        id: indexProc
+        running: true
+        command: ["python3", Quickshell.shellPath("scripts/settings/index.py")]
+        stdout: StdioCollector { onStreamFinished: { try { root.generated = JSON.parse(text) } catch (e) {} } }
+    }
+    onRefreshTickChanged: indexProc.running = true
 
     readonly property var categories: [
         { id: "home",            name: "Home",                 icon: "home" },
@@ -185,17 +198,26 @@ Singleton {
         q = q.trim().toLowerCase();
         if (q.length === 0) return [];
         const words = q.split(/\s+/);
-        return root.index
+        const rows = root.index.map(e => ({ title: e[0], keywords: e[1], page: e[2], sub: e[3], hl: "" }))
+            .concat(root.generated.map(e => ({ title: e.title, keywords: e.keywords ?? "", page: e.page, sub: e.sub, hl: e.title })));
+        const seen = {};
+        return rows
             .map(e => {
-                const title = e[0].toLowerCase();
-                const hay = title + " " + e[1];
+                const title = e.title.toLowerCase();
+                const hay = title + " " + e.keywords;
                 if (!words.every(w => hay.indexOf(w) !== -1)) return null;
-                const score = title.startsWith(q) ? 0 : title.indexOf(q) !== -1 ? 1 : 2;
-                return { title: e[0], page: e[2], sub: e[3], score: score };
+                const score = title === q ? 0 : title.startsWith(q) ? 1 : title.indexOf(q) !== -1 ? 2 : 3;
+                return { title: e.title, page: e.page, sub: e.sub, highlight: e.hl, score: score };
             })
-            .filter(e => e !== null)
+            .filter(e => {
+                if (e === null) return false;
+                const k = `${e.title.toLowerCase()}|${e.page}|${e.sub}`;   // the same setting from both lists once
+                if (seen[k]) return false;
+                seen[k] = true;
+                return true;
+            })
             .sort((a, b) => a.score - b.score)
-            .slice(0, 8);
+            .slice(0, 10);
     }
 
     function categoryName(id) {
@@ -206,20 +228,15 @@ Singleton {
         return root.subTitles[`${page}/${sub}`] ?? "";
     }
 
-    function go(page, sub = "") {
-        if (page === "advanced") return;   // the original settings were merged into these pages (2026-10-15)
-        if (page === root.page && sub === root.sub && !root.advanced) return;
+    function go(page, sub = "", highlight = "") {
+        root.highlight = highlight;
+        if (page === root.page && sub === root.sub) return;
         root.history = root.history.concat([{ page: root.page, sub: root.sub }]);
-        root.advanced = false;
         root.page = page;
         root.sub = sub;
     }
 
     function back() {
-        if (root.advanced) {
-            root.advanced = false;
-            return;
-        }
         if (root.history.length === 0) {
             if (root.sub !== "") root.sub = "";
             return;
@@ -230,46 +247,13 @@ Singleton {
         root.sub = last.sub;
     }
 
-    readonly property bool canGoBack: advanced || history.length > 0 || sub !== ""
+    readonly property bool canGoBack: history.length > 0 || sub !== ""
 
-    // Launcher search results still name the original settings pages (GlobalStates.openSettingsAt). Since 2026-10-15
-    // those settings live in these pages: open the page that now has that section.
-    readonly property var oldSections: ({
-        "desktop/Wallpaper": ["personalization", "background-more"], "desktop/Multiple wallpapers": ["personalization", "background-more"],
-        "interface/Color Schemes": ["personalization", "colors-more"], "interface/Transparency": ["personalization", "colors-more"],
-        "interface/Color generation": ["personalization", "colors-more"], "interface/Left Sidebar": ["personalization", "sidebar-more"],
-        "interface/Right Sidebar": ["personalization", "sidebar-more"], "interface/Hot Corners": ["personalization", "sidebar-more"],
-        "interface/Overview": ["personalization", "start-more"], "interface/Dock": ["personalization", "dock-more"],
-        "interface/Lock screen": ["personalization", "lockscreen-more"], "interface/Overlay": ["extras", ""],
-        "interface/Region selector (screen snipping/Google Lens)": ["system", "screenshots"],
-        "interface/On-screen display": ["system", "notifications-more"], "interface/Wallpaper selector": ["personalization", "background-more"],
-        "interface/Fonts": ["personalization", "fonts"], "interface/Settings Panel": ["personalization", ""],
-        "services/Save paths": ["system", "screenshots"], "services/Search": ["personalization", "start-more"],
-        "general/System Appearance": ["personalization", "colors-more"], "general/Time": ["time", "time-more"],
-        "general/Language": ["time", "time-more"], "general/Device batteries": ["system", "power-more"],
-        "general/Battery": ["system", "power-more"], "general/Audio": ["system", "sound-more"], "general/Sounds": ["system", "sound-more"],
-        "general/Work safety": ["privacy", ""], "hyprland/Displays": ["system", "display-more"], "hyprland/Input": ["devices", "input"],
-        "hyprland/Idle": ["system", "power-more"], "hyprland/Autostart Apps": ["apps", "autostart"],
-    })
-    readonly property var oldPages: ({
-        "quick": ["personalization", ""], "general": ["personalization", "colors-more"], "bar": ["personalization", "taskbar-more"],
-        "desktop": ["personalization", "widgets-more"], "interface": ["personalization", ""], "services": ["extras", ""],
-        "hyprland": ["personalization", "windows"], "about": ["system", "about"],
-    })
     Connections {
         target: GlobalStates
-        function onSettingsTargetChanged() {
-            const t = GlobalStates.settingsTarget;
-            if (!t) return;
-            const to = root.oldSections[`${t.page}/${t.section}`] ?? root.oldPages[t.page] ?? ["home", ""];
-            root.go(to[0], to[1]);
-        }
-        // Closing Settings leaves the original (advanced) pages: the next open starts at Phoenix's own Settings again
-        // (2026-10-08; it used to stay in the advanced view for good)
         function onSettingsOpenChanged() {
             if (GlobalStates.settingsOpen) return;
             // the next open starts at Home, like Windows Settings (QA 2026-10-09: it reopened on the last page)
-            root.advanced = false;
             root.page = "home";
             root.sub = "";
             root.history = [];

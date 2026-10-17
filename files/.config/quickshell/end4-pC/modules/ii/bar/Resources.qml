@@ -6,8 +6,17 @@ import Quickshell
 import QtQuick.Layouts
 
 BarWidgetSwitcherArea {
-    Component.onCompleted: ResourceUsage.consumers++
-    Component.onDestruction: ResourceUsage.consumers--
+    // the classic look reads ResourceUsage; the graphs read SystemStats: only ask ResourceUsage to sample when it's
+    // shown (2026-10-16; it sampled all the time next to SystemStats)
+    readonly property bool usesClassic: !Config.options.extras.resourceGraphs
+    property bool counted: false
+    function syncConsumer() {
+        if (root.usesClassic && !root.counted) { ResourceUsage.consumers++; root.counted = true; }
+        else if (!root.usesClassic && root.counted) { ResourceUsage.consumers--; root.counted = false; }
+    }
+    onUsesClassicChanged: syncConsumer()
+    Component.onCompleted: syncConsumer()
+    Component.onDestruction: if (root.counted) ResourceUsage.consumers--
     id: root
     property color contentColor: Appearance.colors.colOnSecondaryContainer
     property bool contentColorOverridden: false

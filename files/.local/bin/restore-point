@@ -42,6 +42,33 @@ EXCLUDE = [f"{QS_REL}/.git", "*.bak*", "*.reapply-bak*", "hypr/custom/backups"]
 RSYNC_EXCLUDE = {"hypr": ["*.bak*", "*.reapply-bak*", "/custom/backups/"], "illogical-impulse": ["*.bak*"],
                  QS_REL: ["/.git/", "*.bak*", "*.reapply-bak*"]}   # the same, relative to each folder
 KEEP = 3
+# Phoenix's own files outside ~/.config (2026-10-16): its programs, login screen / power meter sources, profiles, the
+# wallpaper helper, and the update records, so going back also puts back what a Phoenix update changed there and the
+# record of which version and system fixes are installed. Relative to the home folder.
+UPDATE_STATE = ".local/state/custom-fixes"
+PHOENIX_DIRS = [".local/share/phoenix", ".local/share/setup-profiles", ".local/lib/wallpaper-engine-shell",
+                ".local/share/quick-start"]
+PHOENIX_RECORDS = [f"{UPDATE_STATE}/installed.json", f"{UPDATE_STATE}/system.json", f"{UPDATE_STATE}/whats-new.json"]
+
+
+def phoenix_files():
+    """home-relative paths: every file a Phoenix update installed outside ~/.config (from its record), the folders
+    above, and the update records"""
+    out = set()
+    try:
+        with open(os.path.join(HOME, UPDATE_STATE, "installed.json")) as f:
+            out.update(r for r in (json.load(f).get("files") or {}) if not r.startswith(".config/"))
+    except (OSError, ValueError):
+        pass
+    for b in ("phoenix", "phoenix-open", "phoenix-check", "phoenix-askpass", "custom-update", "system-update",
+              "restore-point", "setup-features", "setup-profile", "setup-apps"):
+        out.add(f".local/bin/{b}")
+    for d in PHOENIX_DIRS:
+        for root, dirs, files in os.walk(os.path.join(HOME, d)):
+            dirs[:] = [x for x in dirs if x != "__pycache__"]
+            out.update(os.path.relpath(os.path.join(root, f), HOME) for f in files)
+    out.update(PHOENIX_RECORDS)
+    return sorted(r for r in out if os.path.isfile(os.path.join(HOME, r)) and ".." not in r.split("/"))
 PKG_CACHES = ["/var/cache/pacman/pkg"]
 
 
@@ -134,6 +161,14 @@ def create(reason, keep=None):
         if not any(os.path.exists(os.path.join(CONFIG, x)) for x in SETTINGS):
             sys.exit("restore-point: there are no desktop settings to save")
         sys.exit(f"restore-point: saving the settings failed: {r.stderr.strip().splitlines()[0] if r.stderr.strip() else r.returncode}")
+    files = phoenix_files()
+    if files and not TEST:
+        lst = os.path.join(tmp, "phoenix-files.txt")
+        with open(lst, "w") as f:
+            f.write("\n".join(files) + "\n")
+        r = run(["tar", "--zstd", "-cf", os.path.join(tmp, "phoenix.tar.zst"), "-C", HOME, "-T", lst])
+        if r.returncode not in (0, 1):
+            os.remove(os.path.join(tmp, "phoenix.tar.zst"))   # settings alone are still a usable restore point
     meta = {"id": pid, "date": now.isoformat(timespec="seconds"), "reason": reason or "Restore point",
             "shell": shell_head(), "custom": custom_label(), "kernel": os.uname().release, "settings": settings_hash()}
     with open(os.path.join(tmp, "meta.json"), "w") as f:
@@ -220,6 +255,28 @@ def restore_settings(pid, meta):
         run(["git", "-C", os.path.join(CONFIG, QS_REL), "reset", "-q", "--mixed", meta["shell"]])
 
 
+def restore_phoenix(pid):
+    """put back Phoenix's own files and its update records from the restore point (files added since are left)"""
+    tmp = tempfile.mkdtemp(prefix="restore-point-")
+    try:
+        r = run(["tar", "--zstd", "-xf", os.path.join(ROOT, pid, "phoenix.tar.zst"), "-C", tmp])
+        if r.returncode != 0:
+            print(f"Phoenix's files couldn't be read from the restore point: {r.stderr.strip()}")
+            return
+        n = 0
+        for root, _, files in os.walk(tmp):
+            for f in files:
+                src = os.path.join(root, f)
+                rel = os.path.relpath(src, tmp)
+                dst = os.path.join(HOME, rel)
+                os.makedirs(os.path.dirname(dst), exist_ok=True)
+                shutil.copy2(src, dst)
+                n += 1
+        print(f"Phoenix's own files and update records put back ({n} files).")
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+
+
 def cmd_restore(pid, yes):
     if not re.fullmatch(r"\d{8}-\d{6}(-\d+)?", pid):   # an id, not a path (QA 2026-10-08)
         sys.exit(f"restore-point: no restore point {pid}")
@@ -252,7 +309,9 @@ def cmd_restore(pid, yes):
             return 1
     before = create("Before undo", keep=pid)
     print(f"Saved the current state first (restore point {before}).")
-    if c["custom"] and c["customThen"] and not TEST:
+    if os.path.isfile(os.path.join(ROOT, pid, "phoenix.tar.zst")) and not TEST:
+        restore_phoenix(pid)   # Phoenix's files and update records as they were (any number of versions back)
+    elif c["custom"] and c["customThen"] and not TEST:
         subprocess.run([os.path.join(HOME, ".local", "bin", "custom-update"), "undo"])
     restore_settings(pid, meta)
     print("Desktop settings put back.")
@@ -266,6 +325,18 @@ def cmd_restore(pid, yes):
                   "else echo \"pacman stopped (exit code $rc): the packages were left as they are.\"; fi")
         if TEST:
             print("TEST: would run: sudo pacman -U " + " ".join(files))
+        elif not sys.stdin.isatty() and os.environ.get("SUDO_ASKPASS"):
+            # run by the shell (Settings › Update, 2026-10-16): sudo asks in the shell's password dialog, no terminal
+            print("@@step Old package versions")
+            env = dict(os.environ, PHOENIX_ASKPASS_MESSAGE="Enter your password to put back the old package versions")
+            rc = subprocess.run(["sudo", "-A", "pacman", "-U", "--noconfirm"] + files, env=env,
+                                stdin=subprocess.DEVNULL).returncode
+            if rc == 0:
+                print("@@msg Packages put back. Sign out and back in (or restart if the kernel changed) to finish.")
+                print("@@relogin")
+            else:
+                print(f"@@msg pacman stopped (exit code {rc}): the packages were left as they are.")
+                return 1
         elif not sys.stdin.isatty() and os.environ.get("WAYLAND_DISPLAY") and shutil.which("kitty"):
             subprocess.Popen(["kitty", "--class", "phoenix-setup", "--title", "Restore point: packages", "bash", "-c",
                               script + "; read -rp 'Press Enter to close.'"],

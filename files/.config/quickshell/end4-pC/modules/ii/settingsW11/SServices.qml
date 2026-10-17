@@ -58,7 +58,7 @@ ColumnLayout {
                     from: 10
                     to: 100
                     stepSize: 2
-                    onValueChanged: {
+                    onEdited: value => {
                         Config.options.musicRecognition.timeout = value;
                     }
                 }
@@ -69,7 +69,7 @@ ColumnLayout {
                     from: 2
                     to: 10
                     stepSize: 1
-                    onValueChanged: {
+                    onEdited: value => {
                         Config.options.musicRecognition.interval = value;
                     }
                 }
@@ -85,7 +85,7 @@ ColumnLayout {
                     buttonIcon: "assistant_navigation"
                     text: Translation.tr("Enable GPS based location")
                     checked: Config.options.bar.weather.enableGPS
-                    onCheckedChanged: {
+                    onToggled: checked => {
                         Config.options.bar.weather.enableGPS = checked;
                     }
                 }
@@ -93,7 +93,7 @@ ColumnLayout {
                     buttonIcon: "thermometer"
                     text: Translation.tr("Fahrenheit unit")
                     checked: Config.options.bar.weather.useUSCS
-                    onCheckedChanged: {
+                    onToggled: checked => {
                         Config.options.bar.weather.useUSCS = checked;
                     }
                 }
@@ -104,7 +104,7 @@ ColumnLayout {
                     from: 5
                     to: 50
                     stepSize: 5
-                    onValueChanged: {
+                    onEdited: value => {
                         Config.options.bar.weather.fetchInterval = value;
                     }
                 }
@@ -135,7 +135,7 @@ ColumnLayout {
                     buttonIcon: "update"
                     text: Translation.tr("Enable update checks")
                     checked: Config.options.updates.enableCheck
-                    onCheckedChanged: {
+                    onToggled: checked => {
                         Config.options.updates.enableCheck = checked;
                     }
                 }
@@ -147,7 +147,7 @@ ColumnLayout {
                     from: 60
                     to: 1440
                     stepSize: 60
-                    onValueChanged: {
+                    onEdited: value => {
                         Config.options.updates.checkInterval = value;
                     }
                 }

@@ -119,7 +119,7 @@ Item {
                 WToggle {
                     icon: "schedule"
                     title: "Schedule night light"
-                    description: Config.options.light.night.automatic ? `On from ${Config.options.light.night.from} to ${Config.options.light.night.to}` : "Turn on automatically at set hours"
+                    description: Config.options.light.night.automatic ? `On from ${Hyprsunset.from} to ${Hyprsunset.to}` : "Turn on automatically at set hours"
                     checked: Config.options.light.night.automatic
                     onToggled: v => Config.options.light.night.automatic = v
                 }
@@ -135,8 +135,9 @@ Item {
                     onSelected: v => {
                         const night = Config.options.light.night
                         if (v === night.followSun) return
-                        if (v) { night.ownFrom = night.from; night.ownTo = night.to }   // your hours come back with "Set hours"
-                        else if (night.ownFrom && night.ownTo) { night.from = night.ownFrom; night.to = night.ownTo }
+                        // your own hours stay as they are now (sunset/sunrise are no longer written over them); hours
+                        // saved by the older version come back once when you switch to "Set hours"
+                        if (!v && night.ownFrom && night.ownTo) { night.from = night.ownFrom; night.to = night.ownTo; night.ownFrom = ""; night.ownTo = "" }
                         night.followSun = v
                     }
                 }
@@ -494,10 +495,7 @@ Item {
                         : new Date(ms).toLocaleDateString(Qt.locale(), "MMM d")
                 }
                 function iconSource(app) {
-                    const i = app.icon || ""
-                    if (i.startsWith("/")) return "file://" + i
-                    if (i.startsWith("file:") || i.startsWith("image:")) return i
-                    return Quickshell.iconPath(i || AppSearch.guessIcon(app.name), "dialog-information")
+                    return AppSearch.iconPath(app.icon || AppSearch.iconFor(app.name), "dialog-information")
                 }
                 WCard {
                     visible: NotificationRules.appList.length === 0
@@ -709,9 +707,18 @@ Item {
                 while (b >= 1024 && i < u.length - 1) { b /= 1024; i++; }
                 return `${b.toFixed(i >= 3 ? 1 : 0)} ${u[i]}`;
             }
-            function runInTerminal(cmd) {
-                Quickshell.execDetached(["kitty", "-1", "--hold", "bash", "-c", cmd]);
+            // cleanup runs in the background (2026-10-16; was a terminal window); sizes are measured again afterwards
+            function runJob(cmd, title) {
+                Tasks.run("cleanup", ["bash", "-c", cmd], { title: title, askpassMessage: "Enter your password to clean up" });
             }
+            property bool orphansArmed: false
+            property var orphanNames: []
+            Process {
+                id: orphanList
+                command: ["bash", "-c", "pacman -Qtdq 2>/dev/null"]
+                stdout: StdioCollector { onStreamFinished: sp.orphanNames = text.trim().split("\n").filter(x => x) }
+            }
+            Connections { target: Tasks; function onFinished(id, ok) { if (id === "cleanup") { sizesProc.running = true; sp.orphansArmed = false } } }
 
             WSection {
                 title: "Drives"
@@ -737,13 +744,24 @@ Item {
                     icon: "inventory_2"
                     title: "Package cache"
                     description: `${sp.pkgCache} of downloaded packages. Keeps the last 2 versions of each.`
-                    WButton { buttonText: "Clean up"; onClicked: sp.runInTerminal("sudo paccache -rk2 && echo && echo Done.") }
+                    WButton { buttonText: Tasks.isRunning("cleanup") ? "Working…" : "Clean up"; enabled: !Tasks.isRunning("cleanup"); onClicked: sp.runJob("sudo paccache -rk2", "Cleaning the package cache") }
                 }
                 WCard {
                     icon: "delete_sweep"
                     title: "Unused packages"
-                    description: sp.orphans < 0 ? "Checking…" : sp.orphans === 0 ? "No orphaned packages" : `${sp.orphans} packages nothing depends on anymore`
-                    WButton { buttonText: "Review"; enabled: sp.orphans > 0; onClicked: sp.runInTerminal("sudo pacman -Rns $(pacman -Qtdq)") }
+                    description: sp.orphans < 0 ? "Checking…" : sp.orphans === 0 ? "No orphaned packages"
+                        : sp.orphansArmed && sp.orphanNames.length > 0 ? `These are removed: ${sp.orphanNames.join(", ")}`
+                        : `${sp.orphans} packages nothing depends on anymore`
+                    WButton {
+                        // two clicks: the first lists what goes, the second removes it
+                        buttonText: sp.orphansArmed ? "Remove them" : "Review"
+                        accent: sp.orphansArmed
+                        enabled: sp.orphans > 0 && !Tasks.isRunning("cleanup")
+                        onClicked: {
+                            if (!sp.orphansArmed) { orphanList.running = true; sp.orphansArmed = true; return }
+                            sp.runJob("sudo pacman -Rns --noconfirm $(pacman -Qtdq)", "Removing unused packages")
+                        }
+                    }
                 }
                 WCard {
                     icon: "delete"
@@ -753,6 +771,7 @@ Item {
                 }
                 Timer { id: refreshTimer; interval: 1500; onTriggered: sp.refresh() }
             }
+            WJob { jobId: "cleanup" }
 
             WSection {
                 title: "Related settings"

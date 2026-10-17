@@ -8,7 +8,7 @@ import qs.modules.common.widgets
 
 Item {
     id: root
-    readonly property bool usePasswordChars: !PolkitService.flow?.responseVisible ?? true
+    readonly property bool usePasswordChars: PolkitService.usePasswordChars
 
     Keys.onPressed: event => { // Esc to close
         if (event.key === Qt.Key_Escape) {

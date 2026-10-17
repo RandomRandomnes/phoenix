@@ -13,6 +13,13 @@ Singleton {
     property int readWriteDelay: 50 // milliseconds
     property bool blockWrites: false
 
+    // Scripts change settings through the running shell (2026-10-16): `qs -c end4-pC ipc call config set <key> <value>`
+    // (e.g. extras.updateMode auto). With two writers (the shell and a script) one change could overwrite the other.
+    IpcHandler {
+        target: "config"
+        function set(key: string, value: string): void { root.setNestedValue(key, value) }
+    }
+
     function setNestedValue(nestedKey, value) {
         let keys = nestedKey.split(".");
         let obj = root.options;

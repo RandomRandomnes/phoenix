@@ -59,10 +59,13 @@ Singleton {
         return `${m} min`
     }
 
+    // other users besides the bar's graphs (the Task Manager while it's open): users++ / users-- (2026-10-16)
+    property int users: 0
+    readonly property bool wanted: Config.options.extras.resourceGraphs || root.users > 0
     Process {
         id: sampler
-        // only needed by the graph widget (Settings › Extras › resource graphs)
-        running: Config.options.extras.resourceGraphs
+        // the graph widget (Settings › Extras › resource graphs) and the Task Manager: one sampler for both
+        running: root.wanted
         command: ["python3", `${Directories.scriptPath}/sysstats/sysstats.py`.replace(/file:\/\//, ""), "1"]
         stdout: SplitParser {
             onRead: line => {
@@ -84,6 +87,6 @@ Singleton {
     Timer {
         id: restartTimer
         interval: 3000
-        onTriggered: sampler.running = Config.options.extras.resourceGraphs
+        onTriggered: sampler.running = Qt.binding(() => root.wanted)
     }
 }

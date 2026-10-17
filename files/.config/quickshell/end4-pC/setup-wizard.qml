@@ -7,7 +7,8 @@
 // leaves ~/.local/state/setup-wizard/pending and hypr/custom/scripts/autostart.sh opens this window (qs -p).
 // Settings › Extras › "Run the first-time setup again" reopens it. Finishing or closing removes the marker.
 // Steps reuse the Windows-style settings pages (modules/ii/settingsW11), ~/.local/bin/setup-profile (profiles) and
-// ~/.local/bin/setup-apps (app catalog, drivers, updates; those run in a kitty window that asks for the password).
+// ~/.local/bin/setup-apps (app catalog, drivers, updates; those run in the background, one after the other, and sudo
+// asks for the password in the shell's own dialog via ~/.local/bin/phoenix-askpass — no terminal windows, 2026-10-16).
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
@@ -70,7 +71,7 @@ ApplicationWindow {
           text: "Set the profile picture and the display name. Your password is the one chosen during installation; to change it, use Change your password below. Login screen at startup chooses whether the PC asks for your password when it starts or signs you in automatically (the default)." },
         { id: "apps",      title: "Apps",              icon: "apps",
           heading: "Applications",
-          text: "Firefox is installed by default. Select additional applications to install. Installation runs in a terminal window and requires the administrator password." },
+          text: "Firefox is installed by default. Select additional applications to install. Installation runs in the background and asks for the administrator password." },
         { id: "system",    title: "Drivers and updates", icon: "memory",
           heading: "Drivers and updates",
           text: "Install available updates and any required graphics drivers, and choose how the computer starts." },
@@ -98,7 +99,7 @@ ApplicationWindow {
     property string appsStatus: ""
     property bool confirmingApps: false   // the "these apps will be installed" prompt
     signal nudgeRequested()   // the "custom fixes" question pulses when Next is pressed without an answer
-    property var termQueue: []            // terminal jobs waiting for the open terminal window to close (F18)
+    property var termQueue: []            // background jobs waiting for the current one to finish (F18)
 
     // internet: NetworkManager's connectivity check, every 5 s while the assistant is open, so connecting in the
     // Wi-Fi step enables the online actions right away. Steps that need it say so and don't start doomed installs.
@@ -189,7 +190,7 @@ ApplicationWindow {
             return
         }
         if (root.cur.id === "done") {
-            Quickshell.execDetached(["qs", "-p", `${root.home}/.config/quickshell/end4-pC/quick-start.qml`])   // the guide app
+            Quickshell.execDetached([`${root.bin}/phoenix-open`, "quickstart"])   // the guide app (a window of the shell)
             root.finish()
         } else root.go(root.step + 1)
     }
@@ -197,8 +198,8 @@ ApplicationWindow {
         root.confirmingApps = false
         const ids = root.picked
         root.picked = []   // handed over; picking more later queues another installation
-        root.appsStatus = termProc.running ? "Waiting: the installation starts when the open terminal window is closed."
-                                           : "Installation in progress in the terminal window…"
+        root.appsStatus = termProc.running ? "Waiting: the installation starts when the current job is done."
+                                           : "Installing in the background… you can keep going."
         root.terminal([`${root.bin}/setup-apps`, "install", ...ids], "Installing applications")
         root.go(root.step + 1)
     }
@@ -216,13 +217,18 @@ ApplicationWindow {
         if (!on) p = p.concat(pack.apps.filter(a => !root.installed.includes(a)))
         root.picked = p
     }
+    // runs a job in the background (2026-10-16; was a kitty window per job): one at a time, the others wait in
+    // termQueue; sudo asks in the shell's password dialog (SUDO_ASKPASS)
     function terminal(args, title) {
-        if (termProc.running) {   // one terminal at a time; starting a running Process again would drop the job
+        if (termProc.running) {   // one job at a time; starting a running Process again would drop the job
             root.termQueue = root.termQueue.concat([{ args: args, title: title }])
             return
         }
-        // class phoenix-setup: a centered window in front of this assistant (custom/rules.lua "setup-terminal")
-        termProc.command = ["kitty", "--class", "phoenix-setup", "--title", title, "--", ...args]
+        termProc.jobTitle = title
+        termProc.environment = { "SUDO_ASKPASS": `${root.bin}/phoenix-askpass`,
+                                 "PATH": `${Quickshell.shellPath("scripts/askpass-bin")}:${Quickshell.env("PATH")}`,
+                                 "PHOENIX_ASKPASS_MESSAGE": `Enter your password (${title.toLowerCase()})` }
+        termProc.command = ["setsid", "-w"].concat(args)   // no terminal: sudo uses the password dialog (see services/Tasks.qml)
         termProc.running = true
     }
 
@@ -294,17 +300,19 @@ ApplicationWindow {
             }
         }
     }
-    Process {   // one kitty window at a time: app installs, drivers, updates
+    Process {   // one background job at a time: app installs, drivers, updates
         id: termProc
+        property string jobTitle: ""
         onExited: (code, status) => {
-            root.appsStatus = root.appsStatus === "Installation in progress in the terminal window…" ? "Installation finished. The terminal window can be closed." : root.appsStatus
+            root.appsStatus = root.appsStatus === "Installing in the background… you can keep going."
+                ? (code === 0 ? "Installation finished." : "Some applications couldn't be installed. Try again from Settings › Extras.") : root.appsStatus
             root.sysStatus = root.sysStatus.endsWith("…") ? "Completed." : root.sysStatus
             installedProc.running = true
             bootProc.running = true
             if (root.termQueue.length > 0) {
                 const job = root.termQueue[0]
                 root.termQueue = root.termQueue.slice(1)
-                if (job.title === "Installing applications") root.appsStatus = "Installation in progress in the terminal window…"
+                if (job.title === "Installing applications") root.appsStatus = "Installing in the background… you can keep going."
                 root.terminal(job.args, job.title)
             }
         }
@@ -889,7 +897,7 @@ ApplicationWindow {
                     icon: "system_update_alt"
                     title: "Install all updates"
                     description: root.sysStatus !== "" ? root.sysStatus : !root.online ? root.offlineNote
-                        : "Recommended after installation. A terminal window opens and requests the administrator password."
+                        : "Recommended after installation. Runs in the background and asks for the administrator password."
                     WButton {
                         accent: true
                         enabled: !termProc.running && root.online
@@ -979,7 +987,7 @@ ApplicationWindow {
                 StyledText {
                     Layout.fillWidth: true
                     wrapMode: Text.WordWrap
-                    text: "The following applications will be installed. A terminal window opens and requests the administrator password; setup can continue in the meantime."
+                    text: "The following applications will be installed in the background. The administrator password is asked; setup can continue in the meantime."
                     color: Appearance.colors.colSubtext
                 }
                 StyledFlickable {

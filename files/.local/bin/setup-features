@@ -22,12 +22,16 @@ user switched it on (OFF_BY_DEFAULT).
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 
 HOME = os.path.expanduser("~")
 CONFIG = os.path.join(os.environ.get("XDG_CONFIG_HOME") or os.path.join(HOME, ".config"), "illogical-impulse", "config.json")
 FEATURES_LUA = os.path.join(HOME, ".config", "hypr", "custom", "features.lua")
+# The switches with an effect outside the shell (Hyprland config, login script, Wallpaper Engine): written to
+# features.lua and acted on here. The shell runs `apply` whenever any switch changes (services/Extras.qml watches them
+# all, 2026-10-16); features.lua is only rewritten when its content changes, since Hyprland reloads when it does.
 FEATURES = ["windowsStyle", "minimizeToDock", "wallpaperEngine", "resourceGraphs", "appGrid",
             "powerMenuKde", "claudeCodeAi", "updatesScript", "steamTray", "workspaceGroups", "phoneLinkStart"]
 OFF_BY_DEFAULT = {"wallpaperEngine"}
@@ -60,6 +64,12 @@ def write_lua(flags):
     body = "".join(f"    {k} = {'true' if v else 'false'},\n" for k, v in flags.items())
     text = ("-- Written by ~/.local/bin/setup-features from the shell config (\"extras\"). Edit in Settings › Extras.\n"
             "return {\n" + body + "}\n")
+    try:
+        with open(FEATURES_LUA) as f:
+            if f.read() == text:
+                return   # unchanged: don't touch it (Hyprland reloads its config when the file changes)
+    except OSError:
+        pass
     tmp = FEATURES_LUA + ".tmp"
     with open(tmp, "w") as f:
         f.write(text)
@@ -123,6 +133,14 @@ def apply():
         hyprctl("reload")
     elif "workspaceGroups" in changed:   # the workspace-groups block in custom/execs.lua runs (or not) on reload
         hyprctl("reload")
+    # login-only switches switched on: start it now too (2026-10-16), so it doesn't wait for the next sign-in.
+    # Switching off leaves what runs alone (closing Steam or Phone Link is up to you).
+    if "steamTray" in changed and new["steamTray"] and shutil.which("steam") \
+            and subprocess.run(["pgrep", "-x", "steam"], capture_output=True).returncode != 0:
+        subprocess.Popen(["steam", "-silent"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True)
+    if "phoneLinkStart" in changed and new["phoneLinkStart"] and shutil.which("kdeconnectd") \
+            and subprocess.run(["pgrep", "-x", "kdeconnectd"], capture_output=True).returncode != 0:
+        subprocess.Popen(["kdeconnectd"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True)
     if "wallpaperEngine" in changed:
         subprocess.run([os.path.join(HOME, ".local", "bin", "wallpaper-engine-ctl"),
                         "start" if new["wallpaperEngine"] else "stop"])

@@ -356,9 +356,10 @@ Item {
                         : Config.options.extras.phoneLinkStart === false
                             ? "Its background service is switched off at sign-in (Task Manager › Startup). Start runs it until you sign out."
                             : "KDE Connect is installed but its background service isn't running. Start runs it now."
-                    WButton { accent: true; buttonText: PhoneLink.installed ? "Start" : "Set up"; onClicked: PhoneLink.installed ? PhoneLink.start() : PhoneLink.setup() }
+                    WButton { accent: true; enabled: !Tasks.isRunning("phonelink"); buttonText: PhoneLink.installed ? "Start" : "Set up"; onClicked: PhoneLink.installed ? PhoneLink.start() : PhoneLink.setup() }
                 }
             }
+            WJob { jobId: "phonelink" }
 
             WSection {
                 visible: PhoneLink.installed && pp.phone !== null
@@ -472,8 +473,8 @@ Item {
                     description: "Stops KDE Connect and closes its firewall ports again (asks for your password)"
                     WButton {
                         buttonText: "Turn off"
-                        onClicked: Quickshell.execDetached(["kitty", "--class", "phoenix-setup", "--title", "Phone Link", "--hold",
-                            "bash", "-c", "phoenix phone-link remove; echo; echo 'You can close this window.'"])
+                        enabled: !Tasks.isRunning("phonelink")
+                        onClicked: PhoneLink.remove()
                     }
                 }
             }

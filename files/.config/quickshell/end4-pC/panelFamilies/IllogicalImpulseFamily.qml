@@ -15,8 +15,9 @@ import qs.modules.ii.onScreenDisplay
 import qs.modules.ii.onScreenKeyboard
 import qs.modules.ii.overview
 import qs.modules.ii.polkit
-import qs.modules.ii.settings
 import qs.modules.ii.settingsW11
+import qs.modules.ii.taskManager
+import qs.modules.ii.quickStart
 import qs.modules.ii.regionSelector
 import qs.modules.ii.screenCorners
 import qs.modules.ii.screenTranslator
@@ -43,6 +44,9 @@ Scope {
     PanelLoader { component: Overlay {} }
     PanelLoader { component: Overview {} }
     PanelLoader { component: Polkit {} }
+    PanelLoader { component: TaskManager {} }   // Phoenix: the Task Manager window (2026-10-16)
+    PanelLoader { component: QuickStart {} }    // Phoenix: the Quick Start guide window (2026-10-16)
+    PanelLoader { component: LockPreview {} }   // Phoenix: lock screen style preview window (2026-10-16)
     PanelLoader { component: RegionSelector {} }
     PanelLoader { component: ScreenCorners {} }
     PanelLoader { component: ScreenTranslator {} }
@@ -51,7 +55,7 @@ Scope {
     PanelLoader { component: SidebarRight {} }
     PanelLoader { extraCondition: Config.options.bar.vertical; component: VerticalBar {} }
     PanelLoader { component: WallpaperSelector {} }
-    PanelLoader { component: W11Settings {} } // Windows 11 style settings (original: Settings {}, embedded as "Advanced")
+    PanelLoader { component: W11Settings {} } // Windows 11 style settings (Phoenix; the original illogical-impulse settings were merged in and removed, 2026-10-16)
     PanelLoader { component: DesktopMenu {} }
     PanelLoader { extraCondition: GlobalStates.dropShelfOpen; component: DropShelfPanel {} }
     PanelLoader { component: NiriBackdrop {} }

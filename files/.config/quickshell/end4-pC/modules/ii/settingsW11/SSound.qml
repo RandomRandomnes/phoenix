@@ -29,7 +29,7 @@ ColumnLayout {
                     buttonIcon: "hearing"
                     text: Translation.tr("Earbang protection")
                     checked: Config.options.audio.protection.enable
-                    onCheckedChanged: {
+                    onToggled: checked => {
                         Config.options.audio.protection.enable = checked;
                     }
                 }
@@ -42,7 +42,7 @@ ColumnLayout {
                         from: 0
                         to: 100
                         stepSize: 2
-                        onValueChanged: {
+                        onEdited: value => {
                             Config.options.audio.protection.maxAllowedIncrease = value;
                         }
                     }
@@ -53,7 +53,7 @@ ColumnLayout {
                         from: 0
                         to: 154 // pavucontrol allows up to 153%
                         stepSize: 2
-                        onValueChanged: {
+                        onEdited: value => {
                             Config.options.audio.protection.maxAllowed = value;
                         }
                     }
@@ -71,7 +71,7 @@ ColumnLayout {
                     text: Translation.tr("Battery")
                     enabled: Battery.available
                     checked: Config.options.sounds.battery
-                    onCheckedChanged: {
+                    onToggled: checked => {
                         Config.options.sounds.battery = checked;
                     }
                 }
@@ -79,7 +79,7 @@ ColumnLayout {
                     buttonIcon: "av_timer"
                     text: Translation.tr("Pomodoro")
                     checked: Config.options.sounds.pomodoro
-                    onCheckedChanged: {
+                    onToggled: checked => {
                         Config.options.sounds.pomodoro = checked;
                     }
                 }

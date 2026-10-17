@@ -22,7 +22,7 @@ ColumnLayout {
                     buttonIcon: "ad"
                     text: Translation.tr('Use system file picker')
                     checked: Config.options.wallpaperSelector.useSystemFileDialog
-                    onCheckedChanged: {
+                    onToggled: checked => {
                         Config.options.wallpaperSelector.useSystemFileDialog = checked;
                     }
                 }
@@ -31,7 +31,7 @@ ColumnLayout {
                     buttonIcon: "home"
                     text: Translation.tr('Show home directory in quick access')
                     checked: Config.options.wallpaperSelector.showHomePath
-                    onCheckedChanged: {
+                    onToggled: checked => {
                         Config.options.wallpaperSelector.showHomePath = checked;
                     }
                 }
@@ -40,7 +40,7 @@ ColumnLayout {
                     buttonIcon: "done"
                     text: Translation.tr('Close after selection')
                     checked: Config.options.wallpaperSelector.closeAfterSelection
-                    onCheckedChanged: {
+                    onToggled: checked => {
                         Config.options.wallpaperSelector.closeAfterSelection = checked;
                     }
                 }
@@ -49,7 +49,7 @@ ColumnLayout {
                     buttonIcon: "blur_on"
                     text: Translation.tr('Show blur background')
                     checked: Config.options.wallpaperSelector.showBlurBackground
-                    onCheckedChanged: {
+                    onToggled: checked => {
                         Config.options.wallpaperSelector.showBlurBackground = checked;
                     }
                 }
@@ -61,7 +61,7 @@ ColumnLayout {
                     from: 3
                     to: 10
                     stepSize: 1
-                    onValueChanged: {
+                    onEdited: value => {
                         Config.options.wallpaperSelector.columns = value;
                     }
                 }
@@ -73,7 +73,7 @@ ColumnLayout {
                     from: 0
                     to: 1440
                     stepSize: 5
-                    onValueChanged: {
+                    onEdited: value => {
                         Config.options.wallpaperSelector.changeInterval = value * 60000;
                     }
                 }
@@ -82,7 +82,7 @@ ColumnLayout {
                     buttonIcon: "search"
                     text: Translation.tr('Always show search bar')
                     checked: Config.options.wallpaperSelector.showSearchbar
-                    onCheckedChanged: {
+                    onToggled: checked => {
                         Config.options.wallpaperSelector.showSearchbar = checked;
                     }
                 }

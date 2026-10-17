@@ -83,7 +83,7 @@ ColumnLayout {
                         buttonIcon: "numbers"
                         text: Translation.tr("Numlock by default")
                         checked: Config.options.hyprland.input.numlock
-                        onCheckedChanged: {
+                        onToggled: checked => {
                             if (checked === Config.options.hyprland.input.numlock) return
                             Config.options.hyprland.input.numlock = checked
                             HyprlandConfig.set("input:numlock_by_default", checked ? 1 : 0)
@@ -95,7 +95,7 @@ ColumnLayout {
                         text: Translation.tr("Repeat delay (ms)")
                         value: Config.options.hyprland.input.repeatDelay
                         from: 100; to: 1000; stepSize: 10
-                        onValueChanged: {
+                        onEdited: value => {
                             if (value === Config.options.hyprland.input.repeatDelay) return
                             Config.options.hyprland.input.repeatDelay = value
                             HyprlandConfig.set("input:repeat_delay", value)
@@ -107,7 +107,7 @@ ColumnLayout {
                         text: Translation.tr("Repeat rate")
                         value: Config.options.hyprland.input.repeatRate
                         from: 10; to: 100; stepSize: 1
-                        onValueChanged: {
+                        onEdited: value => {
                             if (value === Config.options.hyprland.input.repeatRate) return
                             Config.options.hyprland.input.repeatRate = value
                             HyprlandConfig.set("input:repeat_rate", value)
@@ -192,7 +192,7 @@ ColumnLayout {
                         buttonIcon: "swap_vert"
                         text: Translation.tr("Natural scroll")
                         checked: Config.options.hyprland.input.touchpad.naturalScroll
-                        onCheckedChanged: {
+                        onToggled: checked => {
                             if (checked === Config.options.hyprland.input.touchpad.naturalScroll) return
                             Config.options.hyprland.input.touchpad.naturalScroll = checked
                             HyprlandConfig.set("input:touchpad:natural_scroll", checked ? 1 : 0)
@@ -203,7 +203,7 @@ ColumnLayout {
                         buttonIcon: "keyboard_hide"
                         text: Translation.tr("Disable while typing")
                         checked: Config.options.hyprland.input.touchpad.disableWhileTyping
-                        onCheckedChanged: {
+                        onToggled: checked => {
                             if (checked === Config.options.hyprland.input.touchpad.disableWhileTyping) return
                             Config.options.hyprland.input.touchpad.disableWhileTyping = checked
                             HyprlandConfig.set("input:touchpad:disable_while_typing", checked ? 1 : 0)
@@ -214,7 +214,7 @@ ColumnLayout {
                         buttonIcon: "touch_app"
                         text: Translation.tr("Clickfinger behavior")
                         checked: Config.options.hyprland.input.touchpad.clickfingerBehavior
-                        onCheckedChanged: {
+                        onToggled: checked => {
                             if (checked === Config.options.hyprland.input.touchpad.clickfingerBehavior) return
                             Config.options.hyprland.input.touchpad.clickfingerBehavior = checked
                             HyprlandConfig.set("input:touchpad:clickfinger_behavior", checked ? 1 : 0)
@@ -241,7 +241,7 @@ ColumnLayout {
                         text: Translation.tr("Scroll factor")
                         value: Math.round(Config.options.hyprland.input.touchpad.scrollFactor * 10)
                         from: 1; to: 30; stepSize: 1
-                        onValueChanged: {
+                        onEdited: value => {
                             const newVal = value / 10.0
                             if (newVal === Config.options.hyprland.input.touchpad.scrollFactor) return
                             Config.options.hyprland.input.touchpad.scrollFactor = newVal

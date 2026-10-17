@@ -115,50 +115,7 @@ ColumnLayout {
             }
         }
 
-    WCSection {
-            icon: "motion_mode"
-            shape: MaterialShape.Shape.Cookie6Sided
-            title: Translation.tr("Transparency")
-            WCGroup {
-                WCSwitch {
-                    buttonIcon: "check"
-                    text: Translation.tr("Enable")
-                    checked: Config.options.appearance.transparency.enable
-                    onCheckedChanged: { Config.options.appearance.transparency.enable = checked }
-                }
-                WCSwitch {
-                    buttonIcon: "auto_awesome"
-                    text: Translation.tr("Automatic (from wallpaper)")
-                    checked: Config.options.appearance.transparency.automatic
-                    enabled: Config.options.appearance.transparency.enable
-                    onCheckedChanged: { Config.options.appearance.transparency.automatic = checked }
-                }
-                WCSlider {
-                    buttonIcon: "layers"
-                    text: Translation.tr("Background")
-                    enabled: Config.options.appearance.transparency.enable
-                            && !Config.options.appearance.transparency.automatic
-                    from: 0; to: 0.6
-                    stopIndicatorValues: [0.11]
-                    value: Config.options.appearance.transparency.backgroundTransparency
-                    onValueChanged: {
-                        Config.options.appearance.transparency.backgroundTransparency = value
-                    }
-                }
-                WCSlider {
-                    buttonIcon: "opacity"
-                    text: Translation.tr("Content")
-                    enabled: Config.options.appearance.transparency.enable
-                            && !Config.options.appearance.transparency.automatic
-                    from: 0; to: 1
-                    stopIndicatorValues: [0.57]
-                    value: Config.options.appearance.transparency.contentTransparency 
-                    onValueChanged: {
-                        Config.options.appearance.transparency.contentTransparency = value  
-                    }
-                }
-            }
-        }
+    // Transparency: Settings › Personalization › Colors (one place for it, 2026-10-16)
 
     WCSection {
             icon: "colors"
@@ -170,19 +127,19 @@ ColumnLayout {
                     buttonIcon: "hardware"
                     text: Translation.tr("Shell & utilities")
                     checked: Config.options.appearance.wallpaperTheming.enableAppsAndShell
-                    onCheckedChanged: { Config.options.appearance.wallpaperTheming.enableAppsAndShell = checked }
+                    onToggled: checked => { Config.options.appearance.wallpaperTheming.enableAppsAndShell = checked }
                 }
                 WCSwitch {
                     buttonIcon: "tv_options_input_settings"
                     text: Translation.tr("Qt apps")
                     checked: Config.options.appearance.wallpaperTheming.enableQtApps
-                    onCheckedChanged: { Config.options.appearance.wallpaperTheming.enableQtApps = checked }
+                    onToggled: checked => { Config.options.appearance.wallpaperTheming.enableQtApps = checked }
                 }
                 WCSwitch {
                     buttonIcon: "terminal"
                     text: Translation.tr("Terminal")
                     checked: Config.options.appearance.wallpaperTheming.enableTerminal
-                    onCheckedChanged: { Config.options.appearance.wallpaperTheming.enableTerminal = checked }
+                    onToggled: checked => { Config.options.appearance.wallpaperTheming.enableTerminal = checked }
                 }
                 WCGroup {
                     uniform: true
@@ -190,7 +147,7 @@ ColumnLayout {
                         buttonIcon: "dark_mode"
                         text: Translation.tr("Force dark mode in terminal")
                         checked: Config.options.appearance.wallpaperTheming.terminalGenerationProps.forceDarkMode
-                        onCheckedChanged: { Config.options.appearance.wallpaperTheming.terminalGenerationProps.forceDarkMode = checked }
+                        onToggled: checked => { Config.options.appearance.wallpaperTheming.terminalGenerationProps.forceDarkMode = checked }
                     }
                 }
                 WCSpin {
@@ -198,21 +155,21 @@ ColumnLayout {
                     text: Translation.tr("Terminal: Harmony (%)")
                     value: Config.options.appearance.wallpaperTheming.terminalGenerationProps.harmony * 100
                     from: 0; to: 100; stepSize: 10
-                    onValueChanged: { Config.options.appearance.wallpaperTheming.terminalGenerationProps.harmony = value / 100 }
+                    onEdited: value => { Config.options.appearance.wallpaperTheming.terminalGenerationProps.harmony = value / 100 }
                 }
                 WCSpin {
                     icon: "gradient"
                     text: Translation.tr("Terminal: Harmonize threshold")
                     value: Config.options.appearance.wallpaperTheming.terminalGenerationProps.harmonizeThreshold
                     from: 0; to: 100; stepSize: 10
-                    onValueChanged: { Config.options.appearance.wallpaperTheming.terminalGenerationProps.harmonizeThreshold = value }
+                    onEdited: value => { Config.options.appearance.wallpaperTheming.terminalGenerationProps.harmonizeThreshold = value }
                 }
                 WCSpin {
                     icon: "format_color_text"
                     text: Translation.tr("Terminal: Foreground boost (%)")
                     value: Config.options.appearance.wallpaperTheming.terminalGenerationProps.termFgBoost * 100
                     from: 0; to: 100; stepSize: 10
-                    onValueChanged: { Config.options.appearance.wallpaperTheming.terminalGenerationProps.termFgBoost = value / 100 }
+                    onEdited: value => { Config.options.appearance.wallpaperTheming.terminalGenerationProps.termFgBoost = value / 100 }
                 }
             }
         }

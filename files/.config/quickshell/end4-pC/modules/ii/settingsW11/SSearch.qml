@@ -20,7 +20,7 @@ ColumnLayout {
                 WCSwitch {
                     text: Translation.tr("Use Levenshtein distance-based algorithm instead of fuzzy")
                     checked: Config.options.search.sloppy
-                    onCheckedChanged: {
+                    onToggled: checked => {
                         Config.options.search.sloppy = checked;
                     }
                 }
@@ -28,7 +28,7 @@ ColumnLayout {
                     buttonIcon: "preview"
                     text: Translation.tr("Show clipboard preview popups")
                     checked: Config.options.search.clipboardPreviewPopup
-                    onCheckedChanged: {
+                    onToggled: checked => {
                         Config.options.search.clipboardPreviewPopup = checked;
                     }
                 }

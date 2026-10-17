@@ -19,6 +19,8 @@ Singleton {
     property bool mediaControlsOpen: false
     property bool osdBrightnessOpen: false
     property bool settingsOpen: false
+    property bool taskManagerOpen: false     // the Task Manager window (modules/ii/taskManager, Phoenix 2026-10-16)
+    property string taskManagerPage: ""
     property bool osdVolumeOpen: false
     property bool oskOpen: false
     property bool overlayOpen: false
@@ -34,14 +36,6 @@ Singleton {
     property bool superReleaseMightTrigger: true
     property bool wallpaperSelectorOpen: false
     property bool workspaceShowNumbers: false
-    property var settingsTarget: null
-
-    function openSettingsAt(pageId, label, section, subsection) {
-        root.settingsOpen = true;
-        Qt.callLater(() => {
-            root.settingsTarget = { page: pageId, label: label ?? "", section: section ?? "", subsection: subsection ?? "" };
-        });
-    }
     property Item currentPageInstance: null
     property list<real> visualizerPoints: []
     property bool desktopWidgetKeyboardFocus: false
@@ -103,9 +97,20 @@ Singleton {
                 const dir = text.trim();
                 if (dir.startsWith("/") && dir !== root.wallpaperEngineWorkshop) {
                     root.wallpaperEngineWorkshop = dir;
-                    root._wallpaperEngineInShellKey = "";   // parse the running wallpapers again with it
+                    root._applyWallpaperEngineProcs(root._wallpaperEngineProcs);   // parse the running wallpapers again with it
                 }
             }
+        }
+    }
+    property var _wallpaperEngineProcs: []
+    function _applyWallpaperEngineProcs(procs) {
+        root._wallpaperEngineProcs = procs;
+        root.wallpaperEngineRunning = procs.length > 0;
+        const parsed = root._parseWallpaperEngineInShell(procs);
+        const key = JSON.stringify(parsed);
+        if (key !== root._wallpaperEngineInShellKey) {
+            root._wallpaperEngineInShellKey = key;
+            root.wallpaperEngineInShell = parsed;
         }
     }
     function _parseWallpaperEngineInShell(procs) {
@@ -136,35 +141,30 @@ Singleton {
         }
         return result;
     }
+    // Wallpaper Engine state (2026-10-16): one long-lived watcher (scripts/wallpapers/we-watch.py) that reads /proc
+    // and prints only when something changes; it replaced an `sh` + `pgrep` started twice a second, forever. Runs only
+    // while Wallpaper Engine is switched on (Settings › Extras).
     Process {
         id: wallpaperEngineRunningCheck
-        // One line per process: argv joined with \x1f (newlines inside arguments become spaces), read from /proc so
-        // arguments containing spaces (colors such as "0 0 0") stay intact. The [l] pattern keeps this sh from matching itself.
-        command: ["sh", "-c", "for p in $(pgrep -f '[l]inux-wallpaperengine'); do tr '\\0\\n' '\\037 ' < /proc/$p/cmdline 2>/dev/null; echo; done; [ -e \"${XDG_STATE_HOME:-$HOME/.local/state}/wallpaper-engine-muted\" ] && echo __WE_MUTED__"]
-        running: true
-        stdout: StdioCollector {
-            onStreamFinished: {
-                // only real renderer processes (argv[0] ends in linux-wallpaperengine or a stand-in name: -inshell, -web), not any
-                // command line that merely mentions the name
-                const procs = this.text.split("\n").filter(l => l.length > 0).map(l => l.split("\x1f").filter((a, i, arr) => i < arr.length - 1 || a !== ""))
-                    .filter(args => /linux-wallpaperengine(-inshell|-web)?$/.test(args[0] ?? ""));
-                root.wallpaperEngineRunning = procs.length > 0;
-                root.wallpaperEngineMuted = this.text.includes("__WE_MUTED__");
-                const parsed = root._parseWallpaperEngineInShell(procs);
-                const key = JSON.stringify(parsed);
-                if (key !== root._wallpaperEngineInShellKey) {
-                    root._wallpaperEngineInShellKey = key;
-                    root.wallpaperEngineInShell = parsed;
-                }
+        running: Config.ready && Config.options.extras.wallpaperEngine === true
+        command: ["python3", Quickshell.shellPath("scripts/wallpapers/we-watch.py"), "0.5"]
+        stdout: SplitParser {
+            onRead: line => {
+                let d;
+                try { d = JSON.parse(line); } catch (e) { return; }
+                root.wallpaperEngineMuted = d.muted === true;
+                root._applyWallpaperEngineProcs(d.procs ?? []);
             }
         }
+        onRunningChanged: {
+            if (running) return;
+            if (Config.ready && Config.options.extras.wallpaperEngine === true) { weRestart.restart(); return; }   // it stopped by itself
+            root.wallpaperEngineRunning = false;   // switched off: nothing is running any more
+            root.wallpaperEngineInShell = ({});
+            root._wallpaperEngineInShellKey = "{}";
+        }
     }
-    Timer {
-        interval: 500
-        running: true
-        repeat: true
-        onTriggered: wallpaperEngineRunningCheck.running = true
-    }
+    Timer { id: weRestart; interval: 2000; onTriggered: wallpaperEngineRunningCheck.running = Qt.binding(() => Config.ready && Config.options.extras.wallpaperEngine === true) }
 
     Timer {
         interval: 3000

@@ -10,15 +10,28 @@
 #          Phoenix updates show their notes and ask
 #   auto = unattended apart from the sudo password at the start
 # The window closes by itself on success and stays open on failure.
+# --gui (2026-10-16): run by the shell without a terminal (Settings › Update, the taskbar's update button):
+#   no questions in the window; sudo asks in the shell's own password dialog (SUDO_ASKPASS=phoenix-askpass), only when
+#   there really are package updates; progress as "@@step <name>" lines, the summary as "@@msg <text>", plus
+#   "@@relogin" / "@@reboot" hints; exit 3 = update mode not chosen yet (the shell asks), 4 = stopped for critical
+#   updates on the publishing PC. "Ask first" mode stays in a terminal (you review yay's list there).
+gui=0; [ "${1:-}" = --gui ] && gui=1
+step() { [ $gui -eq 1 ] && echo "@@step $1"; echo -e "\e[1m==> $1\e[0m"; }
 CONFIG="$HOME/.config/illogical-impulse/config.json"
 update_mode() { python3 -c 'import json,sys
 try: print(json.load(open(sys.argv[1])).get("extras", {}).get("updateMode", ""))
 except Exception: print("")' "$CONFIG"; }
-set_update_mode() { python3 -c 'import json,os,sys
+set_update_mode() {
+    # through the running shell when there is one (it owns config.json; 2026-10-16), else straight into the file
+    qs -c end4-pC ipc call config set extras.updateMode "$1" >/dev/null 2>&1 && return 0
+    python3 -c 'import json,os,sys
 p=sys.argv[1]; c=json.load(open(p)); c.setdefault("extras", {})["updateMode"]=sys.argv[2]
 t=p+".tmp"; json.dump(c, open(t, "w"), indent=4); os.replace(t, p)' "$CONFIG" "$1"; }
 
 mode=$(update_mode)
+if [ $gui -eq 1 ] && [ "$mode" != ask ] && [ "$mode" != auto ]; then
+    echo "@@needmode"; exit 3
+fi
 if [ "$mode" != ask ] && [ "$mode" != auto ]; then
     if [ -t 0 ]; then
         # first update after installing: ask once, like the installer does
@@ -45,9 +58,13 @@ pgrep -f '^qs -c [e]nd4-pC$' >/dev/null && in_hypr=1 || in_hypr=0
 # drivers. Shown on every PC; on the PC that publishes Phoenix the update stops to ask, so they can be tried in the
 # test VM first (and a system fix prepared) before they reach this desktop and everyone else's.
 if [ -x "$HOME/.local/bin/phoenix-check" ]; then
-    echo -e "\e[1m==> Critical updates\e[0m"
+    step "Critical updates"
     "$HOME/.local/bin/phoenix-check" updates --fresh
     crit=$?
+    if [ $gui -eq 1 ] && [ $crit -ne 0 ] && [ -d "$HOME/.local/state/custom-fixes-publisher" ]; then
+        echo "@@msg This PC publishes Phoenix: try these critical updates in the test VM first, then update from a terminal (system-update)."
+        echo "@@stop critical"; exit 4
+    fi
     if [ $crit -ne 0 ] && [ -d "$HOME/.local/state/custom-fixes-publisher" ] && [ -r /dev/tty ]; then
         echo
         echo "This PC publishes Phoenix: try these in the test VM first (~/clone-usb/vm/vmlab.sh start plain, then update there)."
@@ -62,7 +79,7 @@ if [ -x "$HOME/.local/bin/phoenix-check" ]; then
 fi
 
 # 0) a restore point: settings + package versions, so Settings › Update › Restore points can undo this update
-echo -e "\e[1m==> Restore point\e[0m"
+step "Restore point"
 if "$HOME/.local/bin/restore-point" create --reason "Before update" >/dev/null; then
     echo "Saved. Settings › Update › Restore points can undo this update."
 else
@@ -70,12 +87,26 @@ else
 fi
 echo
 
-echo -e "\e[1m==> System packages\e[0m"
+step "System packages"
 # --sudoloop: keep sudo alive through long AUR builds so the password is only asked once.
 # pacman-contrib (checkupdates: the taskbar's update count and the critical-update check) is added when missing;
 # the installer didn't install it before 2026-10-15.
 extra=(); pacman -Q pacman-contrib >/dev/null 2>&1 || extra=(--needed pacman-contrib)
-if [ "$mode" = ask ]; then
+# nothing to update: skip yay (and its password prompt) entirely; Phoenix-only updates need no admin rights
+pending=-1
+if command -v checkupdates >/dev/null && [ ${#extra[@]} -eq 0 ]; then
+    pending=$(( $(checkupdates 2>/dev/null | wc -l) + $(yay -Qua 2>/dev/null | wc -l) ))
+fi
+if [ $pending -eq 0 ]; then
+    echo "Already up to date."
+    true
+elif [ $gui -eq 1 ]; then
+    # no terminal: sudo asks in the shell's password dialog; --sudoloop keeps it to one question
+    export SUDO_ASKPASS="$HOME/.local/bin/phoenix-askpass"
+    export PHOENIX_ASKPASS_MESSAGE="Enter your password to install the system updates"
+    yay -Syu --combinedupgrade=false --noconfirm --sudoloop --sudoflags "-A" \
+        --answerclean None --answerdiff None --answeredit None --removemake "${extra[@]}" </dev/null
+elif [ "$mode" = ask ]; then
     # yay lists every package with old → new version, offers to show the AUR build files, and asks before installing
     echo "Review the list below; nothing is installed until you confirm."
     yay -Syu --combinedupgrade=false --sudoloop --removemake "${extra[@]}"
@@ -89,7 +120,7 @@ yay_rc=$?
 # 2) system fixes: always, right after the packages and the shell they belong to (only those matching the installed
 #    versions install; see ~/.local/bin/custom-update)
 echo
-echo -e "\e[1m==> System fixes\e[0m"
+step "System fixes"
 "$HOME/.local/bin/custom-update" system-apply
 sysfix_rc=$?
 
@@ -97,13 +128,14 @@ sysfix_rc=$?
 fixes_rc=0
 if grep -q '"customFixes": *true' "$HOME/.config/illogical-impulse/config.json" 2>/dev/null; then
     echo
-    echo -e "\e[1m==> Phoenix updates\e[0m"
-    if [ "$mode" = ask ]; then "$HOME/.local/bin/custom-update" apply; else "$HOME/.local/bin/custom-update" apply --yes; fi
+    step "Phoenix updates"
+    if [ "$mode" = ask ] && [ $gui -eq 0 ]; then "$HOME/.local/bin/custom-update" apply; else "$HOME/.local/bin/custom-update" apply --yes; fi
     fixes_rc=$?
 fi
 
 msgs=()
-if [ $yay_rc -eq 0 ]; then msgs+=("System packages: updated.")
+if [ $yay_rc -eq 0 ] && [ "${pending:-1}" -eq 0 ]; then msgs+=("System packages: already up to date.")
+elif [ $yay_rc -eq 0 ]; then msgs+=("System packages: updated.")
 elif [ "$mode" = ask ]; then msgs+=("System packages: not updated (you said no, or it failed; see the output above).")
 else msgs+=("System packages: update failed (exit code $yay_rc). See the output above."); fi
 [ $sysfix_rc -ne 0 ] && msgs+=("System fixes: installation failed (see the output above).")
@@ -121,9 +153,17 @@ if [ $in_hypr -eq 1 ] && [ "$hypr_before" = "$(pacman -Q hyprland 2>/dev/null)" 
 fi
 
 echo
-echo -e "\e[1m==> Summary\e[0m"
+step "Summary"
 printf '%s\n' "${msgs[@]}"
 echo
+if [ $gui -eq 1 ]; then
+    # the shell shows the result (and a notification): no questions here
+    for m in "${msgs[@]}"; do echo "@@msg $m"; done
+    [ "$hypr_before" != "$(pacman -Q hyprland 2>/dev/null)" ] && [ $in_hypr -eq 1 ] && echo "@@relogin"
+    [ "$kernel_before" != "$(pacman -Q linux 2>/dev/null)" ] && echo "@@reboot"
+    [ $yay_rc -eq 0 ] && [ $sysfix_rc -eq 0 ] && [ $fixes_rc -eq 0 ] && [ $health_rc -eq 0 ] && exit 0
+    exit 1
+fi
 
 if [ $yay_rc -eq 0 ] && [ $sysfix_rc -eq 0 ] && [ $fixes_rc -eq 0 ] && [ $health_rc -eq 0 ]; then
     notify-send -a "System update" "Update finished" "$(printf '%s\n' "${msgs[@]}")"

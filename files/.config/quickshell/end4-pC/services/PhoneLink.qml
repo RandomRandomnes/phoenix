@@ -19,7 +19,11 @@ Singleton {
     readonly property var pairRequests: devices.filter(d => d.pairRequested && !d.paired)
     readonly property string helper: Quickshell.shellPath("scripts/phonelink/phonelink.py")
 
-    function run(args) { Quickshell.execDetached(["python3", root.helper].concat(args)) }
+    // actions go to the running helper (one D-Bus connection, the card updates right after; 2026-10-16), else a one-off run
+    function run(args) {
+        if (watcher.running) watcher.write(JSON.stringify(args) + "\n");
+        else Quickshell.execDetached(["python3", root.helper].concat(args));
+    }
     function ring(id) { run(["ring", id]) }
     function sendClipboard(id) { run(["clipboard", id]) }
     function browse(id) { run(["browse", id]) }
@@ -40,9 +44,14 @@ Singleton {
         Quickshell.execDetached(["bash", "-c", `f=$(phoenix-file-picker open "$HOME" "All files" "*" 2>/dev/null); `
             + `[ -n "$f" ] && python3 '${root.helper}' share '${id}' "$f"`])
     }
+    // set up / turn off: background jobs (2026-10-16; were terminal windows), progress on the Phone page
     function setup() {
-        Quickshell.execDetached(["kitty", "--class", "phoenix-setup", "--title", "Set up Phone Link", "--hold",
-            "bash", "-c", "phoenix phone-link setup; echo; echo 'You can close this window.'"])
+        Tasks.run("phonelink", [`${Quickshell.env("HOME")}/.local/bin/phoenix`, "phone-link", "setup"],
+            { title: "Setting up Phone Link", askpassMessage: "Enter your password to install KDE Connect and open its firewall ports" })
+    }
+    function remove() {
+        Tasks.run("phonelink", [`${Quickshell.env("HOME")}/.local/bin/phoenix`, "phone-link", "remove"],
+            { title: "Turning off Phone Link", askpassMessage: "Enter your password to close Phone Link's firewall ports" })
     }
 
     // newest photos (asks the phone for its storage the first time): photosFor(id) fills root.photos
@@ -50,30 +59,28 @@ Singleton {
     property string photosFor: ""
     property bool photosLoading: false
     function loadPhotos(id) {
-        if (!id || photoProc.running) return
+        if (!id || root.photosLoading) return
         root.photosFor = id
         root.photosLoading = true
-        photoProc.command = ["python3", root.helper, "photos", id]
-        photoProc.running = true
+        photoTimeout.restart()
+        root.run(["photos", id])
     }
-    Process {
-        id: photoProc
-        stdout: StdioCollector {
-            onStreamFinished: {
-                try { root.photos = JSON.parse(text).photos ?? [] } catch (e) { root.photos = [] }
-                root.photosLoading = false
-            }
-        }
-    }
+    Timer { id: photoTimeout; interval: 40000; onTriggered: root.photosLoading = false }   // no answer: stop waiting
 
     Process {
         id: watcher
         running: true
-        command: ["python3", root.helper, "watch", "2"]
+        // event-driven (KDE Connect's D-Bus signals) since 2026-10-16; was a full check every 2 s
+        command: ["python3", root.helper, "serve"]
+        stdinEnabled: true
         stdout: SplitParser {
             onRead: line => {
                 let d
                 try { d = JSON.parse(line) } catch (e) { return }
+                if (d.reply !== undefined) {   // an answer to a command
+                    if (d.reply === "photos") { root.photos = d.photos ?? []; root.photosLoading = false; photoTimeout.stop() }
+                    return
+                }
                 root.installed = d.installed ?? false
                 root.running = d.running ?? false
                 root.devices = d.devices ?? []

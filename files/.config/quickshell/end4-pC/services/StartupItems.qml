@@ -30,7 +30,7 @@ Singleton {
     function nameFor(cmd) {
         const m = cmd.match(/^gtk-launch\s+(\S+)/);
         const id = m ? m[1] : cmd.split(/\s+/)[0].split("/").pop();
-        const e = AppSearch.list.find(x => x.id === id) ?? DesktopEntries.heuristicLookup(id);
+        const e = AppSearch.entryFor(id);
         return { name: e?.name ?? id, icon: e?.icon ?? AppSearch.guessIcon(id) };
     }
 

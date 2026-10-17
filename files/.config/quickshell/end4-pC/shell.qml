@@ -24,11 +24,6 @@ ShellRoot {
     readonly property bool phoenixServices: Extras.extras !== undefined && GameAssist.extras !== undefined && NewApps.loaded !== undefined
         && NightSchedule.place !== undefined && DisplayProfiles.tool !== undefined
 
-    Process {
-        id: autostartProc
-        command: ["python3", `${Directories.scriptPath}/hyprland/autostart.py`]
-    }
-
     Connections {
         target: Config
         function onReadyChanged() {
@@ -39,10 +34,7 @@ ShellRoot {
                 Config.options.overview.enable = false
             }
 
-            if (Config.options.hyprland.autostartApps.enable &&
-                Config.options.hyprland.autostartApps.apps.some(a => a.cmd && !a.off)) {
-                autostartProc.running = true
-            }
+            // startup apps: started by ~/.config/hypr/custom/scripts/autostart.sh (after the first unlock), 2026-10-16
         }
     }
 

@@ -14,8 +14,10 @@ Singleton {
     readonly property real gammaLowerLimit: 25
     readonly property bool isNiri: WM.compositor === "niri"
 
-    property string from: Config.options?.light?.night?.from ?? "19:00"
-    property string to: Config.options?.light?.night?.to ?? "06:30"
+    // sunset to sunrise (NightSchedule) or your own hours; the computed times are never written over yours (2026-10-16)
+    readonly property bool followsSun: NightSchedule.active && NightSchedule.ok && NightSchedule.sunset !== "" && NightSchedule.sunrise !== ""
+    property string from: followsSun ? NightSchedule.sunset : (Config.options?.light?.night?.from ?? "19:00")
+    property string to: followsSun ? NightSchedule.sunrise : (Config.options?.light?.night?.to ?? "06:30")
     property bool automatic: (Config.options?.light?.night?.automatic ?? false) && (Config?.ready ?? true)
     property int colorTemperature: Config.options?.light?.night?.colorTemperature ?? 5000
     property int gamma: 100
@@ -83,9 +85,11 @@ Singleton {
         }
     }
 
+    // start hyprsunset if needed and wait until it answers (2026-10-16: a fixed `sleep 0.3` could lose the first change)
+    readonly property string ensureRunning: "pidof hyprsunset >/dev/null || { hyprsunset >/dev/null 2>&1 & disown; for i in $(seq 30); do hyprctl hyprsunset gamma >/dev/null 2>&1 && break; sleep 0.1; done; }"
     function startHyprsunset() {
         if (root.isNiri) return;
-        Quickshell.execDetached(["bash", "-c", `pidof hyprsunset || hyprsunset`]);
+        Quickshell.execDetached(["bash", "-c", root.ensureRunning]);
     }
 
     function load() {
@@ -96,7 +100,7 @@ Singleton {
         // Phoenix (2026-10-15): set 6500 K before identity. hyprsunset 0.4 keeps reporting its last temperature (6000 K
         // when freshly started) while in identity mode, and fetchState() counts anything but 6500 as "on", so Settings
         // showed Night light on while nothing was tinted.
-        Quickshell.execDetached(["bash", "-c", `pidof hyprsunset || hyprsunset & disown; sleep 0.3; hyprctl hyprsunset temperature 6500; hyprctl hyprsunset identity`]);
+        Quickshell.execDetached(["bash", "-c", `${root.ensureRunning}; hyprctl hyprsunset temperature 6500; hyprctl hyprsunset identity`]);
         root.temperatureActive = false;
     }
 
@@ -104,8 +108,7 @@ Singleton {
         if (root.isNiri) {
             root.startNiriSunset(root.colorTemperature);
         } else {
-            root.startHyprsunset();
-            Quickshell.execDetached(["bash", "-c", `hyprctl hyprsunset temperature ${root.colorTemperature}`]);
+            Quickshell.execDetached(["bash", "-c", `${root.ensureRunning}; hyprctl hyprsunset temperature ${root.colorTemperature}`]);
         }
         root.temperatureActive = true;
     }

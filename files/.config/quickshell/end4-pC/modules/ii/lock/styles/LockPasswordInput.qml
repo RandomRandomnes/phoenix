@@ -20,7 +20,7 @@ Item {
     property string passwordCharacter: "●"
     property real letterSpacing: 2
     property bool ctrlHeld: false                 // Ctrl+Enter: unlock and keep the PC awake (illogical-impulse)
-    property bool preview: false                  // lock-preview.qml: Enter only clears, nothing is checked
+    property bool preview: false                  // the preview (modules/ii/lock/LockPreview.qml): Enter only clears, nothing is checked
     signal accepted()
     readonly property alias textInput: input       // e.g. for illogical-impulse's shape dots drawn over the field
 

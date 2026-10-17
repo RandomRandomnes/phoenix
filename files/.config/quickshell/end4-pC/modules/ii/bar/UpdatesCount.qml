@@ -25,7 +25,9 @@ MouseArea {
 
     onClicked: (mouse) => {
         if (mouse.button === Qt.LeftButton) {
-            updateProc.running = true
+            // one update path for every button (services/Updates.qml): a background job with its progress in
+            // Settings › Update (2026-10-16; was a terminal); while it runs, a click shows the progress
+            if (Updates.installing) Updates.showPage(); else Updates.install()
         } else if (mouse.button === Qt.RightButton) {
             Updates.refresh()
             Quickshell.execDetached(["notify-send",
@@ -38,40 +40,6 @@ MouseArea {
 
     onPressAndHold: (mouse) => {
         if (mouse.button === Qt.RightButton) root.styleEditorRequested()
-    }
-
-    Process {
-        id: updateProc
-        // system packages + system fixes + Phoenix updates (which carry the shell), or the stock
-        // yay update when Settings › Extras › update script is off
-        command: Config.options.extras.updatesScript
-            ? ["kitty", "fish", "-i", "-l", "-c", "~/.local/bin/system-update"]
-            : ["kitty", "--hold", "fish", "-i", "-l", "-c", "yay -Syu --combinedupgrade=false"]
-        onExited: (exitCode, exitStatus) => {
-            Updates.refresh()
-            notifyTimer.restart()
-        }
-    }
-
-    Timer {
-        id: notifyTimer
-        interval: 5000
-        repeat: false
-        onTriggered: {
-            if (Updates.count === 0) {
-                Quickshell.execDetached(["notify-send",
-                    Translation.tr("Updates"),
-                    Translation.tr("System up to date"),
-                    "-a", "Shell"
-                ])
-            } else {
-                Quickshell.execDetached(["notify-send",
-                    Translation.tr("Updates"),
-                    Translation.tr("Update cancelled — %1 updates still pending").arg(Updates.count),
-                    "-a", "Shell", "-u", "normal"
-                ])
-            }
-        }
     }
 
     Component {
@@ -144,7 +112,7 @@ MouseArea {
 
             Loader {
                 Layout.alignment: Qt.AlignVCenter
-                sourceComponent: Updates.checking ? spinnerComp : textComp
+                sourceComponent: Updates.checking || Updates.installing ? spinnerComp : textComp
             }
         }
     }
@@ -184,7 +152,7 @@ MouseArea {
 
             Loader {
                 Layout.alignment: Qt.AlignHCenter
-                sourceComponent: Updates.checking ? spinnerComp : textComp
+                sourceComponent: Updates.checking || Updates.installing ? spinnerComp : textComp
             }
         }
     }

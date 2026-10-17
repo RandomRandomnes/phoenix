@@ -14,7 +14,7 @@ Item {
     id: root
     required property LockContext context
     property string style: previewStyle !== "" ? previewStyle : (Config.options.lock.style ?? "original")
-    property string previewStyle: ""      // lock-preview.qml shows a style without changing the setting
+    property string previewStyle: ""      // the preview (modules/ii/lock/LockPreview.qml) shows a style without changing the setting
     readonly property var files: ({
         "islands": "LockStyleIslands.qml",
         "cookie": "LockStyleCookie.qml",

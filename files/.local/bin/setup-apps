@@ -35,7 +35,9 @@ def is_installed(app):
 
 def pause(rc=1, seconds=5):
     """After a success the window closes by itself after a few seconds; after a failure it waits, so the messages
-    can be read."""
+    can be read. Without a terminal (a background job of the shell, 2026-10-16) there is no window to keep open."""
+    if not sys.stdin.isatty():
+        return
     if rc == 0:
         try:
             for left in range(seconds, 0, -1):

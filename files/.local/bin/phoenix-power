@@ -22,11 +22,7 @@ fi
 
 # 1. Wallpaper Engine: the app and its renderer, as at logout (switch-desktop)
 if pgrep -f '[l]inux-wallpaper-engine-ux/app.asar|[l]inux-wallpaperengine' >/dev/null; then
-    pkill -TERM -f '[l]inux-wallpaper-engine-ux/app.asar'; pkill -TERM -x linux-wallpaper
-    for _ in $(seq 10); do
-        pgrep -f '[l]inux-wallpaper-engine-ux/app.asar|[l]inux-wallpaperengine --' >/dev/null || break
-        sleep 0.5
-    done
+    "$HOME/.local/bin/wallpaper-engine-ctl" quit
     log "$act: Wallpaper Engine closed"
 fi
 

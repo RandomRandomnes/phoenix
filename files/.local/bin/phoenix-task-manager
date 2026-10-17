@@ -1,6 +1,6 @@
 #!/bin/bash
-# Phoenix Task Manager (2026-10-15): opens ~/.config/quickshell/end4-pC/task-manager.qml, or brings the open one to the
-# front (Ctrl+Shift+Esc, the session menu, Settings › Apps › Task manager and the app menu all run this).
+# Phoenix Task Manager (2026-10-15): opens the shell's Task Manager window (modules/ii/taskManager; standalone
+# task-manager.qml without a running shell), or brings the open one to the front (Ctrl+Shift+Esc, the session menu, Settings › Apps › Task manager and the app menu all run this).
 #   phoenix-task-manager [page]     page: processes | performance | startup | services | users
 #   phoenix-task-manager --configured   the task manager chosen in Settings › Apps (Ctrl+Shift+Esc runs this)
 if [ "${1:-}" = "--configured" ]; then
@@ -9,6 +9,14 @@ try: print(json.load(open(os.path.expanduser("~/.config/illogical-impulse/config
 except Exception: print("")' 2>/dev/null)
     case "$cmd" in ""|phoenix-task-manager|*/phoenix-task-manager) set -- ;; *) exec bash -c "$cmd" ;; esac
 fi
+# a window of the desktop shell (2026-10-16): opens instantly, or comes to the front when already open
+# (a shell that is still starting may not answer yet: a few tries before the stand-alone program)
+running=0; qs list -c end4-pC 2>/dev/null | grep -q '^Instance' && running=1
+for _ in $(seq 1 $(( running ? 15 : 1 ))); do
+    qs -c end4-pC ipc call taskManager open "${1:-}" >/dev/null 2>&1 && exit 0
+    [ $running = 1 ] && sleep 0.3
+done
+# no shell running (another desktop, or it crashed): the same Task Manager as its own program
 addr=$(hyprctl clients -j 2>/dev/null | python3 -c 'import json,sys
 for c in json.load(sys.stdin):
     if c.get("title") == "Task Manager" and "quickshell" in c.get("class", ""): print(c["address"]); break' 2>/dev/null)

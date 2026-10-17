@@ -162,7 +162,7 @@ ColumnLayout {
                     text: Translation.tr("Window Rounding")
                     value: Config.options.hyprland.decoration.rounding
                     from: 0; to: 30; stepSize: 1
-                    onValueChanged: {
+                    onEdited: value => {
                         if (value === Config.options.hyprland.decoration.rounding) return
                         Config.options.hyprland.decoration.rounding = value
                         HyprlandConfig.set("decoration:rounding", value)
@@ -173,7 +173,7 @@ ColumnLayout {
                     buttonIcon: "blur_on"
                     text: Translation.tr("Blur")
                     checked: Config.options.hyprland.decoration.blur.enabled
-                    onCheckedChanged: {
+                    onToggled: checked => {
                         if (checked === Config.options.hyprland.decoration.blur.enabled) return
                         Config.options.hyprland.decoration.blur.enabled = checked
                         HyprlandConfig.set("decoration:blur:enabled", checked ? 1 : 0)
@@ -185,7 +185,7 @@ ColumnLayout {
                     text: Translation.tr("Blur Size")
                     value: Config.options.hyprland.decoration.blur.size
                     from: 1; to: 20; stepSize: 1
-                    onValueChanged: {
+                    onEdited: value => {
                         if (value === Config.options.hyprland.decoration.blur.size) return
                         Config.options.hyprland.decoration.blur.size = value
                         HyprlandConfig.set("decoration:blur:size", value)
@@ -197,7 +197,7 @@ ColumnLayout {
                     text: Translation.tr("Blur Passes")
                     value: Config.options.hyprland.decoration.blur.passes
                     from: 1; to: 6; stepSize: 1
-                    onValueChanged: {
+                    onEdited: value => {
                         if (value === Config.options.hyprland.decoration.blur.passes) return
                         Config.options.hyprland.decoration.blur.passes = value
                         HyprlandConfig.set("decoration:blur:passes", value)
@@ -209,7 +209,7 @@ ColumnLayout {
                     text: Translation.tr("Gaps In")
                     value: Config.options.hyprland.general.gapsIn
                     from: 0; to: 40; stepSize: 1
-                    onValueChanged: {
+                    onEdited: value => {
                         if (value === Config.options.hyprland.general.gapsIn) return
                         Config.options.hyprland.general.gapsIn = value
                         HyprlandConfig.set("general:gaps_in", value)
@@ -221,7 +221,7 @@ ColumnLayout {
                     text: Translation.tr("Gaps Out")
                     value: Config.options.hyprland.general.gapsOut
                     from: 0; to: 60; stepSize: 1
-                    onValueChanged: {
+                    onEdited: value => {
                         if (value === Config.options.hyprland.general.gapsOut) return
                         Config.options.hyprland.general.gapsOut = value
                         HyprlandConfig.set("general:gaps_out", value)
@@ -233,7 +233,7 @@ ColumnLayout {
                     text: Translation.tr("Active Opacity")
                     value: Math.round(Config.options.hyprland.decoration.activeOpacity * 100)
                     from: 10; to: 100; stepSize: 5
-                    onValueChanged: {
+                    onEdited: value => {
                         const newVal = value / 100.0
                         if (newVal === Config.options.hyprland.decoration.activeOpacity) return
                         Config.options.hyprland.decoration.activeOpacity = newVal
@@ -246,7 +246,7 @@ ColumnLayout {
                     text: Translation.tr("Inactive Opacity")
                     value: Math.round(Config.options.hyprland.decoration.inactiveOpacity * 100)
                     from: 10; to: 100; stepSize: 5
-                    onValueChanged: {
+                    onEdited: value => {
                         const newVal = value / 100.0
                         if (newVal === Config.options.hyprland.decoration.inactiveOpacity) return
                         Config.options.hyprland.decoration.inactiveOpacity = newVal
@@ -258,7 +258,7 @@ ColumnLayout {
                     text: Translation.tr("Border Size")
                     value: Config.options.hyprland.general.borderSize
                     from: 0; to: 10; stepSize: 1
-                    onValueChanged: {
+                    onEdited: value => {
                         if (value === Config.options.hyprland.general.borderSize) return
                         Config.options.hyprland.general.borderSize = value
                         HyprlandConfig.set("general:border_size", value)
@@ -269,7 +269,7 @@ ColumnLayout {
                     buttonIcon: "format_paint"
                     text: Translation.tr("Custom border colors")
                     checked: Config.options.hyprland.general.borderColor.enable
-                    onCheckedChanged: {
+                    onToggled: checked => {
                         if (checked === Config.options.hyprland.general.borderColor.enable) return
                         Config.options.hyprland.general.borderColor.enable = checked
                         if (checked) HyprlandConfig.applyBorderColors()
@@ -302,7 +302,7 @@ ColumnLayout {
                         text: Translation.tr("Active border opacity")
                         value: Math.round(Config.options.hyprland.general.borderColor.activeOpacity * 100)
                         from: 0; to: 100; stepSize: 5
-                        onValueChanged: {
+                        onEdited: value => {
                             // Compared as integers: the spin box only holds whole percents.
                             if (value === Math.round(Config.options.hyprland.general.borderColor.activeOpacity * 100)) return
                             Config.options.hyprland.general.borderColor.activeOpacity = value / 100.0
@@ -326,7 +326,7 @@ ColumnLayout {
                         text: Translation.tr("Inactive border opacity")
                         value: Math.round(Config.options.hyprland.general.borderColor.inactiveOpacity * 100)
                         from: 0; to: 100; stepSize: 5
-                        onValueChanged: {
+                        onEdited: value => {
                             // Compared as integers: the spin box only holds whole percents.
                             if (value === Math.round(Config.options.hyprland.general.borderColor.inactiveOpacity * 100)) return
                             Config.options.hyprland.general.borderColor.inactiveOpacity = value / 100.0
@@ -461,7 +461,7 @@ ColumnLayout {
                     buttonIcon: "check"
                     text: Translation.tr("Enable")
                     checked: Config.options.hyprland.animations.enable
-                    onCheckedChanged: {
+                    onToggled: checked => {
                         if (checked === Config.options.hyprland.animations.enable) return
                         Config.options.hyprland.animations.enable = checked
                         HyprlandConfig.set("animations:enabled", checked ? 1 : 0)
@@ -538,7 +538,7 @@ ColumnLayout {
                     buttonIcon: "center_focus_strong"
                     text: Translation.tr("Focus on activate")
                     checked: Config.options.hyprland.misc.focusOnActivate
-                    onCheckedChanged: {
+                    onToggled: checked => {
                         if (checked === Config.options.hyprland.misc.focusOnActivate) return
                         Config.options.hyprland.misc.focusOnActivate = checked
                         HyprlandConfig.set("misc:focus_on_activate", checked ? 1 : 0)

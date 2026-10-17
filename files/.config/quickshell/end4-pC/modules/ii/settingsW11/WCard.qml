@@ -59,6 +59,41 @@ Rectangle {
         animation: Appearance.animation.elementMoveFast.colorAnimation.createObject(this)
     }
 
+    // Search result (2026-10-16): the setting the search opened scrolls into view and flashes (WState.highlight)
+    readonly property bool searchHit: root.title !== "" && WState.highlight === root.title && root.visible
+    onSearchHitChanged: if (searchHit) hitTimer.restart()
+    Component.onCompleted: if (searchHit) hitTimer.restart()
+    Timer {
+        id: hitTimer
+        interval: 250   // after the page has laid itself out
+        onTriggered: {
+            let f = root.parent;
+            while (f && !(f.contentY !== undefined && f.contentItem !== undefined)) f = f.parent;
+            if (f) {
+                const y = root.mapToItem(f.contentItem, 0, 0).y;
+                f.contentY = Math.max(0, Math.min(y - f.height / 3, f.contentHeight - f.height));
+            }
+            flash.restart();
+            WState.highlight = "";
+        }
+    }
+    Rectangle {
+        id: hitRing
+        anchors.fill: parent
+        z: 10
+        color: "transparent"
+        radius: root.topLeftRadius
+        border.width: 2
+        border.color: Appearance.colors.colPrimary
+        opacity: 0
+        SequentialAnimation {
+            id: flash
+            NumberAnimation { target: hitRing; property: "opacity"; to: 1; duration: 150 }
+            PauseAnimation { duration: 1200 }
+            NumberAnimation { target: hitRing; property: "opacity"; to: 0; duration: 600 }
+        }
+    }
+
     MouseArea {
         id: mouse
         anchors.fill: parent

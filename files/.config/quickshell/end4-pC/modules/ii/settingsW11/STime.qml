@@ -120,7 +120,7 @@ ColumnLayout {
                     buttonIcon: "pace"
                     text: Translation.tr("Second precision")
                     checked: Config.options.time.secondPrecision
-                    onCheckedChanged: {
+                    onToggled: checked => {
                         Config.options.time.secondPrecision = checked;
                     }
                 }
@@ -128,7 +128,7 @@ ColumnLayout {
                     buttonIcon: "date_range"
                     text: Translation.tr("Show date")
                     checked: Config.options.time.showDate
-                    onCheckedChanged: {
+                    onToggled: checked => {
                         Config.options.time.showDate = checked;
                     }
                 }

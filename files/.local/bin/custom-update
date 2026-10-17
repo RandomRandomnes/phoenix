@@ -39,6 +39,7 @@ import subprocess
 import sys
 import tarfile
 import tempfile
+import time
 import urllib.request
 
 HOME = os.path.expanduser("~")
@@ -49,6 +50,7 @@ SIGNERS = os.path.join(SHARE, "allowed_signers")
 BASE = os.path.join(SHARE, "base.json")          # version the clone was built with (written by custom-publish)
 STATE = os.path.join(HOME, ".local", "state", "custom-fixes")
 INSTALLED = os.path.join(STATE, "installed.json")      # custom line
+JOURNAL = os.path.join(STATE, "install-journal.json")  # an install in progress (all or nothing, 2026-10-16)
 SYSTEM = os.path.join(STATE, "system.json")            # system line: {"applied": {label: {...}}}
 WHATSNEW = os.path.join(STATE, "whats-new.json")        # notes of installed releases not read yet (Settings › Update)
 SCHEME = 2                                             # 2 = two release lines (custom-*/system-* tags)
@@ -96,6 +98,10 @@ def test_channel():
 
 
 def set_extra(key, on):
+    # through the running shell when there is one (it owns config.json; two writers could overwrite each other)
+    if shutil.which("qs") and subprocess.run(["qs", "-c", "end4-pC", "ipc", "call", "config", "set", f"extras.{key}",
+                                              "true" if on else "false"], capture_output=True).returncode == 0:
+        return
     cfg = load(CONFIG, None)
     if cfg is None:
         sys.exit("custom-update: no shell config yet")
@@ -538,7 +544,11 @@ def cmd_check(quiet=False):
 
 
 def cmd_offers(as_json):
-    out = {"installed": installed().get("label") or "", "fix": None, "upgrade": None,
+    inst = installed()
+    # "Undo last" in Settings only shows when there is a backup of the version before this one (2026-10-16)
+    can_undo = bool(inst.get("version")) and os.path.isdir(
+        os.path.join(STATE, "backups", f"v{inst.get('label') or inst.get('version')}"))
+    out = {"installed": inst.get("label") or "", "canUndo": can_undo, "fix": None, "upgrade": None,
            "risk": RISK, "enabled": bool(usable()), "error": "",
            "system": {"enabled": bool(system_usable()), "applied": applied_system(), "pending": [], "waiting": [],
                       "partial": partial_system(), "error": ""}}
@@ -675,6 +685,12 @@ def install(src, label, yes, what):
     backup = os.path.join(STATE, "backups", f"v{vlabel(m)}")
     shutil.rmtree(backup, ignore_errors=True)
     os.makedirs(backup, exist_ok=True)   # even when nothing is replaced, so Undo can still step back (QA 2026-10-08)
+    # all or nothing (2026-10-16): the journal names every file this install may touch and which ones are new; it is
+    # removed once the install is recorded. Left behind (power cut, crash, full disk), the next run puts things back
+    # from the backup (recover_interrupted), so a PC never stays half on one version and half on another.
+    planned = sorted(contents) + [r for r in m.get("removed", []) if not (r.startswith("/") or ".." in r.split("/"))]
+    save(JOURNAL, {"to": vlabel(m), "backup": backup, "planned": planned,
+                   "new": [r for r in planned if not os.path.exists(os.path.join(HOME, r))]})
     changed, kept, record, created = [], [], dict(inst["files"]), []
     base_files = None if all(r in inst["files"] for r in m["files"]) else baseline(src)
     for rel, (data, mode) in contents.items():
@@ -754,13 +770,77 @@ def install(src, label, yes, what):
                      "previousLabel": inst.get("label") or str(inst["version"]), "date": m.get("date", ""),
                      "files": record, "changed": changed, "installedAt": datetime.datetime.now().isoformat(timespec="seconds")})
 
+    try:
+        os.remove(JOURNAL)   # recorded: the install is complete
+    except OSError:
+        pass
+
     if any(r.startswith(".config/hypr/") for r in changed) and os.environ.get("HYPRLAND_INSTANCE_SIGNATURE"):
         subprocess.run(["hyprctl", "reload"], capture_output=True)
+    settle_shell(changed, removed)
     record_whats_new(src, "custom", prev_key, m)
     print(f"Installed version {vlabel(m)}: {len(changed)} file(s) updated.")
     for rel in kept:
         print(f"  kept the locally modified ~/{rel} (the new version is saved as ~/{rel}.fixes-new)")
     return 0
+
+
+def settle_shell(changed, removed):
+    """One clean reload of the running shell after an install (2026-10-16). Its file watcher can miss changes when many
+    files change at once, and it keeps the old list of a folder's files: a removed service or module then fails the
+    next reload ("Type … unavailable"). Adding and removing a placeholder in such a folder makes it look again."""
+    shell = [r for r in changed + removed if r.startswith(SHELL_REL)]
+    if not shell:
+        return
+    root = os.path.join(HOME, SHELL_REL.rstrip("/"))
+    for d in sorted({os.path.dirname(os.path.join(HOME, r)) for r in removed if r.startswith(SHELL_REL) and r.endswith(".qml")}):
+        if os.path.isdir(d):
+            ph = os.path.join(d, "ZzPhoenixRescan.qml")
+            try:
+                with open(ph, "w") as f:
+                    f.write("import QtQuick\nItem {}\n")
+                time.sleep(1.5)
+                os.remove(ph)
+            except OSError:
+                pass
+    time.sleep(1)
+    try:
+        os.utime(os.path.join(root, "shell.qml"))
+    except OSError:
+        pass
+
+
+def recover_interrupted():
+    """An install that stopped half-way (journal left behind): put back the replaced files from its backup and remove
+    the ones it added, so the PC is on the version its record says."""
+    j = load(JOURNAL, None)
+    if not j:
+        return
+    backup, restored, deleted = j.get("backup", ""), 0, 0
+    new = set(j.get("new", []))
+    for rel in j.get("planned", []):
+        if rel.startswith("/") or ".." in rel.split("/"):
+            continue
+        dst = os.path.join(HOME, rel)
+        saved = os.path.join(backup, rel)
+        try:
+            if os.path.isfile(saved):
+                os.makedirs(os.path.dirname(dst), exist_ok=True)
+                shutil.copy2(saved, dst)
+                restored += 1
+            elif rel in new and os.path.isfile(dst):
+                os.remove(dst)
+                deleted += 1
+            if os.path.exists(dst + ".fixes-tmp"):
+                os.remove(dst + ".fixes-tmp")
+        except OSError:
+            pass
+    try:
+        os.remove(JOURNAL)
+    except OSError:
+        pass
+    print(f"An earlier Phoenix update to {j.get('to', '?')} was interrupted: undone ({restored} file(s) put back, "
+          f"{deleted} removed). It will be offered again.")
 
 
 def record_whats_new(src, line, prev_key, m):
@@ -940,6 +1020,8 @@ def phoenix_inactive():
 def main():
     a = sys.argv[1:]
     cmd = a[0] if a else "status"
+    if cmd in ("apply", "upgrade", "undo", "check", "offers", "status"):
+        recover_interrupted()   # an install that stopped half-way is undone first
     if cmd in ("apply", "system-apply", "upgrade", "undo") and phoenix_inactive():
         print("Phoenix is switched off (phoenix activate turns it on); no fixes are installed while it is off.")
         sys.exit(0)

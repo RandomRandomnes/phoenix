@@ -1,0 +1,5 @@
+#!/bin/sh
+# Phoenix (2026-10-16): put first on PATH for the shell's background jobs (services/Tasks.qml), so every `sudo` in a
+# script (and yay's) asks in the shell's password dialog (SUDO_ASKPASS=phoenix-askpass) whatever its input is
+# connected to. Without -A, sudo only uses the helper when it has no terminal and no input.
+exec /usr/bin/sudo -A "$@"

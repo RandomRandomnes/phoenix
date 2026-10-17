@@ -55,7 +55,7 @@ ColumnLayout {
                     from: 16
                     to: 64
                     stepSize: 2
-                    onValueChanged: {
+                    onEdited: value => {
                         if (value !== SystemAppearance.cursorSize) SystemAppearance.setCursor(SystemAppearance.cursorTheme, value)
                     }
                 }
@@ -77,7 +77,7 @@ ColumnLayout {
                     from: 8
                     to: 20
                     stepSize: 1
-                    onValueChanged: {
+                    onEdited: value => {
                         if (value !== SystemAppearance.fontSize) SystemAppearance.setFont("ui", SystemAppearance.fontFamily, value)
                     }
                 }
@@ -99,7 +99,7 @@ ColumnLayout {
                     from: 8
                     to: 20
                     stepSize: 1
-                    onValueChanged: {
+                    onEdited: value => {
                         if (value !== SystemAppearance.monoSize) SystemAppearance.setFont("mono", SystemAppearance.monoFamily, value)
                     }
                 }

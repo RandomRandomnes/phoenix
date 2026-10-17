@@ -9,6 +9,8 @@
   wallpaper-engine-ctl muted              prints 1 if muted, else 0
   wallpaper-engine-ctl workshop           the Steam workshop folder of Wallpaper Engine in use
   wallpaper-engine-ctl stop|start        stop or start the Wallpaper Engine background (Hyprland; used by setup-features)
+  wallpaper-engine-ctl quit               close the app and every renderer and wait for them (up to 5 s): before
+                                          signing out, restarting or shutting down (switch-desktop, phoenix-power)
 
 Hyprland: writes the choice into the Linux Wallpaper Engine app's own state
 (~/.config/Linux Wallpaper Engine/active-wallpapers.json, keeping the screen's other settings) and restarts the app
@@ -289,6 +291,16 @@ def main():
         # used by setup-features when the Wallpaper Engine background is switched off (Hyprland only)
         if not is_kde():
             stop_hyprland()
+    elif cmd == "quit":
+        # one place for "close Wallpaper Engine before the session ends" (2026-10-16; was copied in switch-desktop and
+        # phoenix-power). The app aborts without a compositor (DrKonqi report next session) if it's still running.
+        stop_hyprland()
+        subprocess.run(["pkill", "-TERM", "-x", "linux-wallpaper"])
+        for _ in range(50):
+            if not renderer_pids() and subprocess.run(["pgrep", "-f", "[/]usr/lib/linux-wallpaper-engine-ux/app.asar"],
+                                                      capture_output=True).returncode != 0:
+                break
+            time.sleep(0.1)
     elif cmd == "start":
         if not is_kde() and subprocess.run(["pgrep", "-f", "[/]usr/lib/linux-wallpaper-engine-ux/app.asar"],
                                            capture_output=True).returncode != 0:

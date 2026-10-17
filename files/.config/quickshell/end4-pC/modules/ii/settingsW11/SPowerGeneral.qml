@@ -36,7 +36,7 @@ ColumnLayout {
                         from: 0
                         to: 100
                         stepSize: 5
-                        onValueChanged: {
+                        onEdited: value => {
                             Config.options.battery.low = value;
                         }
                     }
@@ -47,7 +47,7 @@ ColumnLayout {
                         from: 0
                         to: 100
                         stepSize: 5
-                        onValueChanged: {
+                        onEdited: value => {
                             Config.options.battery.critical = value;
                         }
                     }
@@ -58,7 +58,7 @@ ColumnLayout {
                         buttonIcon: "pause"
                         text: Translation.tr("Automatic suspend")
                         checked: Config.options.battery.automaticSuspend
-                        onCheckedChanged: {
+                        onToggled: checked => {
                             Config.options.battery.automaticSuspend = checked;
                         }
                     }
@@ -69,7 +69,7 @@ ColumnLayout {
                         from: 0
                         to: 100
                         stepSize: 5
-                        onValueChanged: {
+                        onEdited: value => {
                             Config.options.battery.suspend = value;
                         }
                     }
@@ -83,7 +83,7 @@ ColumnLayout {
                         from: 0
                         to: 101
                         stepSize: 5
-                        onValueChanged: {
+                        onEdited: value => {
                             Config.options.battery.full = value;
                         }
                     }
@@ -106,7 +106,7 @@ ColumnLayout {
                         from: 0
                         to: 100
                         stepSize: 5
-                        onValueChanged: {
+                        onEdited: value => {
                             Config.options.battery.peripheralLow = value;
                         }
                     }
@@ -117,7 +117,7 @@ ColumnLayout {
                         from: 0
                         to: 100
                         stepSize: 5
-                        onValueChanged: {
+                        onEdited: value => {
                             Config.options.battery.peripheralCritical = value;
                         }
                     }
@@ -126,7 +126,7 @@ ColumnLayout {
                     buttonIcon: "notifications"
                     text: Translation.tr("Notify when a device battery is low")
                     checked: Config.options.battery.peripheralNotify
-                    onCheckedChanged: {
+                    onToggled: checked => {
                         Config.options.battery.peripheralNotify = checked;
                     }
                 }

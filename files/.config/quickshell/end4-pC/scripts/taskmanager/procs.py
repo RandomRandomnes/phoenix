@@ -226,6 +226,10 @@ def sample():
     for pid, w in sorted(wins.items(), key=lambda kv: kv[1].get("class", "").lower()):
         if pid not in procs or pid in taken:
             continue
+        # the desktop shell's own windows (Settings, the Task Manager itself): the shell isn't an app you opened, it
+        # stays with the background processes as "qs" (2026-10-16: the Task Manager became a window of the shell)
+        if procs[pid]["name"] == "qs" and w.get("class") == "org.quickshell":
+            continue
         pids = tree(pid, taken)
         groups.append({"kind": "app", "key": f"app:{pid}", "name": w.get("initialTitle") or w.get("class") or procs[pid]["name"],
                        "cls": w.get("class", ""), "title": w.get("title", ""), "pid": pid, "pids": pids})

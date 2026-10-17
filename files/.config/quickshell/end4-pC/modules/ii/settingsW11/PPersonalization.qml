@@ -849,7 +849,7 @@ Item {
         WPage {
             WSection {
                 title: "Style"
-                // Phoenix lock screen styles (2026-10-15): modules/ii/lock/styles/, preview = lock-preview.qml
+                // Phoenix lock screen styles (2026-10-15): modules/ii/lock/styles/, preview = modules/ii/lock/LockPreview.qml
                 WCombo {
                     id: lockStyle
                     icon: "style"
@@ -871,8 +871,8 @@ Item {
                     onSelected: v => Config.options.lock.style = v
                     WButton {
                         buttonText: "Preview"
-                        onClicked: Quickshell.execDetached(["bash", "-c",
-                            `PHOENIX_LOCK_PREVIEW='${lockStyle.currentValue}' exec qs -p '${Quickshell.shellPath("lock-preview.qml")}'`])
+                        // a window of the shell (modules/ii/lock/LockPreview.qml, 2026-10-16)
+                        onClicked: Quickshell.execDetached(["qs", "-c", "end4-pC", "ipc", "call", "lockPreview", "open", lockStyle.currentValue])
                     }
                 }
             }

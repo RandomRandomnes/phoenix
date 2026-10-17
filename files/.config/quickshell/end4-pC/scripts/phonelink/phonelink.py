@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
 """Phone Link helper (Phoenix P6, 2026-10-15, ours; not upstream). Talks to KDE Connect's daemon (kdeconnectd) over D-Bus.
 
-  phonelink.py watch [seconds]        one JSON line per change: {"ok", "installed", "running", "devices": [...]}
+  phonelink.py serve                  the shell's helper (2026-10-16): one JSON state line per change, driven by KDE
+                                      Connect's D-Bus signals (no polling; a check every 30 s as a safety net); takes
+                                      commands on stdin, one JSON list per line (["ring", "<device>"], …), answers
+                                      {"reply": <cmd>, "ok": bool, …} and sends the new state right after
+  phonelink.py watch [seconds]        one JSON line per change, by polling (fallback without python-gobject)
   phonelink.py ring|clipboard|browse|messages <device>
   phonelink.py share <device> <file>...     send files to the phone
   phonelink.py reply <device> <replyId> <text>
@@ -229,21 +233,12 @@ def photos(dev):
     return {"photos": [], "error": "the phone doesn't allow file access (KDE Connect app › Filesystem expose)"}
 
 
-def main():
-    a = sys.argv[1:]
-    if not a:
-        print(__doc__)
-        return 1
+def act(a):
+    """run one action (the command-line words after the program name); returns (ok, output dict or None)"""
     cmd = a[0]
-    if cmd == "watch":
-        watch(float(a[1]) if len(a) > 1 else 2.0)
-        return 0
-    if dbus is None:
-        print("python-dbus is missing", file=sys.stderr)
-        return 1
     if cmd == "refresh":
         call(ROOT, "org.kde.kdeconnect.daemon", "forceOnNetworkChange")
-        return 0
+        return True, None
     dev = a[1] if len(a) > 1 else ""
     base = f"{ROOT}/devices/{dev}"
     if cmd == "ring":
@@ -265,13 +260,101 @@ def main():
     elif cmd == "media":
         call(base + "/mprisremote", "org.kde.kdeconnect.device.mprisremote", "sendAction", a[2])
     elif cmd == "photos":
-        print(json.dumps(photos(dev)))
+        return True, photos(dev)
     elif cmd in ("pair", "unpair", "accept", "reject"):
         call(base, "org.kde.kdeconnect.device",
              {"pair": "requestPairing", "unpair": "unpair", "accept": "acceptPairing", "reject": "cancelPairing"}[cmd])
     elif cmd == "plugin":
         set_plugin(dev, a[2], a[3] == "on")
     else:
+        return False, None
+    return True, None
+
+
+def serve():
+    """event-driven state for the shell + commands on stdin (see the top of this file)"""
+    from dbus.mainloop.glib import DBusGMainLoop
+    from gi.repository import GLib
+    DBusGMainLoop(set_as_default=True)
+    b = dbus.SessionBus()
+    st = {"last": None, "pending": False}
+
+    def emit():
+        st["pending"] = False
+        try:
+            cur = json.dumps(state(), separators=(",", ":"))
+        except Exception as e:
+            cur = json.dumps({"ok": False, "error": str(e)})
+        if cur != st["last"]:
+            print(cur, flush=True)
+            st["last"] = cur
+        return False
+
+    def soon(ms=300):
+        # KDE Connect sends bursts of signals (a phone connecting changes many properties): one refresh per burst
+        if not st["pending"]:
+            st["pending"] = True
+            GLib.timeout_add(ms, emit)
+
+    def any_signal(*args, **kw):
+        soon()
+
+    b.add_signal_receiver(any_signal, bus_name=BUS, path_keyword="path")
+    b.add_signal_receiver(lambda name, old, new: soon(100) if name == BUS else None,
+                          signal_name="NameOwnerChanged", dbus_interface="org.freedesktop.DBus")
+    GLib.timeout_add_seconds(30, lambda: (soon(0), True)[1])
+
+    def on_stdin(source, cond):
+        if cond & (GLib.IO_HUP | GLib.IO_ERR):
+            GLib.MainLoop().quit()
+            sys.exit(0)
+        line = sys.stdin.readline()
+        if not line:
+            sys.exit(0)
+        try:
+            a = json.loads(line)
+            ok, out = act([str(x) for x in a])
+            reply = {"reply": a[0], "ok": ok}
+            if out:
+                reply.update(out)
+        except Exception as e:
+            reply = {"reply": (a[0] if isinstance(a, list) and a else "?"), "ok": False, "error": str(e)}
+        print(json.dumps(reply), flush=True)
+        soon(150)
+        return True
+
+    GLib.io_add_watch(sys.stdin, GLib.IO_IN | GLib.IO_HUP | GLib.IO_ERR, on_stdin)
+    emit()
+    GLib.MainLoop().run()
+
+
+def main():
+    a = sys.argv[1:]
+    if not a:
+        print(__doc__)
+        return 1
+    cmd = a[0]
+    if cmd == "serve":
+        if dbus is None:
+            watch(2.0)
+            return 0
+        try:
+            import gi  # noqa: F401
+        except ImportError:   # no python-gobject: poll like before
+            watch(2.0)
+            return 0
+        serve()
+        return 0
+    if cmd == "watch":
+        watch(float(a[1]) if len(a) > 1 else 2.0)
+        return 0
+    if dbus is None:
+        print("python-dbus is missing", file=sys.stderr)
+        return 1
+    ok, out = act(a)
+    if out is not None:
+        print(json.dumps(out))
+    if not ok:
         print(__doc__)
         return 1
     return 0

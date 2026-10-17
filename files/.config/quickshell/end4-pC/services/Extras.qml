@@ -16,9 +16,9 @@ Singleton {
     id: root
 
     readonly property var extras: Config.options.extras
-    readonly property string signature: [extras.windowsStyle, extras.minimizeToDock, extras.wallpaperEngine,
-        extras.resourceGraphs, extras.appGrid, extras.powerMenuKde, extras.claudeCodeAi, extras.updatesScript,
-        extras.steamTray, extras.workspaceGroups, extras.phoneLinkStart].join(",")
+    // every on/off switch in "extras" (2026-10-16; was a hand-kept list that had to match setup-features)
+    readonly property string signature: Object.keys(extras).filter(k => typeof extras[k] === "boolean").sort()
+        .map(k => `${k}=${extras[k]}`).join(",")
     property string appliedSignature: ""
 
     function apply() {

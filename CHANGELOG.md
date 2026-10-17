@@ -1,5 +1,13 @@
 # Changelog
 
+## custom 2.403 (2026-10-16, fix)
+- Updates install in the background with progress in Settings › Update; the password is asked in Phoenix's own dialog, only when packages need it, and no terminal opens (Ask first mode still shows the list)
+- Password change, sign-in at startup, Phone Link setup, cleanup, app installs and uninstalling also work without terminal windows
+- Startup apps: start after you unlock, open on their workspace without switching, and start again after signing out and in; Task Manager and Settings show every startup item with an on/off switch
+- Task Manager, Quick Start and the lock screen preview open instantly inside the desktop with the same look and icons
+- Settings: search finds every setting and jumps to it; switches no longer show an old state; duplicate settings and the old settings code removed
+- Less background work: Wallpaper Engine, Phone Link and system stats no longer poll; night light keeps your own hours; updates are all-or-nothing and restore points cover Phoenix's own files
+
 ## custom 2.393 (2026-10-16, fix)
 - Settings updates itself: the Window rules 'Pick an open window' list follows your open windows live, and the rules list reloads when the rules change elsewhere
 - Pages that read their data once (Default apps, Startup, Wi-Fi adapter, touchpad, account type) reload it whenever you come back to the Settings window

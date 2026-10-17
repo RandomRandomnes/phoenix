@@ -340,7 +340,7 @@ Scope {
                         property var results: WState.search(searchField.text)
                         function open(r) {
                             searchField.text = "";
-                            WState.go(r.page, r.sub);
+                            WState.go(r.page, r.sub, r.highlight ?? "");
                         }
                         visible: searchField.text.length > 0
                         anchors.right: parent.right

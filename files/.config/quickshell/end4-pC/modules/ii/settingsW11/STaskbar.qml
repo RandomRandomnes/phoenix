@@ -130,7 +130,7 @@ ColumnLayout {
                             anchors { fill: parent; margins: 8 }
                             buttonIcon: "tv_displays"
                             text: Translation.tr("All")
-                            onCheckedChanged: {
+                            onToggled: checked => {
                                 if (checked) Config.options.bar.screenList = []
                             }
 
@@ -164,7 +164,7 @@ ColumnLayout {
                                 anchors { fill: parent; margins: 8 }
                                 buttonIcon: "monitor"
                                 text: monitorRow.modelData.name
-                                onCheckedChanged: {
+                                onToggled: checked => {
                                     const allNames = Hyprland.monitors.values.map(m => m.name)
                                     let list = Config.options.bar.screenList.length === 0 ? allNames.slice() : Config.options.bar.screenList.slice()
                                     if (checked) {
@@ -230,21 +230,7 @@ ColumnLayout {
             shape: MaterialShape.Shape.Gem
             title: Translation.tr("Positioning & Styles")
             WCGroup {
-                WCSelection {
-                    text: Translation.tr("Bar position")
-                    icon: "swap_vert"
-                    currentValue: (Config.options.bar.bottom ? 1 : 0) | (Config.options.bar.vertical ? 2 : 0)
-                    onSelected: newValue => {
-                        Config.options.bar.bottom = (newValue & 1) !== 0;
-                        Config.options.bar.vertical = (newValue & 2) !== 0;
-                    }
-                    options: [
-                        { displayName: Translation.tr("Top"),    icon: "arrow_upward",   value: 0 },
-                        { displayName: Translation.tr("Left"),   icon: "arrow_back",     value: 2 },
-                        { displayName: Translation.tr("Bottom"), icon: "arrow_downward", value: 1 },
-                        { displayName: Translation.tr("Right"),  icon: "arrow_forward",  value: 3 }
-                    ]
-                }
+                // Bar position: Settings › Personalization › Taskbar (one place for it, 2026-10-16)
                 WCSelection {
                     text: Translation.tr("Bar style")
                     icon: "style"
@@ -289,7 +275,7 @@ ColumnLayout {
                         text: Translation.tr("Show Background")
                         enabled: Config.options.bar.cornerStyle === 0 || Config.options.bar.cornerStyle === 1
                         checked: Config.options.bar.showBackground
-                        onCheckedChanged: { Config.options.bar.showBackground = checked; }
+                        onToggled: checked => { Config.options.bar.showBackground = checked; }
                     }
                     WCSelection {
                         text: Translation.tr("Autohide")
@@ -307,7 +293,7 @@ ColumnLayout {
                     enabled: Config.options.bar.showFrame
                     text: Translation.tr("Overlap windows when center-only")
                     checked: Config.options.bar.centerOnlyReserveFrame
-                    onCheckedChanged: { Config.options.bar.centerOnlyReserveFrame = checked; }
+                    onToggled: checked => { Config.options.bar.centerOnlyReserveFrame = checked; }
                 }
                 WCGroup {
                     WCSwitch {
@@ -318,7 +304,7 @@ ColumnLayout {
                         property bool switchReady: false
                         Component.onCompleted: Qt.callLater(() => switchReady = true)
 
-                        onCheckedChanged: {
+                        onToggled: checked => {
                             if (switchReady && checked) {
                                 GlobalStates.refreshBar();
                             }
@@ -330,7 +316,7 @@ ColumnLayout {
                         enabled: Config.options.bar.showFrame
                         text: Translation.tr("Follow Frame Color")
                         checked: Config.options.bar.followFrameColor
-                        onCheckedChanged: { Config.options.bar.followFrameColor = checked; }
+                        onToggled: checked => { Config.options.bar.followFrameColor = checked; }
                     }
                 }
                 WCSpin {
@@ -340,7 +326,7 @@ ColumnLayout {
                     from: 2
                     to: 10
                     stepSize: 1
-                    onValueChanged: {
+                    onEdited: value => {
                         Config.options.bar.frameThickness = value;
                     }
                 }
@@ -408,7 +394,7 @@ ColumnLayout {
                         buttonIcon: "play_circle"
                         text: Translation.tr("Show media controls")
                         checked: Config.options.bar.dynamicIsland.showMediaControls
-                        onCheckedChanged: { Config.options.bar.dynamicIsland.showMediaControls = checked; }
+                        onToggled: checked => { Config.options.bar.dynamicIsland.showMediaControls = checked; }
                     }
                 }
             }
@@ -459,7 +445,7 @@ ColumnLayout {
                     buttonIcon: "counter_2"
                     text: Translation.tr("Unread indicator: show count")
                     checked: Config.options.bar.indicators.notifications.showUnreadCount
-                    onCheckedChanged: { Config.options.bar.indicators.notifications.showUnreadCount = checked; }
+                    onToggled: checked => { Config.options.bar.indicators.notifications.showUnreadCount = checked; }
                 }
                 WCSpin {
                     icon: "av_timer"
@@ -468,7 +454,7 @@ ColumnLayout {
                     from: 1000
                     to: 60000
                     stepSize: 1000
-                    onValueChanged: {
+                    onEdited: value => {
                         Config.options.notifications.timeout = value;
                     }
                 }
@@ -484,12 +470,12 @@ ColumnLayout {
                 WCSwitch {
                     buttonIcon: "keep"; text: Translation.tr("Make icons pinned by default")
                     checked: Config.options.tray.invertPinnedItems
-                    onCheckedChanged: { Config.options.tray.invertPinnedItems = checked; }
+                    onToggled: checked => { Config.options.tray.invertPinnedItems = checked; }
                 }
                 WCSwitch {
                     buttonIcon: "colors"; text: Translation.tr("Tint icons")
                     checked: Config.options.tray.monochromeIcons
-                    onCheckedChanged: { Config.options.tray.monochromeIcons = checked; }
+                    onToggled: checked => { Config.options.tray.monochromeIcons = checked; }
                 }
             }
         }
@@ -551,7 +537,7 @@ ColumnLayout {
                     buttonIcon: "colors"
                     text: Translation.tr("Colorize icon")
                     checked: Config.options.custom.colorizeIcon
-                    onCheckedChanged: { Config.options.custom.colorizeIcon = checked }
+                    onToggled: checked => { Config.options.custom.colorizeIcon = checked }
                 }
                 WCColors {
                     enabled: Config.options.custom.colorizeIcon
@@ -591,7 +577,7 @@ ColumnLayout {
                     from: 4
                     to: 400
                     stepSize: 2
-                    onValueChanged: {
+                    onEdited: value => {
                         Config.options.bar.divider.spacing = value;
                     }
                 }
@@ -611,13 +597,13 @@ ColumnLayout {
                         buttonIcon: "screenshot_region"
                         text: Translation.tr("Screen snip")
                         checked: Config.options.bar.utilButtons.showScreenSnip
-                        onCheckedChanged: { Config.options.bar.utilButtons.showScreenSnip = checked }
+                        onToggled: checked => { Config.options.bar.utilButtons.showScreenSnip = checked }
                     }
                     WCSwitch {
                         buttonIcon: "colorize"
                         text: Translation.tr("Color picker")
                         checked: Config.options.bar.utilButtons.showColorPicker
-                        onCheckedChanged: { Config.options.bar.utilButtons.showColorPicker = checked }
+                        onToggled: checked => { Config.options.bar.utilButtons.showColorPicker = checked }
                     }
                 }
                 WCGroup {
@@ -626,13 +612,13 @@ ColumnLayout {
                         buttonIcon: "keyboard"
                         text: Translation.tr("Keyboard toggle")
                         checked: Config.options.bar.utilButtons.showKeyboardToggle
-                        onCheckedChanged: { Config.options.bar.utilButtons.showKeyboardToggle = checked }
+                        onToggled: checked => { Config.options.bar.utilButtons.showKeyboardToggle = checked }
                     }
                     WCSwitch {
                         buttonIcon: "mic"
                         text: Translation.tr("Mic toggle")
                         checked: Config.options.bar.utilButtons.showMicToggle
-                        onCheckedChanged: { Config.options.bar.utilButtons.showMicToggle = checked }
+                        onToggled: checked => { Config.options.bar.utilButtons.showMicToggle = checked }
                     }
                 }
                 WCGroup {
@@ -641,13 +627,13 @@ ColumnLayout {
                         buttonIcon: "dark_mode"
                         text: Translation.tr("Dark/Light toggle")
                         checked: Config.options.bar.utilButtons.showDarkModeToggle
-                        onCheckedChanged: { Config.options.bar.utilButtons.showDarkModeToggle = checked }
+                        onToggled: checked => { Config.options.bar.utilButtons.showDarkModeToggle = checked }
                     }
                     WCSwitch {
                         buttonIcon: "speed"
                         text: Translation.tr("Performance Profile")
                         checked: Config.options.bar.utilButtons.showPerformanceProfileToggle
-                        onCheckedChanged: { Config.options.bar.utilButtons.showPerformanceProfileToggle = checked }
+                        onToggled: checked => { Config.options.bar.utilButtons.showPerformanceProfileToggle = checked }
                     }
                 }
                 WCGroup {
@@ -656,13 +642,13 @@ ColumnLayout {
                         buttonIcon: "screen_record"
                         text: Translation.tr("Record Screen")
                         checked: Config.options.bar.utilButtons.showScreenRecord
-                        onCheckedChanged: { Config.options.bar.utilButtons.showScreenRecord = checked }
+                        onToggled: checked => { Config.options.bar.utilButtons.showScreenRecord = checked }
                     }
                     WCSwitch {
                         buttonIcon: "imagesmode"
                         text: Translation.tr("Wallpapers Toggle")
                         checked: Config.options.bar.utilButtons.showWallpaperToggle
-                        onCheckedChanged: { Config.options.bar.utilButtons.showWallpaperToggle = checked }
+                        onToggled: checked => { Config.options.bar.utilButtons.showWallpaperToggle = checked }
                     }
                 }
             }
@@ -691,13 +677,13 @@ ColumnLayout {
                     icon: "view_column"; text: Translation.tr("Workspaces shown")
                     value: Config.options.bar.workspaces.shown
                     from: 1; to: 30
-                    onValueChanged: { Config.options.bar.workspaces.shown = value; }
+                    onEdited: value => { Config.options.bar.workspaces.shown = value; }
                 }
                 WCSwitch {
                     enabled: page.defaultWorkspacesDesign
                     buttonIcon: "counter_1"; text: Translation.tr("Always show numbers")
                     checked: Config.options.bar.workspaces.alwaysShowNumbers
-                    onCheckedChanged: { Config.options.bar.workspaces.alwaysShowNumbers = checked; }
+                    onToggled: checked => { Config.options.bar.workspaces.alwaysShowNumbers = checked; }
                 }
                 WCSelection {
                     enabled: page.defaultWorkspacesDesign
@@ -718,7 +704,7 @@ ColumnLayout {
                     enabled: page.defaultWorkspacesDesign
                     buttonIcon: "award_star"; text: Translation.tr("Show app icons")
                     checked: Config.options.bar.workspaces.showAppIcons
-                    onCheckedChanged: { Config.options.bar.workspaces.showAppIcons = checked; }
+                    onToggled: checked => { Config.options.bar.workspaces.showAppIcons = checked; }
                 }
                 WCSelection {
                     enabled: page.defaultWorkspacesDesign
@@ -750,13 +736,13 @@ ColumnLayout {
                         buttonIcon: "planner_review"
                         text: Translation.tr("CPU")
                         checked: Config.options.bar.resources.alwaysShowCpu
-                        onCheckedChanged: { Config.options.bar.resources.alwaysShowCpu = checked }
+                        onToggled: checked => { Config.options.bar.resources.alwaysShowCpu = checked }
                     }
                     WCSwitch {
                         buttonIcon: "thermostat"
                         text: Translation.tr("CPU Temperature")
                         checked: Config.options.bar.resources.alwaysShowCpuTemp
-                        onCheckedChanged: { Config.options.bar.resources.alwaysShowCpuTemp = checked }
+                        onToggled: checked => { Config.options.bar.resources.alwaysShowCpuTemp = checked }
                     }
                 }
                 WCGroup {
@@ -765,13 +751,13 @@ ColumnLayout {
                         buttonIcon: "memory"
                         text: Translation.tr("RAM")
                         checked: Config.options.bar.resources.alwaysShowRam
-                        onCheckedChanged: { Config.options.bar.resources.alwaysShowRam = checked }
+                        onToggled: checked => { Config.options.bar.resources.alwaysShowRam = checked }
                     }
                     WCSwitch {
                         buttonIcon: "storage"
                         text: Translation.tr("Disk")
                         checked: Config.options.bar.resources.alwaysShowDisk
-                        onCheckedChanged: { Config.options.bar.resources.alwaysShowDisk = checked }
+                        onToggled: checked => { Config.options.bar.resources.alwaysShowDisk = checked }
                     }
                 }
                 WCGroup {
@@ -780,13 +766,13 @@ ColumnLayout {
                         buttonIcon: "swap_horiz"
                         text: Translation.tr("Swap")
                         checked: Config.options.bar.resources.alwaysShowSwap
-                        onCheckedChanged: { Config.options.bar.resources.alwaysShowSwap = checked }
+                        onToggled: checked => { Config.options.bar.resources.alwaysShowSwap = checked }
                     }
                     WCSwitch {
                         buttonIcon: "developer_board"
                         text: Translation.tr("GPU")
                         checked: Config.options.bar.resources.alwaysShowGpu
-                        onCheckedChanged: { Config.options.bar.resources.alwaysShowGpu = checked }
+                        onToggled: checked => { Config.options.bar.resources.alwaysShowGpu = checked }
                     }
                 }
                 WCSelection {
@@ -803,7 +789,7 @@ ColumnLayout {
                 WCSwitch {
                     buttonIcon: "decimal_increase"; text: Translation.tr("Show Percentage")
                     checked: Config.options.bar.resources.showValue
-                    onCheckedChanged: { Config.options.bar.resources.showValue = checked; }
+                    onToggled: checked => { Config.options.bar.resources.showValue = checked; }
                 }
                 WCSpin {
                     icon: "av_timer"
@@ -812,7 +798,7 @@ ColumnLayout {
                     from: 100
                     to: 10000
                     stepSize: 100
-                    onValueChanged: {
+                    onEdited: value => {
                         Config.options.resources.updateInterval = value;
                     }
                 }
@@ -849,12 +835,12 @@ ColumnLayout {
                 WCSwitch {
                     buttonIcon: "keep"; text: Translation.tr("Pin media controls")
                     checked: Config.options.bar.media.alwaysVisible
-                    onCheckedChanged: { Config.options.bar.media.alwaysVisible = checked; }
+                    onToggled: checked => { Config.options.bar.media.alwaysVisible = checked; }
                 }
                 WCSwitch {
                     buttonIcon: "titlecase"; text: Translation.tr("Show only title")
                     checked: Config.options.bar.media.onlyTitle
-                    onCheckedChanged: { Config.options.bar.media.onlyTitle = checked; }
+                    onToggled: checked => { Config.options.bar.media.onlyTitle = checked; }
                 }
                 WCSpin {
                     icon: "width"
@@ -863,7 +849,7 @@ ColumnLayout {
                     from: 100
                     to: 500
                     stepSize: 10
-                    onValueChanged: {
+                    onEdited: value => {
                         Config.options.bar.media.maxWidth = value;
                     }
                 }
@@ -877,12 +863,12 @@ ColumnLayout {
                 WCSwitch {
                     buttonIcon: "visibility"; text: Translation.tr("Enable")
                     checked: Config.options.bar.tooltips.enable
-                    onCheckedChanged: { Config.options.bar.tooltips.enable = checked; }
+                    onToggled: checked => { Config.options.bar.tooltips.enable = checked; }
                 }
                 WCSwitch {
                     buttonIcon: "ads_click"; text: Translation.tr("Click to show")
                     checked: Config.options.bar.tooltips.clickToShow
-                    onCheckedChanged: { Config.options.bar.tooltips.clickToShow = checked; }
+                    onToggled: checked => { Config.options.bar.tooltips.clickToShow = checked; }
                     enabled: Config.options.bar.tooltips.enable
                 }
                 WCSelection {

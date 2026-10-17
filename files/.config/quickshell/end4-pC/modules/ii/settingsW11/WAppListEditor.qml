@@ -29,15 +29,7 @@ ColumnLayout {
         root.edited(l);
     }
     // Desktop entry for a pinned id: exact desktop id, then window class, then Quickshell's heuristic.
-    function lookup(id) {
-        const l = id.toLowerCase();
-        const apps = AppSearch.list;
-        return apps.find(e => e.id.toLowerCase() === l)
-            ?? apps.find(e => (e.startupClass ?? "").toLowerCase() === l)
-            ?? apps.find(e => e.id.toLowerCase().endsWith("." + l))
-            ?? DesktopEntries.heuristicLookup(id)
-            ?? null;
-    }
+    function lookup(id) { return AppSearch.entryFor(id); }
     function remove(i) {
         root.edited(root.apps.filter((_, k) => k !== i));
     }
@@ -55,7 +47,7 @@ ColumnLayout {
     component AppIconImage: IconImage {
         required property string appId
         implicitSize: 28
-        source: Quickshell.iconPath(AppSearch.guessIcon(appId), "image-missing")
+        source: AppSearch.iconPath(AppSearch.iconFor(appId), "image-missing")
     }
 
     component SmallIconButton: RippleButton {

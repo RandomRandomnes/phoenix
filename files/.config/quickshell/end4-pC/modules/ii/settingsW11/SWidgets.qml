@@ -44,7 +44,7 @@ ColumnLayout {
                     buttonIcon: "check"
                     text: Translation.tr("Enable")
                     checked: Config.options.background.widgets.clock.enable
-                    onCheckedChanged: {
+                    onToggled: checked => {
                         Config.options.background.widgets.clock.enable = checked;
                     }
                 }
@@ -54,7 +54,7 @@ ColumnLayout {
                     text: Translation.tr("Show only when locked")
                     enabled: WM.compositor !== "niri"
                     checked: Config.options.background.widgets.clock.showOnlyWhenLocked
-                    onCheckedChanged: {
+                    onToggled: checked => {
                         Config.options.background.widgets.clock.showOnlyWhenLocked = checked;
                     }
                 }
@@ -146,13 +146,13 @@ ColumnLayout {
                             buttonIcon: "vertical_distribute"
                             text: Translation.tr("Vertical")
                             checked: Config.options.background.widgets.clock.digital.vertical
-                            onCheckedChanged: { Config.options.background.widgets.clock.digital.vertical = checked }
+                            onToggled: checked => { Config.options.background.widgets.clock.digital.vertical = checked }
                         }
                         WCSwitch {
                             buttonIcon: "animation"
                             text: Translation.tr("Animate time change")
                             checked: Config.options.background.widgets.clock.digital.animateChange
-                            onCheckedChanged: { Config.options.background.widgets.clock.digital.animateChange = checked }
+                            onToggled: checked => { Config.options.background.widgets.clock.digital.animateChange = checked }
                         }
                     }
                     WCGroup {
@@ -161,13 +161,13 @@ ColumnLayout {
                             buttonIcon: "date_range"
                             text: Translation.tr("Show date")
                             checked: Config.options.background.widgets.clock.digital.showDate
-                            onCheckedChanged: { Config.options.background.widgets.clock.digital.showDate = checked }
+                            onToggled: checked => { Config.options.background.widgets.clock.digital.showDate = checked }
                         }
                         WCSwitch {
                             buttonIcon: "activity_zone"
                             text: Translation.tr("Use adaptive alignment")
                             checked: Config.options.background.widgets.clock.digital.adaptiveAlignment
-                            onCheckedChanged: { Config.options.background.widgets.clock.digital.adaptiveAlignment = checked }
+                            onToggled: checked => { Config.options.background.widgets.clock.digital.adaptiveAlignment = checked }
                         }
                     }
                 }
@@ -178,7 +178,7 @@ ColumnLayout {
                         buttonIcon: "auto_awesome"
                         text: Translation.tr("Automatic colors")
                         checked: Config.options.background.widgets.clock.color === ""
-                        onCheckedChanged: {
+                        onToggled: checked => {
                             if (checked) {
                                 Config.options.background.widgets.clock.color = ""
                             }
@@ -216,7 +216,7 @@ ColumnLayout {
                         from: 1
                         to: 1000
                         stopIndicatorValues: [350]
-                        onValueChanged: {
+                        onEdited: value => {
                             Config.options.background.widgets.clock.digital.font.weight = value;
                         }
                     }
@@ -229,7 +229,7 @@ ColumnLayout {
                         from: 50
                         to: 700
                         stopIndicatorValues: [90]
-                        onValueChanged: {
+                        onEdited: value => {
                             Config.options.background.widgets.clock.digital.font.size = value;
                         }
                     }
@@ -242,7 +242,7 @@ ColumnLayout {
                         from: 25
                         to: 125
                         stopIndicatorValues: [100]
-                        onValueChanged: {
+                        onEdited: value => {
                             Config.options.background.widgets.clock.digital.font.width = value;
                         }
                     }
@@ -253,7 +253,7 @@ ColumnLayout {
                         buttonIcon: "line_curve"
                         from: 0
                         to: 100
-                        onValueChanged: {
+                        onEdited: value => {
                             Config.options.background.widgets.clock.digital.font.roundness = value;
                         }
                     }
@@ -268,7 +268,7 @@ ColumnLayout {
                         buttonIcon: "wand_stars"
                         text: Translation.tr("Auto styling with Gemini")
                         checked: Config.options.background.widgets.clock.cookie.aiStyling
-                        onCheckedChanged: {
+                        onToggled: checked => {
                             Config.options.background.widgets.clock.cookie.aiStyling = checked;
                         }
                     }
@@ -277,7 +277,7 @@ ColumnLayout {
                         buttonIcon: "airwave"
                         text: Translation.tr("Use old sine wave cookie implementation")
                         checked: Config.options.background.widgets.clock.cookie.useSineCookie
-                        onCheckedChanged: {
+                        onToggled: checked => {
                             Config.options.background.widgets.clock.cookie.useSineCookie = checked;
                         }
                     }
@@ -289,7 +289,7 @@ ColumnLayout {
                         from: 0
                         to: 40
                         stepSize: 1
-                        onValueChanged: {
+                        onEdited: value => {
                             Config.options.background.widgets.clock.cookie.sides = value;
                         }
                     }
@@ -298,7 +298,7 @@ ColumnLayout {
                         buttonIcon: "autoplay"
                         text: Translation.tr("Constantly rotate")
                         checked: Config.options.background.widgets.clock.cookie.constantlyRotate
-                        onCheckedChanged: {
+                        onToggled: checked => {
                             Config.options.background.widgets.clock.cookie.constantlyRotate = checked;
                         }
                     }
@@ -313,7 +313,7 @@ ColumnLayout {
                             onEnabledChanged: {
                                 checked = Config.options.background.widgets.clock.cookie.hourMarks;
                             }
-                            onCheckedChanged: {
+                            onToggled: checked => {
                                 Config.options.background.widgets.clock.cookie.hourMarks = checked;
                             }
                         }
@@ -326,7 +326,7 @@ ColumnLayout {
                             onEnabledChanged: {
                                 checked = Config.options.background.widgets.clock.cookie.timeIndicators;
                             }
-                            onCheckedChanged: {
+                            onToggled: checked => {
                                 Config.options.background.widgets.clock.cookie.timeIndicators = checked;
                             }
                         }
@@ -536,7 +536,7 @@ ColumnLayout {
                         buttonIcon: "check"
                         text: Translation.tr("Enable")
                         checked: Config.options.background.widgets.clock.quote.enable
-                        onCheckedChanged: {
+                        onToggled: checked => {
                             Config.options.background.widgets.clock.quote.enable = checked;
                         }
                     }
@@ -545,7 +545,7 @@ ColumnLayout {
                         text: Translation.tr("Follow Clock Font")
                         enabled: Config.options.background.widgets.clock.style !== "pixel"
                         checked: Config.options.background.widgets.clock.quote.followClock
-                        onCheckedChanged: {
+                        onToggled: checked => {
                             Config.options.background.widgets.clock.quote.followClock = checked;
                         }
                     }
@@ -584,7 +584,7 @@ ColumnLayout {
                     buttonIcon: "check"
                     text: Translation.tr("Enable")
                     checked: Config.options.background.widgets.customImage.enable
-                    onCheckedChanged: {
+                    onToggled: checked => {
                         Config.options.background.widgets.customImage.enable = checked;
                     }
                 }
@@ -608,7 +608,7 @@ ColumnLayout {
                     buttonIcon: "photo_size_select_large"
                     text: Translation.tr("Image card")
                     checked: Config.options.background.widgets.imageCard.enable
-                    onCheckedChanged: {
+                    onToggled: checked => {
                         Config.options.background.widgets.imageCard.enable = checked;
                     }
                 }
@@ -646,7 +646,7 @@ ColumnLayout {
                     buttonIcon: "check"
                     text: Translation.tr("Enable")
                     checked: settingsVisualizer.entry.enable
-                    onCheckedChanged: {
+                    onToggled: checked => {
                         settingsVisualizer.entry.enable = checked;
                     }
                 }
@@ -717,7 +717,7 @@ ColumnLayout {
                     from: 50
                     to: 300
                     stopIndicatorValues: [100]
-                    onValueChanged: {
+                    onEdited: value => {
                         settingsVisualizer.entry.sensitivity = Math.round(value) / 100;
                     }
                 }
@@ -730,7 +730,7 @@ ColumnLayout {
                     from: 120
                     to: 600
                     stopIndicatorValues: [260]
-                    onValueChanged: {
+                    onEdited: value => {
                         settingsVisualizer.entry.height = Math.round(value);
                     }
                 }
@@ -743,7 +743,7 @@ ColumnLayout {
                     from: 200
                     to: 900
                     stopIndicatorValues: [380]
-                    onValueChanged: {
+                    onEdited: value => {
                         settingsVisualizer.entry.ringSize = Math.round(value);
                     }
                 }
@@ -764,7 +764,7 @@ ColumnLayout {
                     buttonIcon: "check"
                     text: Translation.tr("Enable")
                     checked: settingsCustomText.entry.enable
-                    onCheckedChanged: {
+                    onToggled: checked => {
                         settingsCustomText.entry.enable = checked;
                     }
                 }
@@ -773,7 +773,7 @@ ColumnLayout {
                     buttonIcon: "shadow"
                     text: Translation.tr("Shadow")
                     checked: settingsCustomText.entry.shadow
-                    onCheckedChanged: {
+                    onToggled: checked => {
                         settingsCustomText.entry.shadow = checked;
                     }
                 }
@@ -851,7 +851,7 @@ ColumnLayout {
                         from: 12
                         to: 400
                         stopIndicatorValues: [72]
-                        onValueChanged: {
+                        onEdited: value => {
                             settingsCustomText.entry.fontSize = Math.round(value);
                         }
                     }
@@ -894,7 +894,7 @@ ColumnLayout {
                         buttonIcon: "auto_awesome"
                         text: Translation.tr("Automatic colors")
                         checked: settingsCustomText.entry.color === ""
-                        onCheckedChanged: {
+                        onToggled: checked => {
                             if (checked) {
                                 settingsCustomText.entry.color = ""
                             }
@@ -1031,7 +1031,7 @@ ColumnLayout {
                                 Item { Layout.fillWidth: true }
                                 WCSwitch {
                                     checked: modelData.enabled
-                                    onCheckedChanged: {
+                                    onToggled: checked => {
                                         if (modelData.icon === "weather_mix")
                                             Config.options.background.widgets.weather.enable = checked
                                         else if (modelData.icon === "image")
@@ -1102,21 +1102,21 @@ ColumnLayout {
                         buttonIcon: "schedule"
                         text: Translation.tr("Clock")
                         checked: DesktopWidgets.isStarred("clock")
-                        onCheckedChanged: DesktopWidgets.setStarred("clock", checked)
+                        onToggled: checked => DesktopWidgets.setStarred("clock", checked)
                     }
                     WCSwitch {
                         Layout.fillWidth: true
                         buttonIcon: "graphic_eq"
                         text: Translation.tr("Visualizer")
                         checked: DesktopWidgets.isStarred("visualizer")
-                        onCheckedChanged: DesktopWidgets.setStarred("visualizer", checked)
+                        onToggled: checked => DesktopWidgets.setStarred("visualizer", checked)
                     }
                     WCSwitch {
                         Layout.fillWidth: true
                         buttonIcon: "image"
                         text: Translation.tr("Custom Image")
                         checked: DesktopWidgets.isStarred("customImage")
-                        onCheckedChanged: DesktopWidgets.setStarred("customImage", checked)
+                        onToggled: checked => DesktopWidgets.setStarred("customImage", checked)
                     }
                 }
             }
@@ -1130,7 +1130,7 @@ ColumnLayout {
                         buttonIcon: "grid_4x4"
                         text: Translation.tr("Show alignment grid while dragging")
                         checked: Config.options.background.showGrid
-                        onCheckedChanged: {
+                        onToggled: checked => {
                             Config.options.background.showGrid = checked;
                         }
                     }
@@ -1139,7 +1139,7 @@ ColumnLayout {
                         buttonIcon: "align_horizontal_center"
                         text: Translation.tr("Show snap lines when dropping")
                         checked: Config.options.background.showSnapLines
-                        onCheckedChanged: {
+                        onToggled: checked => {
                             Config.options.background.showSnapLines = checked;
                         }
                     }

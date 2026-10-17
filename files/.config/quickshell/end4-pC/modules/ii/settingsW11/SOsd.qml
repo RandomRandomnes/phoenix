@@ -24,7 +24,7 @@ ColumnLayout {
                     from: 100
                     to: 3000
                     stepSize: 100
-                    onValueChanged: {
+                    onEdited: value => {
                         Config.options.osd.timeout = value;
                     }
                 }

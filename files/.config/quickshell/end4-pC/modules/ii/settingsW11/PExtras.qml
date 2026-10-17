@@ -83,7 +83,7 @@ WPage {
             description: "A short guide to keyboard shortcuts, windows, updates, additional features and troubleshooting"
             WButton {
                 buttonText: "Open"
-                onClicked: Quickshell.execDetached(["qs", "-p", `${Quickshell.env("HOME")}/.config/quickshell/end4-pC/quick-start.qml`])
+                onClicked: Quickshell.execDetached([`${Quickshell.env("HOME")}/.local/bin/phoenix-open`, "quickstart"])
             }
         }
         WCard {
@@ -131,11 +131,14 @@ WPage {
             description: page.importApps.join(", ") + ". Applications that are already installed are skipped"
             WButton {
                 accent: true
-                buttonText: "Install"
-                onClicked: Quickshell.execDetached(["kitty", "--title", "Installing apps", "--",
-                    `${Quickshell.env("HOME")}/.local/bin/setup-apps`, "install", ...page.importApps])
+                buttonText: Tasks.isRunning("apps") ? "Installing…" : "Install"
+                enabled: !Tasks.isRunning("apps")
+                // a background job with its progress below (2026-10-16; was a terminal window)
+                onClicked: Tasks.run("apps", [`${Quickshell.env("HOME")}/.local/bin/setup-apps`, "install", ...page.importApps],
+                    { title: "Installing apps", askpassMessage: "Enter your password to install the apps" })
             }
         }
+        WJob { jobId: "apps" }
     }
 
     WSection {

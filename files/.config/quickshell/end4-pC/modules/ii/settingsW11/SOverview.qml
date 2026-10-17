@@ -23,7 +23,7 @@ ColumnLayout {
                     buttonIcon: "check"
                     text: Translation.tr("Enable")
                     checked: Config.options.overview.enable
-                    onCheckedChanged: {
+                    onToggled: checked => {
                         Config.options.overview.enable = checked;
                     }
                 }
@@ -31,7 +31,7 @@ ColumnLayout {
                     buttonIcon: "center_focus_strong"
                     text: Translation.tr("Center icons")
                     checked: Config.options.overview.centerIcons
-                    onCheckedChanged: {
+                    onToggled: checked => {
                         Config.options.overview.centerIcons = checked;
                     }
                 }
@@ -42,7 +42,7 @@ ColumnLayout {
                     from: 1
                     to: 100
                     stepSize: 1
-                    onValueChanged: {
+                    onEdited: value => {
                         Config.options.overview.scale = value / 100;
                     }
                 }
@@ -84,7 +84,7 @@ ColumnLayout {
                             from: 1
                             to: 20
                             stepSize: 1
-                            onValueChanged: {
+                            onEdited: value => {
                                 Config.options.overview.rows = value;
                             }
                         }
@@ -95,7 +95,7 @@ ColumnLayout {
                             from: 1
                             to: 20
                             stepSize: 1
-                            onValueChanged: {
+                            onEdited: value => {
                                 Config.options.overview.columns = value;
                             }
                         }

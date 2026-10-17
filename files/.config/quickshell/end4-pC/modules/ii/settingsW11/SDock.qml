@@ -22,25 +22,25 @@ ColumnLayout {
                     buttonIcon: "check"
                     text: Translation.tr("Enable")
                     checked: Config.options.dock.enable
-                    onCheckedChanged: { Config.options.dock.enable = checked }
+                    onToggled: checked => { Config.options.dock.enable = checked }
                 }
                 WCSwitch {
                     buttonIcon: "background_dot_small"
                     text: Translation.tr("Background")
                     checked: Config.options.dock.showBackground
-                    onCheckedChanged: { Config.options.dock.showBackground = checked }
+                    onToggled: checked => { Config.options.dock.showBackground = checked }
                 }
                 WCSwitch {
                     buttonIcon: "highlight_mouse_cursor"
                     text: Translation.tr("Hover to reveal")
                     checked: Config.options.dock.hoverToReveal
-                    onCheckedChanged: { Config.options.dock.hoverToReveal = checked }
+                    onToggled: checked => { Config.options.dock.hoverToReveal = checked }
                 }
                 WCSwitch {
                     buttonIcon: "push_pin"
                     text: Translation.tr("Pinned on startup")
                     checked: Config.options.dock.pinnedOnStartup
-                    onCheckedChanged: { Config.options.dock.pinnedOnStartup = checked }
+                    onToggled: checked => { Config.options.dock.pinnedOnStartup = checked }
                 }
             }
 
@@ -75,7 +75,7 @@ ColumnLayout {
                         from: 0
                         to: 40
                         stepSize: 1
-                        onValueChanged: { Config.options.dock.radius = value }
+                        onEdited: value => { Config.options.dock.radius = value }
                     }
                     WCColors {
                         icon: "format_paint"
@@ -89,14 +89,14 @@ ColumnLayout {
                         buttonIcon: "filter_frames"
                         text: Translation.tr("Follow frame color")
                         checked: Config.options.dock.followFrameColor
-                        onCheckedChanged: { Config.options.dock.followFrameColor = checked }
+                        onToggled: checked => { Config.options.dock.followFrameColor = checked }
                     }
                     WCSwitch {
                         enabled: Config.options.dock.style !== "hug"
                         buttonIcon: "border_style"
                         text: Translation.tr("Border")
                         checked: Config.options.dock.showBorder
-                        onCheckedChanged: { Config.options.dock.showBorder = checked }
+                        onToggled: checked => { Config.options.dock.showBorder = checked }
                     }
                     WCSpin {
                         enabled: Config.options.dock.showBorder && Config.options.dock.style !== "hug"
@@ -106,7 +106,7 @@ ColumnLayout {
                         from: 1
                         to: 10
                         stepSize: 1
-                        onValueChanged: { Config.options.dock.borderWidth = value }
+                        onEdited: value => { Config.options.dock.borderWidth = value }
                     }
                     WCColors {
                         enabled: Config.options.dock.showBorder && Config.options.dock.style !== "hug"
@@ -127,7 +127,7 @@ ColumnLayout {
                         buttonIcon: "preview"
                         text: Translation.tr("Window previews")
                         checked: Config.options.dock.showPreviews
-                        onCheckedChanged: { Config.options.dock.showPreviews = checked }
+                        onToggled: checked => { Config.options.dock.showPreviews = checked }
                     }
                     WCSpin {
                         icon: "photo_size_select_large"
@@ -136,7 +136,7 @@ ColumnLayout {
                         from: 20
                         to: 48
                         stepSize: 1
-                        onValueChanged: { Config.options.dock.iconSize = value }
+                        onEdited: value => { Config.options.dock.iconSize = value }
                     }
                     WCSpin {
                         icon: "space_bar"
@@ -145,7 +145,7 @@ ColumnLayout {
                         from: 0
                         to: 12
                         stepSize: 1
-                        onValueChanged: { Config.options.dock.iconSpacing = value }
+                        onEdited: value => { Config.options.dock.iconSpacing = value }
                     }
                 }
             }
@@ -157,25 +157,25 @@ ColumnLayout {
                         buttonIcon: "music_note"
                         text: Translation.tr("Media Player")
                         checked: Config.options.dock.showMedia
-                        onCheckedChanged: { Config.options.dock.showMedia = checked }
+                        onToggled: checked => { Config.options.dock.showMedia = checked }
                     }
                     WCSwitch {
                         buttonIcon: "keep"
                         text: Translation.tr("Show Pin Button")
                         checked: Config.options.dock.showPinButton
-                        onCheckedChanged: { Config.options.dock.showPinButton = checked }
+                        onToggled: checked => { Config.options.dock.showPinButton = checked }
                     }
                     WCSwitch {
                         buttonIcon: "apps"
                         text: Translation.tr("Show Apps Button")
                         checked: Config.options.dock.showAppsButton
-                        onCheckedChanged: { Config.options.dock.showAppsButton = checked }
+                        onToggled: checked => { Config.options.dock.showAppsButton = checked }
                     }
                     WCSwitch {
                         buttonIcon: "colors"
                         text: Translation.tr("Tint app icons")
                         checked: Config.options.dock.monochromeIcons
-                        onCheckedChanged: { Config.options.dock.monochromeIcons = checked }
+                        onToggled: checked => { Config.options.dock.monochromeIcons = checked }
                     }
                 }
             }

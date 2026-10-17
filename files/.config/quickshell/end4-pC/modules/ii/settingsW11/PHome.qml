@@ -200,7 +200,7 @@ WPage {
                         IconImage {
                             anchors.centerIn: parent
                             implicitSize: 28
-                            source: Quickshell.iconPath(AppSearch.guessIcon(modelData), "image-missing")
+                            source: AppSearch.iconPath(AppSearch.iconFor(modelData), "image-missing")
                         }
                     }
                 }

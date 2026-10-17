@@ -24,7 +24,7 @@ ColumnLayout {
                         buttonIcon: "select_window"
                         text: Translation.tr('Windows')
                         checked: Config.options.regionSelector.targetRegions.windows
-                        onCheckedChanged: {
+                        onToggled: checked => {
                             Config.options.regionSelector.targetRegions.windows = checked;
                         }
                     }
@@ -32,7 +32,7 @@ ColumnLayout {
                         buttonIcon: "right_panel_open"
                         text: Translation.tr('Layers')
                         checked: Config.options.regionSelector.targetRegions.layers
-                        onCheckedChanged: {
+                        onToggled: checked => {
                             Config.options.regionSelector.targetRegions.layers = checked;
                         }
                     }
@@ -40,7 +40,7 @@ ColumnLayout {
                         buttonIcon: "nearby"
                         text: Translation.tr('Content')
                         checked: Config.options.regionSelector.targetRegions.content
-                        onCheckedChanged: {
+                        onToggled: checked => {
                             Config.options.regionSelector.targetRegions.content = checked;
                         }
                     }
@@ -73,7 +73,7 @@ ColumnLayout {
                         buttonIcon: "point_scan"
                         text: Translation.tr("Show aim lines")
                         checked: Config.options.regionSelector.rect.showAimLines
-                        onCheckedChanged: {
+                        onToggled: checked => {
                             Config.options.regionSelector.rect.showAimLines = checked;
                         }
                     }
@@ -91,7 +91,7 @@ ColumnLayout {
                         from: 1
                         to: 20
                         stepSize: 1
-                        onValueChanged: {
+                        onEdited: value => {
                             Config.options.regionSelector.circle.strokeWidth = value;
                         }
                     }
@@ -103,7 +103,7 @@ ColumnLayout {
                         from: 0
                         to: 100
                         stepSize: 5
-                        onValueChanged: {
+                        onEdited: value => {
                             Config.options.regionSelector.circle.padding = value;
                         }
                     }

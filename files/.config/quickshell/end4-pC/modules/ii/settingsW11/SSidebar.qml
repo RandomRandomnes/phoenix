@@ -54,13 +54,13 @@ ColumnLayout {
                                 buttonIcon: "check"
                                 text: Translation.tr("Enable")
                                 checked: Config.options.sidebar.media.enable
-                                onCheckedChanged: { Config.options.sidebar.media.enable = checked }
+                                onToggled: checked => { Config.options.sidebar.media.enable = checked }
                             }
                             WCSwitch {
                                 buttonIcon: "radio_button_partial"
                                 text: Translation.tr("Follow Album Colors")
                                 checked: Config.options.sidebar.media.artColors
-                                onCheckedChanged: { Config.options.sidebar.media.artColors = checked }
+                                onToggled: checked => { Config.options.sidebar.media.artColors = checked }
                             }
                         }
                     }
@@ -166,7 +166,7 @@ ColumnLayout {
                             buttonIcon: "translate"
                             text: Translation.tr("Enable Translator")
                             checked: Config.options.sidebar.translator.enable
-                            onCheckedChanged: { Config.options.sidebar.translator.enable = checked }
+                            onToggled: checked => { Config.options.sidebar.translator.enable = checked }
                         }
                     }
                 }
@@ -183,7 +183,7 @@ ColumnLayout {
                     buttonIcon: "planner_banner_ad_pt"
                     text: Translation.tr('Banner')
                     checked: Config.options.sidebar.banner
-                    onCheckedChanged: {
+                    onToggled: checked => {
                         Config.options.sidebar.banner = checked;
                     }
                 }
@@ -192,7 +192,7 @@ ColumnLayout {
                     buttonIcon: "bottom_navigation"
                     text: Translation.tr('Bottom Group')
                     checked: Config.options.sidebar.bottomGroup
-                    onCheckedChanged: {
+                    onToggled: checked => {
                         Config.options.sidebar.bottomGroup = checked;
                     }
                 }
@@ -201,7 +201,7 @@ ColumnLayout {
                     buttonIcon: "music_note"
                     text: Translation.tr('Media Player')
                     checked: Config.options.sidebar.mediaPlayer
-                    onCheckedChanged: {
+                    onToggled: checked => {
                         Config.options.sidebar.mediaPlayer = checked;
                     }
                 }
@@ -210,7 +210,7 @@ ColumnLayout {
                     buttonIcon: "memory"
                     text: Translation.tr('Keep right sidebar loaded')
                     checked: Config.options.sidebar.keepRightSidebarLoaded
-                    onCheckedChanged: {
+                    onToggled: checked => {
                         Config.options.sidebar.keepRightSidebarLoaded = checked;
                     }
                 }
@@ -247,7 +247,7 @@ ColumnLayout {
                         from: 1
                         to: 8
                         stepSize: 1
-                        onValueChanged: {
+                        onEdited: value => {
                             Config.options.sidebar.quickToggles.android.columns = value;
                         }
                     }
@@ -261,7 +261,7 @@ ColumnLayout {
                         buttonIcon: "check"
                         text: Translation.tr("Enable")
                         checked: Config.options.sidebar.quickSliders.enable
-                        onCheckedChanged: {
+                        onToggled: checked => {
                             Config.options.sidebar.quickSliders.enable = checked;
                         }
                     }
@@ -271,7 +271,7 @@ ColumnLayout {
                         text: Translation.tr("Brightness")
                         enabled: Config.options.sidebar.quickSliders.enable
                         checked: Config.options.sidebar.quickSliders.showBrightness
-                        onCheckedChanged: {
+                        onToggled: checked => {
                             Config.options.sidebar.quickSliders.showBrightness = checked;
                         }
                     }
@@ -281,7 +281,7 @@ ColumnLayout {
                         text: Translation.tr("Volume")
                         enabled: Config.options.sidebar.quickSliders.enable
                         checked: Config.options.sidebar.quickSliders.showVolume
-                        onCheckedChanged: {
+                        onToggled: checked => {
                             Config.options.sidebar.quickSliders.showVolume = checked;
                         }
                     }
@@ -291,7 +291,7 @@ ColumnLayout {
                         text: Translation.tr("Microphone")
                         enabled: Config.options.sidebar.quickSliders.enable
                         checked: Config.options.sidebar.quickSliders.showMic
-                        onCheckedChanged: {
+                        onToggled: checked => {
                             Config.options.sidebar.quickSliders.showMic = checked;
                         }
                     }
@@ -312,38 +312,38 @@ ColumnLayout {
                         buttonIcon: "check"
                         text: Translation.tr("Enable")
                         checked: Config.options.sidebar.cornerOpen.enable
-                        onCheckedChanged: { Config.options.sidebar.cornerOpen.enable = checked }
+                        onToggled: checked => { Config.options.sidebar.cornerOpen.enable = checked }
                     }
                     WCSwitch {
                         buttonIcon: "highlight_mouse_cursor"
                         text: Translation.tr("Hover to trigger")
                         checked: Config.options.sidebar.cornerOpen.clickless
-                        onCheckedChanged: { Config.options.sidebar.cornerOpen.clickless = checked }
+                        onToggled: checked => { Config.options.sidebar.cornerOpen.clickless = checked }
                     }
                     WCSwitch {
                         buttonIcon: "vertical_align_bottom"
                         text: Translation.tr("Place at bottom")
                         checked: Config.options.sidebar.cornerOpen.bottom
-                        onCheckedChanged: { Config.options.sidebar.cornerOpen.bottom = checked }
+                        onToggled: checked => { Config.options.sidebar.cornerOpen.bottom = checked }
                     }
                     WCSwitch {
                         buttonIcon: "unfold_more_double"
                         text: Translation.tr("Value scroll")
                         checked: Config.options.sidebar.cornerOpen.valueScroll
-                        onCheckedChanged: { Config.options.sidebar.cornerOpen.valueScroll = checked }
+                        onToggled: checked => { Config.options.sidebar.cornerOpen.valueScroll = checked }
                     }
                     WCSwitch {
                         buttonIcon: "visibility"
                         text: Translation.tr("Visualize region")
                         checked: Config.options.sidebar.cornerOpen.visualize
-                        onCheckedChanged: { Config.options.sidebar.cornerOpen.visualize = checked }
+                        onToggled: checked => { Config.options.sidebar.cornerOpen.visualize = checked }
                     }
                     WCSwitch {
                         enabled: Config.options.sidebar.cornerOpen.clickless
                         buttonIcon: "ads_click"
                         text: Translation.tr("Force hover at absolute corner")
                         checked: Config.options.sidebar.cornerOpen.clicklessCornerEnd
-                        onCheckedChanged: { Config.options.sidebar.cornerOpen.clicklessCornerEnd = checked }
+                        onToggled: checked => { Config.options.sidebar.cornerOpen.clicklessCornerEnd = checked }
                     }
                     WCSpin {
                         enabled: Config.options.sidebar.cornerOpen.clickless
@@ -351,21 +351,21 @@ ColumnLayout {
                         text: Translation.tr("Vertical offset")
                         value: Config.options.sidebar.cornerOpen.clicklessCornerVerticalOffset
                         from: 0; to: 20; stepSize: 1
-                        onValueChanged: { Config.options.sidebar.cornerOpen.clicklessCornerVerticalOffset = value }
+                        onEdited: value => { Config.options.sidebar.cornerOpen.clicklessCornerVerticalOffset = value }
                     }
                     WCSpin {
                         icon: "arrow_range"
                         text: Translation.tr("Region width")
                         value: Config.options.sidebar.cornerOpen.cornerRegionWidth
                         from: 1; to: 300; stepSize: 1
-                        onValueChanged: { Config.options.sidebar.cornerOpen.cornerRegionWidth = value }
+                        onEdited: value => { Config.options.sidebar.cornerOpen.cornerRegionWidth = value }
                     }
                     WCSpin {
                         icon: "height"
                         text: Translation.tr("Region height")
                         value: Config.options.sidebar.cornerOpen.cornerRegionHeight
                         from: 1; to: 300; stepSize: 1
-                        onValueChanged: { Config.options.sidebar.cornerOpen.cornerRegionHeight = value }
+                        onEdited: value => { Config.options.sidebar.cornerOpen.cornerRegionHeight = value }
                     }
                 }
             }

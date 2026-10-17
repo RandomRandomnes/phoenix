@@ -19,6 +19,7 @@ WCard {
     property real textWidth: 120
     readonly property bool pressed: slider.pressed
     signal moved()
+    signal edited(real value)   // the user moved it (2026-10-16: `value` stays bound to the page's setting)
 
     title: root.showLabel ? root.text : ""
     icon: root.buttonIcon
@@ -39,7 +40,10 @@ WCard {
         value: root.value
         stopIndicatorValues: root.stopIndicatorValues
         onMoved: {
-            root.value = slider.value;
+            const v = slider.value;
+            root.edited(v);
+            if (root.value !== v) root.value = v;
+            slider.value = Qt.binding(() => root.value);
             root.moved();
         }
     }

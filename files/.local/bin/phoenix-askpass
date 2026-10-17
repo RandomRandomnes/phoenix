@@ -1,0 +1,25 @@
+#!/bin/bash
+# phoenix-askpass (Phoenix, 2026-10-16): SUDO_ASKPASS helper that asks for the password in the shell's own password
+# dialog (the same one polkit uses, services/PolkitService.qml), so admin jobs started from the shell (updates, app
+# installs) need no terminal. sudo runs it with its prompt as $1 and reads the password from stdout.
+#   PHOENIX_ASKPASS_MESSAGE   the sentence shown in the dialog (default: what sudo says)
+# Without a running shell it falls back to KDE's ksshaskpass when that is installed; otherwise it fails (sudo then
+# reports that no password was given).
+msg="${PHOENIX_ASKPASS_MESSAGE:-${1:-Enter your password}}"
+msg="${msg%:}"
+
+if qs list -c end4-pC 2>/dev/null | grep -q '^Instance'; then
+    dir="${XDG_RUNTIME_DIR:-/tmp}"
+    fifo=$(mktemp -u "$dir/phoenix-askpass.XXXXXX") || exit 1
+    ( umask 077; mkfifo "$fifo" ) || exit 1
+    trap 'rm -f "$fifo"' EXIT
+    qs -c end4-pC ipc call askpass ask "$fifo" "$msg" >/dev/null 2>&1 || exit 1
+    # wait up to 5 minutes for the answer; an empty line means Cancel
+    answer=""
+    IFS= read -r -t 300 answer < "$fifo" || exit 1
+    [ -n "$answer" ] || exit 1
+    printf '%s\n' "$answer"
+    exit 0
+fi
+command -v ksshaskpass >/dev/null && exec ksshaskpass "$msg"
+exit 1

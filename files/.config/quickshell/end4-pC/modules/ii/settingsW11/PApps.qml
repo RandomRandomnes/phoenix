@@ -24,7 +24,7 @@ Item {
     component AppIconImage: IconImage {
         property string iconName
         implicitSize: 28
-        source: Quickshell.iconPath(iconName, "application-x-executable")
+        source: AppSearch.iconPath(iconName, "application-x-executable")
     }
 
     // ── Overview ───────────────────────────────────────────────────
@@ -64,6 +64,7 @@ Item {
                 return l.sort((a, b) => a.name.localeCompare(b.name));
             }
             function uninstall(entry) { AppSearch.uninstall(entry) }   // shared with the Super menu's right-click menu
+            WJob { jobId: "uninstall" }
 
             WCard {
                 icon: "search"
@@ -100,7 +101,15 @@ Item {
                         description: modelData.genericName || modelData.comment || ""
                         leading: Component { AppIconImage { iconName: appRow.modelData.icon } }
                         WButton { buttonText: "Open"; onClicked: { appRow.modelData.execute(); GlobalStates.settingsOpen = false; } }
-                        WButton { buttonText: "Uninstall"; onClicked: ip.uninstall(appRow.modelData) }
+                        WButton {
+                            // two clicks (2026-10-16): it uninstalls in the background, no terminal to say no in
+                            property bool armed: false
+                            buttonText: armed ? "Confirm" : "Uninstall"
+                            accent: armed
+                            enabled: !Tasks.isRunning("uninstall")
+                            onClicked: { if (!armed) { armed = true; disarm.restart(); return } armed = false; ip.uninstall(appRow.modelData) }
+                            Timer { id: disarm; interval: 5000; onTriggered: parent.armed = false }
+                        }
                     }
                 }
             }

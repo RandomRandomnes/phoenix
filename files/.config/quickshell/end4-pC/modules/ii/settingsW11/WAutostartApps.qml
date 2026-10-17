@@ -84,7 +84,7 @@ ColumnLayout {
                 buttonIcon: "check"
                 text: Translation.tr("Enable")
                 checked: root.autostart.enable
-                onCheckedChanged: root.autostart.enable = checked
+                onToggled: checked => root.autostart.enable = checked
             }
         }
 
@@ -208,7 +208,7 @@ ColumnLayout {
 
                     property bool ready: false
                     Component.onCompleted: ready = true
-                    onValueChanged: if (ready) root.setField(index, "workspace", value)
+                    onEdited: value => if (ready) root.setField(index, "workspace", value)
                 }
 
                 WCSpin {
@@ -221,7 +221,7 @@ ColumnLayout {
 
                     property bool ready: false
                     Component.onCompleted: ready = true
-                    onValueChanged: if (ready) root.setField(index, "delay", value)
+                    onEdited: value => if (ready) root.setField(index, "delay", value)
                 }
             }
         }

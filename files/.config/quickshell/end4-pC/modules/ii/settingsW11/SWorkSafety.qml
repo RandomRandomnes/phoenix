@@ -29,7 +29,7 @@ ColumnLayout {
                     buttonIcon: "assignment"
                     text: Translation.tr("Hide clipboard images copied from sussy sources")
                     checked: Config.options.workSafety.enable.clipboard
-                    onCheckedChanged: {
+                    onToggled: checked => {
                         Config.options.workSafety.enable.clipboard = checked;
                     }
                 }
@@ -37,7 +37,7 @@ ColumnLayout {
                     buttonIcon: "wallpaper"
                     text: Translation.tr("Hide sussy/anime wallpapers")
                     checked: Config.options.workSafety.enable.wallpaper
-                    onCheckedChanged: {
+                    onToggled: checked => {
                         Config.options.workSafety.enable.wallpaper = checked;
                     }
                 }

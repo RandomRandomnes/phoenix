@@ -8,6 +8,7 @@
 #   phoenix-open taskmanager [page]    Settings › Apps › Task manager (Phoenix's Task Manager by default)
 #   phoenix-open volume                the volume mixer (config apps.volumeMixer)
 #   phoenix-open settings [page [sub]] Phoenix Settings (in KDE Plasma: KDE's System Settings)
+#   phoenix-open quickstart [page]     the Quick Start guide (a window of the shell; its own program without one)
 CONFIG="$HOME/.config/illogical-impulse/config.json"
 app() {   # config apps.<key>
     python3 -c 'import json,sys
@@ -47,6 +48,13 @@ case "$what" in
             else exec qs -c end4-pC ipc call settings open; fi
         fi
         exec systemsettings ;;
+    quickstart)
+        running=0; qs list -c end4-pC 2>/dev/null | grep -q '^Instance' && running=1
+        for _ in $(seq 1 $(( running ? 15 : 1 ))); do   # a shell still starting may not answer yet
+            qs -c end4-pC ipc call quickStart open "${1:-}" >/dev/null 2>&1 && exit 0
+            [ $running = 1 ] && sleep 0.3
+        done
+        QUICK_START_PAGE="${1:-}" exec qs -p "$HOME/.config/quickshell/end4-pC/quick-start.qml" ;;
     *)
-        sed -n '2,11p' "$0" | sed 's/^# \{0,1\}//'; exit 1 ;;
+        sed -n '2,12p' "$0" | sed 's/^# \{0,1\}//'; exit 1 ;;
 esac
