@@ -1,5 +1,11 @@
 # Changelog
 
+## custom 2.453 (2026-10-17, fix)
+- Wine/X11 tray icons (RSI Launcher) come back after the shell restarts
+- Icons picked by name show again (Settings › Taskbar › Left sidebar button, sidebar)
+- Wallpaper Engine watcher no longer keeps running after the shell stops
+- Bar colour layers fixed (StyledRectangle)
+
 ## custom 2.443 (2026-10-17, fix)
 - Settings › Apps was blank: a syntax error on the Startup page broke the whole section (fixed)
 

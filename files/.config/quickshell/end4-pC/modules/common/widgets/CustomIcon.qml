@@ -14,17 +14,24 @@ Item {
     property string iconFolder: FileUtils.folderUrl(root.customFolder) || Qt.resolvedUrl(Quickshell.shellPath("assets/icons"))
     width: 30
     height: 30
+    onSourceChanged: iconImage.attempt = 0
     
     IconImage {
         id: iconImage
         anchors.fill: parent
+        // icon names are stored without the file extension (IconPickerGrid), some setup profiles name the plain icon
+        // ("spark" for spark-symbolic.svg): try those files in turn (Phoenix, 2026-10-17)
+        property int attempt: 0
+        readonly property bool bareName: root.source !== "" && !root.source.includes("/") && !/\.(svg|png)$/.test(root.source)
+        readonly property var suffixes: [".svg", "-symbolic.svg", ".png"]
         source: {
-            const fullPathWhenSourceIsIconName = iconFolder + "/" + root.source;
-            if (iconFolder && fullPathWhenSourceIsIconName) {
-                return fullPathWhenSourceIsIconName
+            if (root.source === "") return "";
+            if (iconFolder && !root.source.includes("/")) {
+                return iconFolder + "/" + root.source + (bareName ? suffixes[attempt] : "")
             }
             return root.source
         }
+        onStatusChanged: if (status === Image.Error && bareName && attempt < suffixes.length - 1) attempt++
         implicitSize: root.height
     }
 

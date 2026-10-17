@@ -19,6 +19,16 @@ Singleton {
 
     // Icons that came through the X11 tray bridge (Wine/Proton programs such as RSI Launcher) have no title or tooltip,
     // only the number of their X11 window as id: look up the program's name (scripts/tray/xembed-name.py; 2026-10-17)
+    // after a shell restart the bridge still holds its icons but doesn't announce them again (scripts/tray/reregister.py)
+    Timer {
+        running: true
+        interval: 3000
+        onTriggered: reregisterProc.running = true
+    }
+    Process {
+        id: reregisterProc
+        command: ["python3", Quickshell.shellPath("scripts/tray/reregister.py")]
+    }
     property var xembedNames: ({})
     property var xembedAsked: ({})
     function resolveXembed(id) {

@@ -59,15 +59,18 @@
   "format": "custom-fixes",
   "line": "custom",
   "version": 2.99,
-  "label": "2.443",
+  "label": "2.453",
   "kind": "fix",
   "date": "2026-10-17",
   "publisher": "RandomRandomnes",
   "notes": [
-    "Settings \u203a Apps was blank: a syntax error on the Startup page broke the whole section (fixed)"
+    "Wine/X11 tray icons (RSI Launcher) come back after the shell restarts",
+    "Icons picked by name show again (Settings \u203a Taskbar \u203a Left sidebar button, sidebar)",
+    "Wallpaper Engine watcher no longer keeps running after the shell stops",
+    "Bar colour layers fixed (StyledRectangle)"
   ],
   "payload": "fixes.tar.gz",
-  "payloadSha256": "8a4ba25c5e9e097145b61a6562831c10c8eeec8c9431b06e371be4f6ad41090c",
+  "payloadSha256": "f3934f9d4b98dbba9f6c42d571f5a7201b94877852e5576916dfe2adb6d8ddd9",
   "files": {
     ".config/hypr/custom/env.lua": "b97ee35362ed653cec2880f9adfdf81698e2f55577aef1dffcb321e4d713794f",
     ".config/hypr/custom/execs.lua": "64197ff280790bc529a0dd1938985c42783a1b17f59ec709ff515f8fa0f5d6b2",
@@ -233,7 +236,7 @@
     ".config/quickshell/end4-pC/modules/common/widgets/ContentSubsection.qml": "5c6c4c1f0931e6a8374289bbdd396b2707d670fdf3487a78db5efe6ea9fc8374",
     ".config/quickshell/end4-pC/modules/common/widgets/ContentSubsectionLabel.qml": "d25a1632eb85ae03988a0db8f89523e09bbf5de0eb30e20bebab2b7227c72c82",
     ".config/quickshell/end4-pC/modules/common/widgets/CustomColorSelectionArray.qml": "d3e7989f5cf1ec1d8f04e6dafd38323a5effdee3637d0cda2dff71274fba87cb",
-    ".config/quickshell/end4-pC/modules/common/widgets/CustomIcon.qml": "c7574bd96c2e4cb2e967c6331d3e6d01c792daf69b46c014189b84edede57696",
+    ".config/quickshell/end4-pC/modules/common/widgets/CustomIcon.qml": "815a4a7333a89d8d46b40f79a239106ab2b95fc854c228b873f38c7ba8ee7fd6",
     ".config/quickshell/end4-pC/modules/common/widgets/DashboardCard.qml": "52c628ba7141f4656e0533368e97bf68a08f723163ce4051f01ad91306a1b7f8",
     ".config/quickshell/end4-pC/modules/common/widgets/DashedBorder.qml": "82a28e38e7ba7ac49e42967d7b3eeff59a676a639a8eb18f155c13aa6a6a8826",
     ".config/quickshell/end4-pC/modules/common/widgets/DialogButton.qml": "cec513b1d9fb6f40468c53e3b74566509c2b0a84b9ecbdae3f6b391daec07711",
@@ -329,7 +332,7 @@
     ".config/quickshell/end4-pC/modules/common/widgets/StyledPopup.qml": "98bf275d3a96496d9a81bbc8b58253970fd5ee3a3b2d9cd7c344a9cbe6947b2a",
     ".config/quickshell/end4-pC/modules/common/widgets/StyledProgressBar.qml": "0b93733e6a8905a58e095c1cde98f16315a6c6145e88e7cbb077eab277431ba8",
     ".config/quickshell/end4-pC/modules/common/widgets/StyledRadioButton.qml": "1fb0263d066d04ad0bc1ef215d36800415d7f2d7927a97f31ed3460c1428215b",
-    ".config/quickshell/end4-pC/modules/common/widgets/StyledRectangle.qml": "1ac4229bd1c3762e82b74c3ec4b7e41a0cfd005c78596cc96f5ca540fe9ba8c8",
+    ".config/quickshell/end4-pC/modules/common/widgets/StyledRectangle.qml": "3299ee2b2fdc6b61b8572b20e35c037b66e295054014a8c6c6802bfd135c012c",
     ".config/quickshell/end4-pC/modules/common/widgets/StyledRectangularShadow.qml": "cbf5ecf0d435a0e58b73f2daa4a9aa4c8337da4c824e3a2b174105f619a69ff5",
     ".config/quickshell/end4-pC/modules/common/widgets/StyledScrollBar.qml": "6379d81f803b6591e835fac86a4d06a2fdde4e68a992bcbd192238fc86aa2f21",
     ".config/quickshell/end4-pC/modules/common/widgets/StyledSlider.qml": "2ff0798dd0f0deccbe044c4284bbbbe05666b96ee17afd3937b89ac82994f93e",
@@ -853,10 +856,11 @@
     ".config/quickshell/end4-pC/scripts/thumbnails/thumbgen-venv.sh": "2e303a0ee70608c8ad40419f8bdf3265c5c651bddeb0c43707f926c16fcc1703",
     ".config/quickshell/end4-pC/scripts/thumbnails/thumbgen.py": "6e9be3b829ce95523e465f4e6c6ae5fa8ee186a762acaffe81fd03bd602d6fd3",
     ".config/quickshell/end4-pC/scripts/tray/context-menu.sh": "3c681f33e1539feb32c071464e328c685e9307f11f79194c833c44bb740cef81",
+    ".config/quickshell/end4-pC/scripts/tray/reregister.py": "679c99094caf2a8af9ae37913b1fe446a8ac4c203803afcccd03b71f4231029b",
     ".config/quickshell/end4-pC/scripts/tray/xembed-name.py": "e06479e99e1d06129109873e1653a53c5ad94f76c5c54c53b83c2fbedb42d977",
     ".config/quickshell/end4-pC/scripts/videos/record.sh": "92ebc771c9c3e8ff65f67824db262ca5023de76f45a6dcde96ba7e586972dce4",
     ".config/quickshell/end4-pC/scripts/wallpapers/stream-wallpapers.py": "bd88e6e39d7a95a751814fb68cff8ad7c3c88368d8ae38fef7158c4528c1b956",
-    ".config/quickshell/end4-pC/scripts/wallpapers/we-watch.py": "fa3e9a4af552beb96e4bc368242da9a7ff5793ffb41d22d9a3b24ba795bf2cb5",
+    ".config/quickshell/end4-pC/scripts/wallpapers/we-watch.py": "91aa37d72c3f400c98c56afc2b08e7751d658d9f5083d3cc0d666a3507a81c9e",
     ".config/quickshell/end4-pC/services/Ai.qml": "49b05dc4ae48304a57814f1efa0b450775b5b12393899baa70d5c20f792fde5d",
     ".config/quickshell/end4-pC/services/AppSearch.qml": "0cc9436ba4cdd3013e300ea9a2690acc8a01d09da28969f1bf112b0552be7906",
     ".config/quickshell/end4-pC/services/Audio.qml": "d34b257a74a8fa68990ef2a49f780ec5720e8099a162a3998d9073882eacef90",
@@ -927,7 +931,7 @@
     ".config/quickshell/end4-pC/services/TimerService.qml": "adf8fd321f660145a9a06ff0d037580e1ce741ca1f581b3d47371cdbd77264e1",
     ".config/quickshell/end4-pC/services/Todo.qml": "044f5ac9d5aba709f7d4b0a5de6388e5ce9fdb3d491834285a374a4399407037",
     ".config/quickshell/end4-pC/services/Translation.qml": "eb6faa824eb7471cd7115e033780640a71b53803ab6ea1decf29d25f83bc56d4",
-    ".config/quickshell/end4-pC/services/TrayService.qml": "cd2b6aaee0e228981cb8e61d2fb2d3c1553532be313e3dfd62ab24fb134cc35e",
+    ".config/quickshell/end4-pC/services/TrayService.qml": "8778621264fe4cb3f9467c4e7211162e73c72cd26a0d0cd495df5a422beb84c5",
     ".config/quickshell/end4-pC/services/Updates.qml": "bc2d283860bc10754696ae41fc2a667d46e744ccc27f8d3d8a8585c11336705f",
     ".config/quickshell/end4-pC/services/Vpn.qml": "329895e971fdfa17789527a525ccb9c55125e9c1c015abba83fef8014b11544b",
     ".config/quickshell/end4-pC/services/WM.qml": "9edd4c6839615bd26e05768b8baa4b61014eef1b9f30ea4cf167db5db1774b60",
@@ -1083,7 +1087,11 @@
     ".local/share/setup-profiles/stock-config.json": "5814a18a9aa1038cd74764efc268ca12b0ba8599dd7255799d8729bc5b80a9f8"
   },
   "changed": [
-    ".config/quickshell/end4-pC/modules/ii/settingsW11/WAutostartApps.qml"
+    ".config/quickshell/end4-pC/modules/common/widgets/CustomIcon.qml",
+    ".config/quickshell/end4-pC/modules/common/widgets/StyledRectangle.qml",
+    ".config/quickshell/end4-pC/scripts/tray/reregister.py",
+    ".config/quickshell/end4-pC/scripts/wallpapers/we-watch.py",
+    ".config/quickshell/end4-pC/services/TrayService.qml"
   ],
   "test": false
 }

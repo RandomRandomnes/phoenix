@@ -11,12 +11,15 @@ Rectangle {
     enum ContentLayer { Background, Pane, Group, Subgroup, Control }
     property var contentLayer: StyledRectangle.ContentLayer.Pane // To appropriately add effects like shadows/3d-ization
 
-    color: switch(contentLayer) {
-        case StyledRectangle.ContentLayer.Background: C.Appearance.colors.colLayer0;
-        case StyledRectangle.ContentLayer.Pane: C.Appearance.colors.colLayer1;
-        case StyledRectangle.ContentLayer.Group: C.Appearance.colors.colLayer2;
-        case StyledRectangle.ContentLayer.Subgroup: C.Appearance.colors.colLayer3;
-        case StyledRectangle.ContentLayer.Control: C.Appearance.colors.colLayer4;
-        default: C.Appearance.colors.colLayer1;
+    // each case returns (it used to fall through to the last colour, so every layer looked like Pane; 2026-10-17)
+    color: {
+        switch (contentLayer) {
+        case StyledRectangle.ContentLayer.Background: return C.Appearance.colors.colLayer0;
+        case StyledRectangle.ContentLayer.Pane: return C.Appearance.colors.colLayer1;
+        case StyledRectangle.ContentLayer.Group: return C.Appearance.colors.colLayer2;
+        case StyledRectangle.ContentLayer.Subgroup: return C.Appearance.colors.colLayer3;
+        case StyledRectangle.ContentLayer.Control: return C.Appearance.colors.colLayer4;
+        default: return C.Appearance.colors.colLayer1;
+        }
     }
 }

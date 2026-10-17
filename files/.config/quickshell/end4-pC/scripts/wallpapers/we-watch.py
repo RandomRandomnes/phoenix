@@ -43,13 +43,21 @@ def renderers():
 
 def main():
     last = None
+    parent = os.getppid()
     while True:
+        # the shell went away (crash, restart): stop, the next shell starts its own watcher. Without this the old
+        # watcher only noticed on its next change of output, so copies piled up (bug check 2026-10-17)
+        if os.getppid() != parent:
+            return
         try:
             cur = json.dumps({"procs": renderers(), "muted": os.path.exists(MUTED)})
         except Exception as e:   # keep going: a vanished process mid-read, etc.
             cur = last or json.dumps({"procs": [], "muted": False, "error": str(e)})
         if cur != last:
-            print(cur, flush=True)
+            try:
+                print(cur, flush=True)
+            except BrokenPipeError:
+                return
             last = cur
         time.sleep(INTERVAL)
 
