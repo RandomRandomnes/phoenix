@@ -486,7 +486,7 @@ Singleton {
                 if (f.isDir) Quickshell.execDetached([`${Quickshell.env("HOME")}/.local/bin/phoenix-open`, "files", f.path]);
                 else Quickshell.execDetached(["xdg-open", f.path]);
             },
-            actions: f.isDir ? [] : [resultComp.createObject(null, {
+            actions: (f.isDir ? [] : [resultComp.createObject(null, {
                 name: Translation.tr("Open the folder"),
                 iconName: "folder_open",
                 iconType: LauncherSearchResult.IconType.Material,
@@ -494,7 +494,16 @@ Singleton {
                     GlobalStates.overviewOpen = false;
                     Quickshell.execDetached([`${Quickshell.env("HOME")}/.local/bin/phoenix-open`, "files", f.path.substring(0, f.path.lastIndexOf("/"))]);
                 }
-            })]
+            })]).concat([resultComp.createObject(null, {
+                // the Super menu's Pinned tab (P14, 2026-10-16)
+                name: Config.options.overview.pinnedItems.includes(f.path) ? Translation.tr("Unpin from Super menu") : Translation.tr("Pin to Super menu"),
+                iconName: Config.options.overview.pinnedItems.includes(f.path) ? "keep_off" : "keep",
+                iconType: LauncherSearchResult.IconType.Material,
+                execute: () => {
+                    const o = Config.options.overview;
+                    o.pinnedItems = o.pinnedItems.includes(f.path) ? o.pinnedItems.filter(p => p !== f.path) : o.pinnedItems.concat([f.path]);
+                }
+            })])
         }));
         const commandResultObject = resultComp.createObject(null, {
             name: StringUtils.cleanPrefix(root.query, Config.options.search.prefix.shellCommand).replace("file://", ""),

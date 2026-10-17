@@ -4,6 +4,8 @@
   files.py serve          read one query per line on stdin, answer one JSON line each:
                           {"q": query, "results": [{"path", "name", "dir", "isDir", "recent"}]}
   files.py query <text>   one answer, for testing
+  files.py items [path…]  the Super menu's Recent / Pinned tabs (P14, 2026-10-16): {"recent": [{path, name, dir,
+                          isDir, when}], "pinned": [{path, name, dir, isDir, exists}]} for the paths given (pinned)
 
 No indexer needed: the home folder is scanned in memory (shallow folders first, hidden folders skipped, at most
 MAX_ENTRIES names, so a big game library can't crowd out documents) and scanned again when the index is older than
@@ -62,6 +64,39 @@ def ensure_index():
             _index = build()
             _built = time.time()
     return _index
+
+
+def recent_entries(limit=40):
+    """[(path, modified ISO time)] newest first, only files and folders that still exist"""
+    try:
+        with open(RECENT, errors="ignore") as f:
+            text = f.read()
+    except OSError:
+        return []
+    items = re.findall(r'<bookmark href="file://([^"]+)"[^>]*modified="([^"]+)"', text)
+    items.sort(key=lambda x: x[1], reverse=True)
+    out, seen = [], set()
+    for href, when in items:
+        p = urllib.parse.unquote(href)
+        if p in seen or not os.path.exists(p):
+            continue
+        seen.add(p)
+        out.append((p, when))
+        if len(out) >= limit:
+            break
+    return out
+
+
+def describe(p):
+    d = os.path.dirname(p)
+    return {"path": p, "name": os.path.basename(p.rstrip("/")) or p, "dir": "~" + d[len(HOME):] if d.startswith(HOME) else d,
+            "isDir": os.path.isdir(p)}
+
+
+def items(pinned):
+    rec = [dict(describe(p), when=w) for p, w in recent_entries()]
+    pin = [dict(describe(p), exists=os.path.exists(p)) for p in pinned]
+    return {"recent": rec, "pinned": pin}
 
 
 def recent_files():
@@ -126,6 +161,9 @@ def main():
     a = sys.argv[1:]
     if a[:1] == ["query"]:
         print(json.dumps({"q": " ".join(a[1:]), "results": search(" ".join(a[1:]))}, indent=1))
+        return 0
+    if a[:1] == ["items"]:
+        print(json.dumps(items(a[1:])))
         return 0
     if a[:1] == ["serve"]:
         threading.Thread(target=ensure_index, daemon=True).start()   # warm up while the user types

@@ -1,5 +1,9 @@
 # Changelog
 
+## custom 2.413 (2026-10-16, fix)
+- Super menu: Apps, Recent and Pinned tabs in the app grid; recent files and pinned files and folders open with one click
+- Right-click a file there: open, open its folder, pin or unpin, remove from the list, copy the path; file search results can be pinned too
+
 ## custom 2.403 (2026-10-16, fix)
 - Updates install in the background with progress in Settings › Update; the password is asked in Phoenix's own dialog, only when packages need it, and no terminal opens (Ask first mode still shows the list)
 - Password change, sign-in at startup, Phone Link setup, cleanup, app installs and uninstalling also work without terminal windows

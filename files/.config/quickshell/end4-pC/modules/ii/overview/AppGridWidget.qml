@@ -9,6 +9,7 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Widgets
+import Quickshell.Io
 
 Item {
     id: root
@@ -61,7 +62,7 @@ Item {
         }
     }
     onEntriesChanged: syncModel()
-    Component.onCompleted: syncModel()
+    Component.onCompleted: { syncModel(); root.refreshFiles(); }
 
     // Drag state: the app at dragFrom is shown at slot dragTo, the others shift to make room.
     property int dragFrom: -1
@@ -104,7 +105,62 @@ Item {
         }
     }
 
+    // ── Apps / Recent / Pinned tabs (P14, 2026-10-16) ──
+    property string tab: "apps"
+    property var recent: []           // [{path, name, dir, isDir, when}] (scripts/search/files.py items)
+    property var pinned: []           // [{path, name, dir, isDir, exists}] for Config overview.pinnedItems
+    readonly property var pinnedPaths: Config.options.overview.pinnedItems
+    readonly property var recentShown: root.recent.filter(f => !Config.options.overview.recentHidden.includes(f.path))
+    readonly property var fileRows: root.tab === "recent" ? root.recentShown : root.tab === "pinned" ? root.pinned : []
+    function refreshFiles() {
+        itemsProc.command = ["python3", Quickshell.shellPath("scripts/search/files.py"), "items"].concat(root.pinnedPaths);
+        itemsProc.running = true;
+    }
+    onPinnedPathsChanged: refreshFiles()
+    Process {
+        id: itemsProc
+        stdout: StdioCollector {
+            onStreamFinished: {
+                try { const d = JSON.parse(text); root.recent = d.recent ?? []; root.pinned = d.pinned ?? []; } catch (e) {}
+            }
+        }
+    }
+    function isPinned(path) { return root.pinnedPaths.includes(path) }
+    function togglePin(path) {
+        const o = Config.options.overview;
+        o.pinnedItems = root.isPinned(path) ? o.pinnedItems.filter(p => p !== path) : o.pinnedItems.concat([path]);
+    }
+    function openFile(f) {
+        GlobalStates.overviewOpen = false;
+        if (f.isDir) Quickshell.execDetached([`${Quickshell.env("HOME")}/.local/bin/phoenix-open`, "files", f.path]);
+        else Quickshell.execDetached(["xdg-open", f.path]);
+    }
+    function folderOf(path) { return path.substring(0, path.lastIndexOf("/")) || "/" }
+    function fileIcon(f) {
+        if (f.isDir) return "folder";
+        const ext = (f.name.split(".").pop() ?? "").toLowerCase();
+        if (["png", "jpg", "jpeg", "webp", "gif", "svg", "bmp", "heic"].includes(ext)) return "image";
+        if (["mp4", "mkv", "webm", "mov", "avi"].includes(ext)) return "movie";
+        if (["mp3", "flac", "ogg", "wav", "m4a", "opus"].includes(ext)) return "music_note";
+        if (ext === "pdf") return "picture_as_pdf";
+        if (["zip", "tar", "gz", "xz", "zst", "7z", "rar"].includes(ext)) return "folder_zip";
+        if (["py", "sh", "qml", "js", "lua", "c", "cpp", "rs", "json", "toml"].includes(ext)) return "code";
+        return "description";
+    }
+    function ago(iso) {
+        const t = Date.parse(iso);
+        if (isNaN(t)) return "";
+        const m = Math.round((Date.now() - t) / 60000);
+        if (m < 1) return Translation.tr("just now");
+        if (m < 60) return Translation.tr("%1 min ago").arg(m);
+        const h = Math.round(m / 60);
+        if (h < 24) return Translation.tr("%1 h ago").arg(h);
+        const d = Math.round(h / 24);
+        return d === 1 ? Translation.tr("yesterday") : Translation.tr("%1 days ago").arg(d);
+    }
+
     // ── Right-click menu (2026-10-16) ──
+    property var menuFile: null      // a file or folder row of the Recent / Pinned tabs
     property var menuApp: null       // DesktopEntry the menu is for
     property bool uninstallArmed: false
     onMenuAppChanged: uninstallArmed = false
@@ -124,7 +180,30 @@ Item {
         const p = delegate.mapToItem(gridBackground, delegate.width / 2, delegate.height * 0.7);
         appMenu.place(p.x, p.y, delegate.mapToItem(gridBackground, 0, 0).y);
     }
-    function closeMenu() { root.menuApp = null; }
+    function closeMenu() { root.menuApp = null; root.menuFile = null; }
+    function openFileMenu(delegate, f) {
+        root.menuApp = null;
+        root.menuFile = f;
+        const p = delegate.mapToItem(gridBackground, Math.min(delegate.width - 60, 240), delegate.height * 0.7);
+        appMenu.place(p.x, p.y, delegate.mapToItem(gridBackground, 0, 0).y);
+    }
+    readonly property var fileMenuItems: {
+        const f = root.menuFile;
+        if (!f) return [];
+        const l = [{ icon: "open_in_new", text: Translation.tr("Open"), act: () => root.openFile(f) }];
+        if (!f.isDir)
+            l.push({ icon: "folder_open", text: Translation.tr("Open the folder"), act: () => root.openFile({ path: root.folderOf(f.path), isDir: true }) });
+        l.push({ sep: true });
+        const pin = root.isPinned(f.path);
+        l.push({ icon: pin ? "keep_off" : "keep", text: pin ? Translation.tr("Unpin") : Translation.tr("Pin"), act: () => root.togglePin(f.path) });
+        if (root.tab === "recent")
+            l.push({ icon: "visibility_off", text: Translation.tr("Remove from this list"), act: () => {
+                const o = Config.options.overview;
+                o.recentHidden = o.recentHidden.concat([f.path]).slice(-200);
+            } });
+        l.push({ icon: "content_copy", text: Translation.tr("Copy the path"), act: () => Quickshell.clipboardText = f.path });
+        return l;
+    }
     readonly property string autostartCmd: menuApp ? `gtk-launch ${menuApp.id}` : ""
     readonly property bool menuAppStarts: Config.options.hyprland.autostartApps.apps.some(a => a.cmd === root.autostartCmd)
     readonly property var menuItems: {
@@ -167,7 +246,7 @@ Item {
     }
     Connections {
         target: GlobalStates
-        function onOverviewOpenChanged() { if (!GlobalStates.overviewOpen) root.closeMenu(); }
+        function onOverviewOpenChanged() { if (!GlobalStates.overviewOpen) { root.closeMenu(); root.tab = "apps"; } }
     }
 
     implicitWidth: gridBackground.implicitWidth + Appearance.sizes.elevationMargin * 2
@@ -182,14 +261,123 @@ Item {
         property real padding: 24
         anchors.margins: Appearance.sizes.elevationMargin
         anchors.centerIn: parent
-        implicitWidth: grid.width + padding * 2
-        implicitHeight: Math.max(grid.height + padding * 2, appMenu.visible ? appMenu.height + 16 : 0)
+        implicitWidth: Math.max(grid.width, 460) + padding * 2
+        // the same height on every tab (the panel doesn't jump), tall enough for the right-click menu
+        readonly property real contentH: Math.max(grid.height, 3 * 52)
+        implicitHeight: Math.max(padding * 2 + tabRow.height + 14 + contentH, appMenu.visible ? appMenu.height + 16 : 0)
         radius: Appearance.rounding.large
         color: Appearance.colors.colLayer0
 
+        Row {
+            id: tabRow
+            anchors { top: parent.top; topMargin: gridBackground.padding - 6; left: grid.left }
+            spacing: 6
+            Repeater {
+                model: [
+                    { id: "apps", name: Translation.tr("Apps"), icon: "apps" },
+                    { id: "recent", name: Translation.tr("Recent"), icon: "history" },
+                    { id: "pinned", name: Translation.tr("Pinned"), icon: "keep" },
+                ]
+                RippleButton {
+                    id: tabChip
+                    required property var modelData
+                    toggled: root.tab === modelData.id
+                    implicitHeight: 32
+                    horizontalPadding: 12
+                    buttonRadius: 16
+                    border: !toggled
+                    colBackground: "transparent"
+                    colBackgroundHover: Appearance.colors.colLayer2Hover
+                    onClicked: { root.closeMenu(); root.tab = modelData.id; if (modelData.id !== "apps") root.refreshFiles(); }
+                    contentItem: RowLayout {
+                        spacing: 6
+                        MaterialSymbol {
+                            text: tabChip.modelData.icon
+                            iconSize: Appearance.font.pixelSize.normal
+                            color: tabChip.toggled ? Appearance.colors.colOnPrimary : Appearance.colors.colOnSurfaceVariant
+                        }
+                        StyledText {
+                            text: tabChip.modelData.name
+                            font.pixelSize: Appearance.font.pixelSize.small
+                            color: tabChip.toggled ? Appearance.colors.colOnPrimary : Appearance.colors.colOnSurface
+                        }
+                    }
+                }
+            }
+        }
+
+        // Recent / Pinned: a list in the grid's place
+        ListView {
+            id: fileList
+            visible: root.tab !== "apps"
+            anchors { top: tabRow.bottom; topMargin: 14; horizontalCenter: parent.horizontalCenter }
+            width: Math.max(grid.width, 460)
+            height: gridBackground.contentH
+            clip: true
+            spacing: 2
+            model: root.fileRows
+            delegate: RippleButton {
+                id: fileRow
+                required property var modelData
+                width: fileList.width
+                implicitHeight: 50
+                buttonRadius: Appearance.rounding.normal
+                colBackground: "transparent"
+                colBackgroundHover: Appearance.colors.colLayer1Hover
+                opacity: fileRow.modelData.exists === false ? 0.5 : 1
+                altAction: () => root.openFileMenu(fileRow, fileRow.modelData)
+                onClicked: { if (fileRow.modelData.exists !== false) root.openFile(fileRow.modelData) }
+                contentItem: RowLayout {
+                    spacing: 12
+                    MaterialSymbol {
+                        Layout.leftMargin: 8
+                        text: root.fileIcon(fileRow.modelData)
+                        iconSize: Appearance.font.pixelSize.huge
+                        color: Appearance.colors.colPrimary
+                    }
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        spacing: 0
+                        StyledText {
+                            Layout.fillWidth: true
+                            text: fileRow.modelData.name
+                            elide: Text.ElideMiddle
+                            font.pixelSize: Appearance.font.pixelSize.normal
+                            color: Appearance.colors.colOnLayer0
+                        }
+                        StyledText {
+                            Layout.fillWidth: true
+                            text: fileRow.modelData.exists === false ? Translation.tr("Not found (moved or deleted)")
+                                : [fileRow.modelData.dir, root.tab === "recent" ? root.ago(fileRow.modelData.when) : ""].filter(x => x).join(" · ")
+                            elide: Text.ElideMiddle
+                            font.pixelSize: Appearance.font.pixelSize.smaller
+                            color: Appearance.colors.colSubtext
+                        }
+                    }
+                    MaterialSymbol {
+                        visible: root.tab === "recent" && root.isPinned(fileRow.modelData.path)
+                        Layout.rightMargin: 10
+                        text: "keep"
+                        iconSize: Appearance.font.pixelSize.normal
+                        color: Appearance.colors.colSubtext
+                    }
+                }
+            }
+            StyledText {
+                anchors.centerIn: parent
+                visible: fileList.count === 0
+                horizontalAlignment: Text.AlignHCenter
+                color: Appearance.colors.colSubtext
+                font.pixelSize: Appearance.font.pixelSize.small
+                text: root.tab === "recent" ? Translation.tr("Files you open show up here")
+                    : Translation.tr("Nothing pinned yet. Right-click a recent file, or a file in search, and choose Pin")
+            }
+        }
+
         Item {
             id: grid
-            anchors.centerIn: parent
+            visible: root.tab === "apps"
+            anchors { top: tabRow.bottom; topMargin: 14; horizontalCenter: parent.horizontalCenter }
             // 8 columns max; narrower when fewer apps are shown, so short lists stay centered in the panel.
             width: root.columns * (root.cellWidth + root.cellSpacing) - root.cellSpacing
             height: Math.max(1, Math.ceil(root.entries.length / root.columns)) * (root.cellHeight + root.cellSpacing) - root.cellSpacing
@@ -368,7 +556,7 @@ Item {
 
         Rectangle {
             id: appMenu
-            visible: root.menuApp !== null
+            visible: root.menuApp !== null || root.menuFile !== null
             z: 100
             width: 280
             height: menuColumn.implicitHeight + 12
@@ -381,7 +569,7 @@ Item {
             property real py: 0
             property real cellTop: 0
             function place(ax, ay, top) { px = ax; py = ay; cellTop = top; }
-            readonly property real panelH: grid.height + gridBackground.padding * 2
+            readonly property real panelH: gridBackground.padding * 2 + tabRow.height + 14 + gridBackground.contentH
             x: Math.max(8, Math.min(gridBackground.width - width - 8, px - 20))
             // below the pointer if it fits, else above the icon, else as low as the panel allows
             y: py + height + 8 <= Math.max(panelH, height + 16) ? py
@@ -400,14 +588,14 @@ Item {
                     Layout.fillWidth: true
                     Layout.margins: 8
                     Layout.bottomMargin: 4
-                    text: root.menuApp?.name ?? ""
+                    text: root.menuApp?.name ?? root.menuFile?.name ?? ""
                     elide: Text.ElideRight
                     font.pixelSize: Appearance.font.pixelSize.small
                     font.weight: Font.DemiBold
                     color: Appearance.colors.colOnLayer2
                 }
                 Repeater {
-                    model: root.menuItems
+                    model: root.menuFile ? root.fileMenuItems : root.menuItems
                     delegate: Loader {
                         id: row
                         required property var modelData

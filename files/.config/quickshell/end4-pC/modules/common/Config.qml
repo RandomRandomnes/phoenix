@@ -796,6 +796,8 @@ Singleton {
                 property list<string> appGridHidden: [] // left out while appGridShowAll is true
                 property list<string> appGridOrder: [] // drag order while appGridShowAll is true; unlisted apps go after
                 property bool appGridAddNew: true // newly installed apps join the grid with a "new" dot (services/NewApps.qml)
+                property list<string> pinnedItems: []   // Super menu › Pinned tab: files and folders (P14, 2026-10-16)
+                property list<string> recentHidden: []  // removed from the Recent tab by hand
             }
 
             property JsonObject regionSelector: JsonObject {
