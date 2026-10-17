@@ -59,16 +59,15 @@
   "format": "custom-fixes",
   "line": "custom",
   "version": 2.99,
-  "label": "2.433",
+  "label": "2.443",
   "kind": "fix",
   "date": "2026-10-17",
   "publisher": "RandomRandomnes",
   "notes": [
-    "RSI Launcher / Wine tray icons work on Hyprland: no stray window, app name shown, Open/Quit menu, minimize button, no title bar",
-    "Installer uses the tested illogical-impulse version and stops on an unknown Quickshell"
+    "Settings \u203a Apps was blank: a syntax error on the Startup page broke the whole section (fixed)"
   ],
   "payload": "fixes.tar.gz",
-  "payloadSha256": "1c817ebc6e403c5fb8b653e714a65ac07d29c1cc6c7f6306a81e34b63d0b6227",
+  "payloadSha256": "8a4ba25c5e9e097145b61a6562831c10c8eeec8c9431b06e371be4f6ad41090c",
   "files": {
     ".config/hypr/custom/env.lua": "b97ee35362ed653cec2880f9adfdf81698e2f55577aef1dffcb321e4d713794f",
     ".config/hypr/custom/execs.lua": "64197ff280790bc529a0dd1938985c42783a1b17f59ec709ff515f8fa0f5d6b2",
@@ -641,7 +640,7 @@
     ".config/quickshell/end4-pC/modules/ii/settingsW11/SWorkSafety.qml": "363cd7412b73bad4eea932b23b85a10b6ecb3bb3c2ce558e370499ec0b25d078",
     ".config/quickshell/end4-pC/modules/ii/settingsW11/W11Settings.qml": "fd0f8cb76b71557948f17bb1930e8d985499fbb9568a603cd65a662f543a9911",
     ".config/quickshell/end4-pC/modules/ii/settingsW11/WAppListEditor.qml": "844d5a6efa95637a4c1bd4bbebbe5b25ed419d5a4c725db013ada50a6254fb86",
-    ".config/quickshell/end4-pC/modules/ii/settingsW11/WAutostartApps.qml": "f03b6650af89a5372b7b55c54b74fa54b30004c079b0b9fcb9fa965e96a4a55f",
+    ".config/quickshell/end4-pC/modules/ii/settingsW11/WAutostartApps.qml": "8475c581767ddcdc1cb2267341e1bdfc8b56a8d0e2cc3ac57c0f5f9485375897",
     ".config/quickshell/end4-pC/modules/ii/settingsW11/WButton.qml": "c05c0c05ebc3368fe542f35511c682929d400fdb260b0073882e72b599b02e70",
     ".config/quickshell/end4-pC/modules/ii/settingsW11/WCColors.qml": "e75a5965bbc572fa85658dd188be91941a737e3e9216c5e2a77e578deb2cfdae",
     ".config/quickshell/end4-pC/modules/ii/settingsW11/WCCombo.qml": "472ec82d3591d8da6fd2367c29f91af05122d446c900c6f0ec6687fa593ef745",
@@ -1084,14 +1083,7 @@
     ".local/share/setup-profiles/stock-config.json": "5814a18a9aa1038cd74764efc268ca12b0ba8599dd7255799d8729bc5b80a9f8"
   },
   "changed": [
-    ".config/hypr/custom/rules.lua",
-    ".config/hypr/custom/scripts/autostart.sh",
-    ".config/quickshell/end4-pC/modules/ii/bar/SysTrayItem.qml",
-    ".config/quickshell/end4-pC/modules/ii/bar/SysTrayMenu.qml",
-    ".config/quickshell/end4-pC/scripts/hyprland/xminimize.py",
-    ".config/quickshell/end4-pC/scripts/tray/context-menu.sh",
-    ".config/quickshell/end4-pC/scripts/tray/xembed-name.py",
-    ".config/quickshell/end4-pC/services/TrayService.qml"
+    ".config/quickshell/end4-pC/modules/ii/settingsW11/WAutostartApps.qml"
   ],
   "test": false
 }

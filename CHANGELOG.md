@@ -1,5 +1,8 @@
 # Changelog
 
+## custom 2.443 (2026-10-17, fix)
+- Settings › Apps was blank: a syntax error on the Startup page broke the whole section (fixed)
+
 ## custom 2.433 (2026-10-17, fix)
 - RSI Launcher / Wine tray icons work on Hyprland: no stray window, app name shown, Open/Quit menu, minimize button, no title bar
 - Installer uses the tested illogical-impulse version and stops on an unknown Quickshell

@@ -208,7 +208,7 @@ ColumnLayout {
 
                     property bool ready: false
                     Component.onCompleted: ready = true
-                    onEdited: value => if (ready) root.setField(index, "workspace", value)
+                    onEdited: value => { if (ready) root.setField(index, "workspace", value); }
                 }
 
                 WCSpin {
@@ -221,7 +221,7 @@ ColumnLayout {
 
                     property bool ready: false
                     Component.onCompleted: ready = true
-                    onEdited: value => if (ready) root.setField(index, "delay", value)
+                    onEdited: value => { if (ready) root.setField(index, "delay", value); }
                 }
             }
         }
