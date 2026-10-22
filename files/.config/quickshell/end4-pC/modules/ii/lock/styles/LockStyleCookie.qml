@@ -120,7 +120,7 @@ LockStyleBase {
                     font.weight: Font.Medium
                 }
                 StyledText {
-                    text: Translation.tr("Type your password to unlock")
+                    text: root.atLogin ? Translation.tr("Type your password to sign in") : Translation.tr("Type your password to unlock")
                     color: root.colTextDim
                     font.pixelSize: 14 * root.s
                 }

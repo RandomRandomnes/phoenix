@@ -187,7 +187,7 @@ ColumnLayout {
                         Layout.fillWidth: true
                         buttonIcon: "translate"
                         text: Translation.tr("Locale code")
-                        placeholderText: Translation.tr("e.g. fr_FR, de_DE, zh_CN...")
+                        placeholderText: Translation.tr("fr_FR")
                         value: Config.options.language.ui === "auto" ? Qt.locale().name : Config.options.language.ui
                     }
 

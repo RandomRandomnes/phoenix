@@ -2,7 +2,9 @@
 # Copies this desktop's look to the login screen (2026-10-08, ours): Phoenix's wallpaper colors, the wallpaper and the
 # account picture, into /var/lib/phoenix-greeter/theme (made writable for the main user by `phoenix login-screen
 # install`). Run at every login by custom/scripts/autostart.sh; does nothing when the login screen isn't installed.
-T=/var/lib/phoenix-greeter/theme
+# 2026-10-22: also lock-config.json (the lock screen style, fonts, blur, clock), so the login screen looks like the lock
+# screen. PHOENIX_GREETER_THEME=<dir>: write a preview's theme folder instead.
+T=${PHOENIX_GREETER_THEME:-/var/lib/phoenix-greeter/theme}
 [ -d "$T" ] && [ -w "$T" ] || exit 0
 colors="$HOME/.local/state/quickshell/user/generated/colors.json"
 wall=$(python3 -c 'import json,os,sys; print(json.load(open(os.path.expanduser("~/.config/illogical-impulse/config.json")))["background"]["wallpaperPath"])' 2>/dev/null)
@@ -26,5 +28,24 @@ if [ -f "$face" ]; then copy "$face" face; copy "$face" "face-$me"; else rm -f "
 # 12- or 24-hour clock like the desktop's (Settings › Time & language)
 python3 -c 'import json,os; f=json.load(open(os.path.expanduser("~/.config/illogical-impulse/config.json"))).get("time",{}).get("format","hh:mm"); print(json.dumps({"format": f}))' > "$T/clock.json.tmp" 2>/dev/null \
     && mv -f "$T/clock.json.tmp" "$T/clock.json"
+# the lock screen's look: stock defaults + this desktop's appearance / lock / time settings (only what the login
+# screen reads; nothing personal)
+python3 - "$T/lock-config.json.tmp" <<'PY' && mv -f "$T/lock-config.json.tmp" "$T/lock-config.json"
+import json, os, sys
+def load(p):
+    try:
+        with open(os.path.expanduser(p)) as f: return json.load(f)
+    except (OSError, ValueError): return {}
+def merged(a, b):
+    o = dict(a)
+    for k, v in b.items(): o[k] = merged(a[k], v) if isinstance(v, dict) and isinstance(a.get(k), dict) else v
+    return o
+cfg = merged(load("~/.local/share/setup-profiles/stock-config.json"), load("~/.config/illogical-impulse/config.json"))
+out = {"appearance": {k: cfg.get("appearance", {}).get(k) for k in ("extraBackgroundTint", "fonts", "transparency")},
+       "lock": {k: v for k, v in cfg.get("lock", {}).items() if k != "security"},
+       "time": {k: cfg.get("time", {}).get(k) for k in ("format", "dateFormat", "shortDateFormat", "dateWithYearFormat")},
+       "bar": {"cornerStyle": cfg.get("bar", {}).get("cornerStyle", 0)}}
+with open(sys.argv[1], "w") as f: json.dump(out, f, indent=1)
+PY
 chmod 644 "$T"/* 2>/dev/null
 exit 0

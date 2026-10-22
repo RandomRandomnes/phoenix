@@ -370,7 +370,7 @@ Item {
                 color: Appearance.colors.colSubtext
                 font.pixelSize: Appearance.font.pixelSize.small
                 text: root.tab === "recent" ? Translation.tr("Files you open show up here")
-                    : Translation.tr("Nothing pinned yet. Right-click a recent file, or a file in search, and choose Pin")
+                    : Translation.tr("Nothing pinned. Right-click a file and choose Pin")
             }
         }
 

@@ -69,14 +69,14 @@ Item {
                     model: BluetoothStatus.connectedDevices
                     DeviceCard { required property var modelData; device: modelData }
                 }
-                WLink { icon: "devices"; title: "View more devices"; description: "Pair new devices, connect, remove"; sub: "bluetooth" }
+                WLink { icon: "devices"; title: "View more devices"; description: "Pair, connect, remove"; sub: "bluetooth" }
             }
             WSection {
                 title: "Phone"
                 WLink {
                     icon: "smartphone"
                     title: PhoneLink.phone ? PhoneLink.phone.name : "Phone Link"
-                    description: !PhoneLink.installed ? "Your phone's notifications, texts, files and more on this PC (set up once)"
+                    description: !PhoneLink.installed ? "Notifications, texts and files from your phone"
                         : !PhoneLink.phone ? "No phone paired yet"
                         : PhoneLink.phone.reachable ? `Connected` + (PhoneLink.phone.battery !== null ? ` · battery ${PhoneLink.phone.battery}%` : "")
                         : "Paired · not connected right now"
@@ -88,15 +88,16 @@ Item {
                 WToggle {
                     icon: "battery_full"
                     title: "Show device batteries in the sidebar"
-                    description: "Battery levels of your mouse, headphones, controllers and other wireless devices, under the media controls"
+                    keywords: "headphones controllers wireless"
+                    description: "Mouse, headset and controller batteries"
                     checked: Config.options.sidebar.deviceBatteries
                     onToggled: v => Config.options.sidebar.deviceBatteries = v
                 }
             }
             WSection {
                 title: "Input"
-                WLink { icon: "mouse"; title: "Mouse"; description: "Pointer speed, acceleration, scrolling, primary button"; sub: "mouse" }
-                WLink { icon: "keyboard"; title: "Keyboard"; description: "Layout, repeat rate, on-screen keyboard"; sub: "keyboard" }
+                WLink { icon: "mouse"; title: "Mouse"; keywords: "pointer acceleration primary button"; description: "Speed, scrolling, buttons"; sub: "mouse" }
+                WLink { icon: "keyboard"; title: "Keyboard"; keywords: "on-screen"; description: "Layout, repeat rate, shortcuts"; sub: "keyboard" }
             }
             WSection {
                 title: "Related settings"
@@ -104,7 +105,7 @@ Item {
             }
             WSection {
                 title: "More"
-                WLink { icon: "mouse"; title: "Mouse, keyboard & touchpad (advanced)"; description: "Pointer speed, acceleration, touchpad gestures, keyboard repeat"; sub: "input" }
+                WLink { icon: "mouse"; title: "Mouse, keyboard & touchpad (advanced)"; keywords: "pointer speed repeat"; description: "Acceleration, touchpad gestures"; sub: "input" }
             }
         }
     }
@@ -119,7 +120,7 @@ Item {
                 WCard {
                     icon: "add"
                     title: "Add device"
-                    description: (Bluetooth.defaultAdapter?.discovering ?? false) ? "Searching for nearby devices… make sure yours is in pairing mode" : "Search for headphones, controllers, keyboards and more"
+                    description: (Bluetooth.defaultAdapter?.discovering ?? false) ? "Searching… put your device in pairing mode" : ""
                     enabled: BluetoothStatus.enabled
                     WButton {
                         accent: !(Bluetooth.defaultAdapter?.discovering ?? false)
@@ -196,7 +197,7 @@ Item {
                 WToggle {
                     icon: "trending_up"
                     title: "Enhanced pointer precision"
-                    description: "Mouse acceleration: the pointer moves farther when you move the mouse faster"
+                    description: "Mouse acceleration"
                     checked: (accel.value ?? "") !== "flat"
                     onToggled: v => mp.put(accel, v ? "adaptive" : "flat")
                 }
@@ -214,7 +215,8 @@ Item {
                 WToggle {
                     icon: "swipe_vertical"
                     title: "Natural scrolling"
-                    description: "Content moves the same direction as your fingers (reverse scroll direction)"
+                    keywords: "reverse"
+                    description: "Reverses the scroll direction"
                     checked: !!natural.value
                     onToggled: v => mp.put(natural, v ? 1 : 0)
                 }
@@ -259,7 +261,8 @@ Item {
                 WCard {
                     icon: "language"
                     title: "Keyboard layout"
-                    description: "XKB layout codes, comma separated for several (e.g. us,de). Current: " + HyprlandXkb.currentLayoutName
+                    keywords: "xkb"
+                    description: "Comma-separated codes (us,de). Current: " + HyprlandXkb.currentLayoutName
                     Rectangle {
                         implicitWidth: 160; implicitHeight: 34
                         radius: 12
@@ -285,7 +288,6 @@ Item {
                 WSlider {
                     icon: "timer"
                     title: "Repeat delay"
-                    description: "How long to hold a key before it starts repeating"
                     from: 150; to: 1000; stepSize: 25
                     format: v => `${Math.round(v)} ms`
                     value: Config.options.hyprland.input.repeatDelay
@@ -294,7 +296,6 @@ Item {
                 WSlider {
                     icon: "fast_forward"
                     title: "Repeat rate"
-                    description: "How fast a held key repeats"
                     from: 10; to: 80; stepSize: 1
                     format: v => `${Math.round(v)}/s`
                     value: Config.options.hyprland.input.repeatRate
@@ -324,7 +325,7 @@ Item {
             }
             WSection {
                 title: "Related"
-                WLink { icon: "keyboard_command_key"; title: "Keyboard shortcuts"; description: "See, search and change every shortcut, or add your own"; sub: "shortcuts" }
+                WLink { icon: "keyboard_command_key"; title: "Keyboard shortcuts"; description: "Change shortcuts or add your own"; sub: "shortcuts" }
             }
         }
     }
@@ -352,10 +353,10 @@ Item {
                 WCard {
                     icon: "smartphone"
                     title: !PhoneLink.installed ? "Set up Phone Link" : "Phone Link isn't running"
-                    description: !PhoneLink.installed ? "See your phone's notifications and texts, send files, ring it, share the clipboard and more. Installs KDE Connect and lets it through the firewall on your home network (asks for your password once)."
+                    description: !PhoneLink.installed ? "Notifications, texts, files, clipboard. Installs KDE Connect; asks for your password"
                         : Config.options.extras.phoneLinkStart === false
-                            ? "Its background service is switched off at sign-in (Task Manager › Startup). Start runs it until you sign out."
-                            : "KDE Connect is installed but its background service isn't running. Start runs it now."
+                            ? "Off at sign-in (Task Manager › Startup)"
+                            : "KDE Connect isn't running"
                     WButton { accent: true; enabled: !Tasks.isRunning("phonelink"); buttonText: PhoneLink.installed ? "Start" : "Set up"; onClicked: PhoneLink.installed ? PhoneLink.start() : PhoneLink.setup() }
                 }
             }
@@ -366,7 +367,7 @@ Item {
                 WCard {
                     icon: pp.online ? "smartphone" : "phonelink_off"
                     title: pp.phone?.name ?? ""
-                    description: !pp.online ? "Paired, not connected. Open KDE Connect on the phone; on Samsung, set its battery use to Unrestricted so it stays connected."
+                    description: !pp.online ? "Not connected. Open KDE Connect on the phone"
                         : ["Connected over Wi-Fi", pp.phone.battery !== null ? `battery ${pp.phone.battery}%${pp.phone.charging ? ", charging" : ""}` : "",
                            pp.phone.network ? pp.phone.network : ""].filter(s => s).join(" · ")
                     WButton { enabled: pp.online; accent: true; buttonText: "Ring"; onClicked: PhoneLink.ring(pp.phone.id) }
@@ -381,42 +382,45 @@ Item {
                 WToggle {
                     icon: "notifications"
                     title: "Phone notifications on this PC"
-                    description: "With reply for messages; dismissing on one dismisses on both. Needs notification access in the phone app"
+                    keywords: "reply dismiss"
+                    description: "Needs notification access in the phone app"
                     checked: pp.pluginOn("kdeconnect_notifications")
                     onToggled: v => pp.setPlugins(["kdeconnect_notifications"], v)
                 }
                 WToggle {
                     icon: "sms"
                     title: "Text messages"
-                    description: "Read and send texts from the PC (Messages in the phone card)"
+                    description: "Read and send texts from the PC"
                     checked: pp.pluginOn("kdeconnect_sms")
                     onToggled: v => pp.setPlugins(["kdeconnect_sms"], v)
                 }
                 WToggle {
                     icon: "call"
                     title: "Calls"
-                    description: "Show incoming calls and pause music while you're on the phone"
+                    description: "Shows calls and pauses music"
                     checked: pp.pluginOn("kdeconnect_telephony")
                     onToggled: v => pp.setPlugins(["kdeconnect_telephony", "kdeconnect_pausemusic"], v)
                 }
                 WToggle {
                     icon: "content_paste"
                     title: "Shared clipboard"
-                    description: "Copy on one, paste on the other (the Clipboard button sends it once either way)"
+                    description: "Copy on one, paste on the other"
                     checked: pp.pluginOn("kdeconnect_clipboard")
                     onToggled: v => pp.setPlugins(["kdeconnect_clipboard"], v)
                 }
                 WToggle {
                     icon: "settings_remote"
                     title: "Use the phone as a remote"
-                    description: "Music and video controls, touchpad and keyboard from the phone"
+                    keywords: "music video"
+                    description: "Media controls, touchpad and keyboard"
                     checked: pp.pluginOn("kdeconnect_mousepad")
                     onToggled: v => pp.setPlugins(["kdeconnect_mousepad", "kdeconnect_remotekeyboard", "kdeconnect_mpriscontrol"], v)
                 }
                 WToggle {
                     icon: "folder_open"
                     title: "Browse the phone's files"
-                    description: "Open its storage in the file manager; recent photos in the phone card"
+                    keywords: "photos"
+                    description: "Opens its storage in the file manager"
                     checked: pp.pluginOn("kdeconnect_sftp")
                     onToggled: v => pp.setPlugins(["kdeconnect_sftp"], v)
                 }
@@ -435,7 +439,8 @@ Item {
                     visible: !pp.phone
                     icon: "help"
                     title: "How to pair"
-                    description: "1. Install KDE Connect on the phone (Galaxy Store, Google Play or F-Droid). 2. Connect it to the same Wi-Fi as this PC. 3. Press Pair below and accept on the phone; both show the same code."
+                    keywords: "galaxy store google play f-droid code"
+                    description: "Install KDE Connect on the phone, join the same Wi-Fi, press Pair and accept on the phone"
                 }
                 Repeater {
                     model: PhoneLink.devices.filter(d => !d.paired)
@@ -452,7 +457,7 @@ Item {
                 WCard {
                     icon: "refresh"
                     title: "Don't see your phone?"
-                    description: "Open KDE Connect on the phone and pull down to refresh, then look again here"
+                    description: "Pull down to refresh in KDE Connect on the phone"
                     WButton { buttonText: "Look again"; onClicked: PhoneLink.refresh() }
                 }
             }
@@ -464,13 +469,14 @@ Item {
                     visible: pp.phone !== null
                     icon: "link_off"
                     title: "Unpair " + (pp.phone?.name ?? "phone")
-                    description: "The phone and PC forget each other; pair again any time"
+                    description: "Pair again any time"
                     WButton { buttonText: "Unpair"; onClicked: PhoneLink.unpair(pp.phone.id) }
                 }
                 WCard {
                     icon: "block"
                     title: "Turn off Phone Link"
-                    description: "Stops KDE Connect and closes its firewall ports again (asks for your password)"
+                    keywords: "firewall"
+                    description: "Stops KDE Connect, closes its ports; asks for your password"
                     WButton {
                         buttonText: "Turn off"
                         enabled: !Tasks.isRunning("phonelink")

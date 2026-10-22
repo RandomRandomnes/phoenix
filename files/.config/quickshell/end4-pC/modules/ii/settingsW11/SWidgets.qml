@@ -782,7 +782,7 @@ ColumnLayout {
                     Layout.fillWidth: true
                     buttonIcon: "edit_note"
                     text: Translation.tr("Text to display")
-                    description: Translation.tr("Double-click the text on your desktop to edit it, drag its corner to resize it")
+                    description: Translation.tr("Double-click to edit, drag the corner to resize")
                     placeholderText: Translation.tr("Text to display")
                     multiline: true
                     fieldWidth: 280

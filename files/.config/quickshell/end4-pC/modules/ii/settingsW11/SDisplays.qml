@@ -165,13 +165,13 @@ ColumnLayout {
                 WCNotice {
                     Layout.fillWidth: true
                     visible: monitorConfig.monitors[monitorCanvas.selectedIndex]?.hdrSupported === null
-                    text: Translation.tr("Couldn't confirm this display's HDR capability from its EDID. Options are shown but may not do anything.")
+                    text: Translation.tr("HDR support couldn't be confirmed; these options may not work")
                 }
 
                 WCNotice {
                     Layout.fillWidth: true
                     visible: monitorConfig.monitors[monitorCanvas.selectedIndex]?.hdrSupported === false
-                    text: Translation.tr("This display's EDID does not report HDR support, so HDR options are disabled here. Open an issue in GitHub if you think this is a mistake.")
+                    text: Translation.tr("This display doesn't report HDR support")
                 }
 
                 WCGroup {

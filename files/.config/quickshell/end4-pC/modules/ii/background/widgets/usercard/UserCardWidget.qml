@@ -417,7 +417,7 @@ AbstractBackgroundWidget {
                                 MouseArea {
                                     anchors.fill: parent
                                     cursorShape: Qt.PointingHandCursor
-                                    onClicked: GlobalStates.settingsOpen = true
+                                    onClicked: GlobalStates.openSettings()
                                 }
                             }
 
@@ -552,7 +552,7 @@ AbstractBackgroundWidget {
                         MouseArea {
                             anchors.fill: parent
                             cursorShape: Qt.PointingHandCursor
-                            onClicked: GlobalStates.settingsOpen = true
+                            onClicked: GlobalStates.openSettings()
                         }
                     }
 

@@ -1,0 +1,41 @@
+#!/bin/bash
+# phoenix-greeter-build OUTDIR (2026-10-22, ours): puts the Phoenix login screen together in OUTDIR —
+# its own files (~/.local/share/phoenix/greeter/bundle: shell.qml, the classic view, stand-ins for the desktop's
+# settings / clock / password check) plus copies of the desktop shell's lock screen styles and the widgets they use,
+# so the login screen looks like the lock screen. `phoenix login-screen install` runs it and copies OUTDIR to
+# /usr/share/phoenix-greeter; `phoenix login-screen status` builds a fresh one to see whether an update is ready.
+set -euo pipefail
+OUT=${1:?usage: phoenix-greeter-build OUTDIR}
+SRC="$HOME/.local/share/phoenix/greeter/bundle"
+SHELL_DIR="$HOME/.config/quickshell/end4-pC"
+[ -f "$SRC/shell.qml" ] || { echo "phoenix-greeter-build: $SRC is missing" >&2; exit 1; }
+# taken from the desktop shell unchanged (the stand-ins in bundle/ replace everything else they import)
+COPY=(
+    modules/common/Appearance.qml
+    modules/common/functions/ColorUtils.qml
+    modules/common/functions/StringUtils.qml
+    modules/common/functions/FileUtils.qml
+    modules/common/widgets/StyledText.qml
+    modules/common/widgets/MaterialSymbol.qml
+    modules/common/widgets/RippleButton.qml
+    modules/common/widgets/MaterialShape.qml
+    modules/common/widgets/shapes
+    modules/common/widgets/StyledImage.qml
+    modules/common/widgets/StyledFlickable.qml
+    modules/common/widgets/StyledScrollBar.qml
+    modules/common/widgets/UserAvatar.qml
+    modules/ii/lock/PasswordChars.qml
+    modules/ii/lock/styles
+    assets/fonts/MaterialSymbolsLite.ttf
+)
+rm -rf "$OUT"; mkdir -p "$OUT"
+cp -r "$SRC"/. "$OUT"/
+for f in "${COPY[@]}"; do
+    [ -e "$SHELL_DIR/$f" ] || { echo "phoenix-greeter-build: $SHELL_DIR/$f is missing" >&2; exit 1; }
+    mkdir -p "$OUT/$(dirname "$f")"
+    cp -r "$SHELL_DIR/$f" "$OUT/$f"
+done
+# the lock screen's own loader and the parts of the shapes folder that are only examples/docs aren't needed
+rm -f "$OUT/modules/ii/lock/styles/LockStyleLoader.qml" "$OUT/modules/common/widgets/shapes/example.qml"
+find "$OUT" \( -name '*.bak*' -o -name '__pycache__' -o -name 'README.md' -o -name 'LICENSE' \) -prune -exec rm -rf {} +
+find "$OUT" -type d -exec chmod 755 {} +; find "$OUT" -type f -exec chmod 644 {} +

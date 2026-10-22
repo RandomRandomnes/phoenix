@@ -39,8 +39,8 @@ Item {
                 }
             }
             WSection {
-                WLink { icon: "schedule"; title: "Date & time"; description: "Time zone, automatic clock, 24-hour time, date format"; sub: "datetime" }
-                WLink { icon: "translate"; title: "Language & region"; description: "Display language, first day of week"; sub: "language" }
+                WLink { icon: "schedule"; title: "Date & time"; keywords: "24-hour automatic date format"; description: "Time zone, clock format"; sub: "datetime" }
+                WLink { icon: "translate"; title: "Language & region"; description: "Language, first day of week"; sub: "language" }
             }
             WSection {
                 title: "More"
@@ -82,14 +82,15 @@ Item {
                 WToggle {
                     icon: "sync"
                     title: "Set time automatically"
-                    description: "Sync with internet time servers (NTP). You may be asked for your password."
+                    keywords: "sync servers"
+                    description: "Uses internet time (NTP); may ask for your password"
                     checked: dt.ntp
                     onToggled: v => dt.run(["timedatectl", "set-ntp", v ? "true" : "false"])
                 }
                 WCard {
                     icon: "public"
                     title: "Time zone"
-                    description: `Current: ${dt.timezone}. Type a city or region, e.g. America/Chicago`
+                    description: `Current: ${dt.timezone}`
                     Rectangle {
                         implicitWidth: 260; implicitHeight: 34
                         radius: 12
@@ -162,7 +163,7 @@ Item {
 
             WSection {
                 title: "Related"
-                WLink { icon: "public"; title: "World clocks"; description: "Extra time zones on the desktop clock widget"; page: "personalization"; sub: "widgets" }
+                WLink { icon: "public"; title: "World clocks"; description: "Extra time zones on the desktop clock"; page: "personalization"; sub: "widgets" }
             }
         }
     }
@@ -176,7 +177,6 @@ Item {
                 WCombo {
                     icon: "translate"
                     title: "Display language"
-                    description: "Language of the shell and settings"
                     model: Translation.allAvailableLanguages.map(l => ({ displayName: l, value: l }))
                     currentValue: Config.options.language.ui
                     onSelected: v => Config.options.language.ui = v

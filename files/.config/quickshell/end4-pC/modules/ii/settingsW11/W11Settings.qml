@@ -419,18 +419,34 @@ Scope {
         }
     }
 
+    // Already open: move the window to the workspace you're on and put it in front (2026-10-22: it stayed on its old
+    // workspace or behind other windows, so opening it again looked like nothing happened)
+    Binding { target: GlobalStates; property: "settingsInFront"; value: panelWindow.focused }
+    Connections {
+        target: GlobalStates
+        function onSettingsForwardRequested() {
+            const w = HyprlandData.windowList.find(c => c.class === "org.quickshell" && c.title === "Settings");
+            if (!w) return;
+            const ws = Hyprland.focusedWorkspace?.id;
+            if (ws !== undefined && w.workspace?.id !== ws)
+                Hyprland.dispatch(`hl.dsp.window.move({ workspace = '${ws}', follow = false, window = 'address:${w.address}' })`);
+            Hyprland.dispatch(`hl.dsp.focus({ window = 'address:${w.address}' })`);
+            Hyprland.dispatch(`hl.dsp.window.alter_zorder({ mode = 'top', window = 'address:${w.address}' })`);
+        }
+    }
+
     IpcHandler {
         target: "settings"
-        function toggle(): void { GlobalStates.settingsOpen = !GlobalStates.settingsOpen; }
-        function open(): void   { GlobalStates.settingsOpen = true; }
+        function toggle(): void { GlobalStates.toggleSettings(); }
+        function open(): void   { GlobalStates.openSettings(); }
         function close(): void  { GlobalStates.settingsOpen = false; }
-        function go(page: string, sub: string): void { GlobalStates.settingsOpen = true; WState.go(page, sub); }
+        function go(page: string, sub: string): void { GlobalStates.openSettings(); WState.go(page, sub); }
     }
 
     CompositorGlobalShortcut {
         name: "settingsToggle"
-        description: "Toggles settings panel"
-        onPressed: GlobalStates.settingsOpen = !GlobalStates.settingsOpen;
+        description: "Opens or closes Settings"
+        onPressed: GlobalStates.toggleSettings();
     }
 }
 

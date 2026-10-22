@@ -27,13 +27,14 @@ LockStyleBase {
             spacing: 10 * root.s
             MaterialSymbol {
                 anchors.verticalCenter: parent.verticalCenter
-                text: "lock"
+                text: root.atLogin ? "calendar_today" : "lock"
                 iconSize: 16 * root.s
                 color: root.colDim
             }
             StyledText {
                 anchors.verticalCenter: parent.verticalCenter
-                text: `${Translation.tr("Locked")} · ${Qt.locale().toString(DateTime.clock.date, "dddd d MMMM")}`.toUpperCase()
+                text: (root.atLogin ? Qt.locale().toString(DateTime.clock.date, "dddd d MMMM")
+                    : `${Translation.tr("Locked")} · ${Qt.locale().toString(DateTime.clock.date, "dddd d MMMM")}`).toUpperCase()
                 color: root.colDim
                 font.pixelSize: 13 * root.s
                 font.letterSpacing: 3 * root.s

@@ -111,7 +111,7 @@ date -r /var/lib/pacman/sync/core.db '+%b %-d, %-I:%M %p' 2>/dev/null`]
                     color: Appearance.colors.colOnLayer2
                 }
                 StyledText {
-                    text: page.rebootPending ? `A new kernel (${page.installed}) is installed. Restart to start using it.`
+                    text: page.rebootPending ? `New kernel ${page.installed} installed: restart to use it`
                         : `Last synced: ${page.lastSync || "unknown"}`
                     font.pixelSize: Appearance.font.pixelSize.small
                     color: Appearance.colors.colSubtext
@@ -144,8 +144,7 @@ date -r /var/lib/pacman/sync/core.db '+%b %-d, %-I:%M %p' 2>/dev/null`]
         WCard {
             icon: "rule"
             title: "How should updates install?"
-            description: "Automatically: everything installs in the background, only your password is asked. "
-                + "Ask first: a window shows what will be updated and you confirm, like the installer. You can change this below at any time."
+            description: "Automatically: installs in the background. Ask first: shows the list to confirm. Changeable below"
             WButton { buttonText: "Ask first"; onClicked: { Config.options.extras.updateMode = "ask"; Updates.install() } }
             WButton { accent: true; buttonText: "Automatically"; onClicked: { Config.options.extras.updateMode = "auto"; Updates.install() } }
         }
@@ -189,15 +188,16 @@ date -r /var/lib/pacman/sync/core.db '+%b %-d, %-I:%M %p' 2>/dev/null`]
                 icon: modelData.level === "high" ? "warning" : modelData.level === "medium" ? "report" : "info"
                 title: `Waiting: ${modelData.pkg} ${modelData.to}` + (modelData.level === "high" ? " (can break the desktop)" : "")
                 description: modelData.why + "\nAfterwards: " + modelData.after
-                    + (page.checkHost && modelData.level !== "info" ? "\nThis PC publishes Phoenix: try it in the test VM first; the update asks before installing it." : "")
+                    + (page.checkHost && modelData.level !== "info" ? "\nPublishing PC: test it in the VM first" : "")
             }
         }
         WCard {
             icon: page.problems.some(p => p.level !== "info") ? "healing" : "verified"
             title: page.problems.some(p => p.level !== "info") ? "The desktop needs attention"
-                : page.critical.some(c => c.level !== "info") ? "The desktop is fine; an update above needs care"
+                : page.critical.some(c => c.level !== "info") ? "Fine; an update above needs care"
                 : "Everything looks fine"
-            description: "Checks the title bars, Hyprland's configuration, the shell, and pending updates that can break the desktop (a new Qt or Hyprland version, Quickshell, graphics drivers). It also runs after every login and update."
+            description: "Also runs after every sign-in and update"
+            keywords: "title bars hyprland configuration shell qt quickshell graphics drivers health"
             WButton {
                 buttonText: checkProc.running ? "Checking…" : "Check now"
                 enabled: !checkProc.running
@@ -231,12 +231,14 @@ date -r /var/lib/pacman/sync/core.db '+%b %-d, %-I:%M %p' 2>/dev/null`]
         WCard {
             icon: "deployed_code_update"
             title: "System packages"
-            description: "Arch Linux packages and AUR apps (pacman + yay). You'll be asked for your password once."
+            description: "Arch and AUR packages; asks for your password once"
+            keywords: "pacman yay"
         }
         WCard {
             icon: "dashboard"
             title: "Desktop shell"
-            description: "Phoenix's own version of the illogical-impulse shell. It comes with Phoenix updates (below), tested as a whole, and no longer follows illogical-impulse's own updates."
+            description: "Comes with Phoenix updates"
+            keywords: "illogical-impulse quickshell"
         }
         WCard {
             icon: "memory"
@@ -277,8 +279,7 @@ date -r /var/lib/pacman/sync/core.db '+%b %-d, %-I:%M %p' 2>/dev/null`]
         WCard {
             icon: "settings_backup_restore"
             title: "Undo an update"
-            description: "A restore point is saved before every update: your desktop settings and the version of every package. "
-                + "Going back puts the settings back and reinstalls the old package versions (asks for your password)."
+            description: "Saved before every update: settings and package versions. Going back asks for your password"
             WButton {
                 buttonText: rpCreateProc.running ? "Saving…" : "Create restore point"
                 enabled: !rpCreateProc.running
@@ -304,11 +305,11 @@ date -r /var/lib/pacman/sync/core.db '+%b %-d, %-I:%M %p' 2>/dev/null`]
             icon: "warning"
             title: page.undoPoint ? `Go back to ${page.rpWhen(page.undoPoint.date)}?` : ""
             description: !page.undoPoint ? "" : [
-                "Your desktop settings and the shell go back to how they were then, including settings you changed since.",
-                page.undoPoint.reinstallPackages > 0 ? `${page.undoPoint.reinstallPackages} package(s) go back to their old version (asks for your password).` : "",
-                page.undoPoint.customChanged ? "The Phoenix version installed since is undone too." : "",
-                (page.undoPoint.missingPackages ?? []).length ? `Not possible for ${page.undoPoint.missingPackages.join(", ")}: no longer in the package cache.` : "",
-                "The current state is saved as a restore point first, so you can come back."
+                "Settings and the shell go back to then, including later changes",
+                page.undoPoint.reinstallPackages > 0 ? `${page.undoPoint.reinstallPackages} package(s) go back (asks for your password)` : "",
+                page.undoPoint.customChanged ? "The later Phoenix version is undone too" : "",
+                (page.undoPoint.missingPackages ?? []).length ? `Not in the package cache: ${page.undoPoint.missingPackages.join(", ")}` : "",
+                "The current state is saved first"
             ].filter(x => x).join("\n")
             WButton { buttonText: "Cancel"; onClicked: page.undoPoint = null }
             WButton {
@@ -448,7 +449,7 @@ date -r /var/lib/pacman/sync/core.db '+%b %-d, %-I:%M %p' 2>/dev/null`]
                     }
                 }
                 StyledText {
-                    text: up.u ? `Installs version ${up.u.label}. Without upgrading, bug fixes for the current version continue to be installed.` : ""
+                    text: up.u ? `Installs version ${up.u.label}. Bug fixes continue either way` : ""
                     color: Appearance.colors.colOnPrimaryContainer
                     opacity: 0.8
                 }
@@ -470,10 +471,10 @@ date -r /var/lib/pacman/sync/core.db '+%b %-d, %-I:%M %p' 2>/dev/null`]
                 if (s.error) return `Couldn't check: ${s.error}`
                 const parts = []
                 for (const r of (s.pending || [])) parts.push(`Ready: ${r.label}: ${(r.notes || []).join("; ")}`)
-                for (const p of (s.partial || [])) parts.push(`System fix ${p.label} left ${p.skipped.length} file(s) unchanged; installing the latest custom fixes completes it`)
+                for (const p of (s.partial || [])) parts.push(`System fix ${p.label}: ${p.skipped.length} file(s) skipped; the latest custom fixes complete it`)
                 for (const w of (s.waiting || [])) parts.push(`Waiting: ${w.label} (${w.reason})`)
                 if (parts.length === 0) parts.push((s.applied || []).length > 0 ? `Up to date. Applied: ${s.applied.join(", ")}` : "Up to date")
-                return parts.join("\n") + "\nThey fix problems caused by Arch, Hyprland or Quickshell updates and install with every update, only on systems with matching versions"
+                return parts.join("\n") + "\nFixes for Arch, Hyprland and Quickshell updates"
             }
             WButton { buttonText: offersProc.running ? "Checking…" : "Check now"; enabled: !offersProc.running; onClicked: page.refreshFixes() }
             WButton {
@@ -491,7 +492,8 @@ date -r /var/lib/pacman/sync/core.db '+%b %-d, %-I:%M %p' 2>/dev/null`]
         WToggle {
             icon: "build_circle"
             title: "Receive custom bug fixes"
-            description: "Signed updates for the desktop shell and the custom features of this system (Wallpaper Engine, Settings, the setup assistant and others). Bug fixes are installed with regular updates; new major versions are only offered here"
+            description: "Fixes install with updates; new major versions are offered here"
+            keywords: "signed shell wallpaper engine setup assistant"
             checked: Config.options.extras.customFixes
             onToggled: v => { Config.options.extras.customFixes = v; page.refreshFixes() }
         }
@@ -501,7 +503,7 @@ date -r /var/lib/pacman/sync/core.db '+%b %-d, %-I:%M %p' 2>/dev/null`]
             title: page.offers.installed && page.offers.installed !== "0" ? `Installed: version ${page.offers.installed}` : "Installed: the version included at installation"
             description: page.offers.error ? `Couldn't check: ${page.offers.error}`
                 : page.offers.fix ? `Bug fix ${page.offers.fix.label} is ready: ${(page.offers.fix.notes || []).join("; ")}`
-                : page.offers.waiting ? `Bug fix ${page.offers.waiting.label} installs after the next update (it needs a newer illogical-impulse shell)`
+                : page.offers.waiting ? `Bug fix ${page.offers.waiting.label} installs after the next update`
                 : "No bug fixes waiting"
             WButton { buttonText: offersProc.running ? "Checking…" : "Check now"; enabled: !offersProc.running; onClicked: page.refreshFixes() }
             WButton {
@@ -520,7 +522,7 @@ date -r /var/lib/pacman/sync/core.db '+%b %-d, %-I:%M %p' 2>/dev/null`]
             visible: Config.options.extras.customFixes
             icon: "science"
             title: "Receive test releases"
-            description: "Also offer test versions. Test versions may be incomplete"
+            description: "May be incomplete"
             checked: Config.options.extras.customFixesTest ?? false
             onToggled: v => { Config.options.extras.customFixesTest = v; page.refreshFixes() }
         }
@@ -532,7 +534,7 @@ date -r /var/lib/pacman/sync/core.db '+%b %-d, %-I:%M %p' 2>/dev/null`]
         WCard {
             icon: "publish"
             title: "This system publishes the fixes"
-            description: "Two release lines: custom fixes (custom-publish publish: --feature +1, --fix +0.1, --minor +0.01) and system fixes for Arch / Hyprland / Quickshell updates (custom-publish publish-system, checked against every custom version). Other systems install system fixes always and custom fixes when enabled"
+            description: "custom-publish publish (--feature +1, --fix +0.1, --minor +0.01) and publish-system"
         }
     }
 
@@ -542,17 +544,17 @@ date -r /var/lib/pacman/sync/core.db '+%b %-d, %-I:%M %p' 2>/dev/null`]
         WCard {
             icon: "science"
             title: "Test release"
-            description: "Publishes a test of the next major version. Only systems that receive test releases (such as the preview system below) are offered it"
+            description: "Only systems receiving test releases see it"
             WButton { buttonText: "Publish test version"; onClicked: page.term(`${page.fixBin}/custom-publish make-test`, "Publish test") }
             WButton { buttonText: "Remove test releases"; onClicked: page.term(`${page.fixBin}/custom-publish clear-tests`, "Remove tests") }
         }
         WCard {
             icon: "devices"
             title: "Preview as a receiving system"
-            description: (page.preview.installed ? `A simulated system in a sandbox folder, on version ${page.preview.installed}, with test releases enabled. ` : "")
-                + "Only the sandbox is modified; the files of this system are not changed."
+            description: (page.preview.installed ? `Sandbox on version ${page.preview.installed}, test releases on. ` : "")
+                + "This system isn't changed"
                 + (page.previewMsg !== "" ? `\nLast: ${page.previewMsg}` : "")
-                + (page.preview.fix ? `\nBug fix ${page.preview.fix.label} would be installed automatically.` : "")
+                + (page.preview.fix ? `\nWould install bug fix ${page.preview.fix.label}` : "")
             WButton { buttonText: previewProc.running ? "Checking…" : "Refresh"; enabled: !previewProc.running; onClicked: page.refreshFixes() }
             WButton {
                 buttonText: "Start over"
@@ -576,8 +578,8 @@ date -r /var/lib/pacman/sync/core.db '+%b %-d, %-I:%M %p' 2>/dev/null`]
             icon: "rule"
             title: "How updates install"
             description: Config.options.extras.updateMode === ""
-                ? "You'll be asked at the next update. Ask first: see what will be updated and confirm, like the installer"
-                : "Ask first: a window shows what will be updated and you confirm. Automatically: installs in the background, only your password is asked"
+                ? "Asked at the next update"
+                : "Ask first shows the list to confirm; Automatically installs in the background"
             model: [{ displayName: "Ask first", value: "ask" }, { displayName: "Automatically", value: "auto" }]
             currentValue: Config.options.extras.updateMode
             onSelected: v => Config.options.extras.updateMode = v

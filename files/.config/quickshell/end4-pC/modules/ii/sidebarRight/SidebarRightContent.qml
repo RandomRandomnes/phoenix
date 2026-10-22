@@ -419,7 +419,7 @@ Item {
                             buttonIcon: "settings"
                             onClicked: {
                                 GlobalStates.sidebarRightOpen = false;
-                                GlobalStates.settingsOpen = !GlobalStates.settingsOpen
+                                GlobalStates.toggleSettings()
                             }
                             StyledToolTip {
                                 text: Translation.tr("Settings")
@@ -747,7 +747,7 @@ Item {
                 buttonIcon: "settings"
                 onClicked: {
                     GlobalStates.sidebarRightOpen = false;
-                    GlobalStates.settingsOpen = !GlobalStates.settingsOpen
+                    GlobalStates.toggleSettings()
                 }
                 StyledToolTip {
                     text: Translation.tr("Settings")

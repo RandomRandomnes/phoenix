@@ -118,7 +118,7 @@ WPage {
                 try { r = JSON.parse(text) } catch (e) {}
                 if (r.ok) {
                     // the message fits what was done (QA 2026-10-09: "follow the rule" stayed after a delete or switch-off)
-                    page.status = r.note ? `Saved; ${r.note}.` : page.lastAction === "edit" ? "Saved and applied. New windows of this app follow the rule."
+                    page.status = r.note ? `Saved; ${r.note}.` : page.lastAction === "edit" ? "Saved. Applies to new windows"
                         : page.lastAction === "delete" ? "Rule removed." : "Saved."
                     page.statusError = false
                     page.draft = null
@@ -137,7 +137,8 @@ WPage {
         WCard {
             icon: "select_window"
             title: "Window rules"
-            description: "Choose how an app's windows open: floating, size and position, workspace, monitor, transparency, or always maximized. Rules apply to windows opened after saving."
+            description: "How an app's windows open. Applies to windows opened after saving"
+            keywords: "floating size position workspace monitor transparency maximized"
             WButton { buttonText: "Add rule"; iconName: "add"; accent: true; onClicked: page.edit(-1) }
         }
         StyledText {
@@ -156,7 +157,7 @@ WPage {
         StyledText {
             visible: page.rules.length === 0
             Layout.leftMargin: 4
-            text: "No rules yet."
+            text: "No rules yet"
             color: Appearance.colors.colSubtext
         }
         Repeater {
@@ -218,7 +219,7 @@ WPage {
         WToggle {
             icon: "title"
             title: "Match the window title instead"
-            description: "For apps whose windows all share one class: the rule applies to windows whose title contains the text below"
+            description: "For apps whose windows share one class"
             checked: page.draft?.matchBy === "title"
             onToggled: v => page.setDraft("matchBy", v ? "title" : "class")
         }
@@ -228,7 +229,7 @@ WPage {
             description: page.draft?.matchBy === "title" ? "Text in the window title" : "The app's class, as shown by hyprctl clients"
             MaterialTextField {
                 Layout.preferredWidth: 220
-                placeholderText: "e.g. org.kde.dolphin"
+                placeholderText: "App class"
                 text: page.draft?.match ?? ""
                 onEditingFinished: {
                     const d = JSON.parse(JSON.stringify(page.draft))
@@ -245,7 +246,7 @@ WPage {
         WToggle {
             icon: "picture_in_picture"
             title: "Floating"
-            description: "A free-moving window (size, position and pinning make it floating too)"
+            keywords: "free-moving"
             checked: !!page.draft?.float
             onToggled: v => page.setDraft("float", v)
         }
@@ -300,7 +301,7 @@ WPage {
             visible: !!page.draft?.workspace
             icon: "visibility_off"
             title: "Open in the background"
-            description: "Stay on the current workspace when the app opens"
+            description: "Stays on the current workspace"
             checked: !!page.draft?.silent
             onToggled: v => page.setDraft("silent", v)
         }
@@ -315,7 +316,7 @@ WPage {
         WToggle {
             icon: "push_pin"
             title: "Show on every workspace"
-            description: "Pinned: the window stays visible when switching workspaces"
+            description: "Stays visible when switching workspaces"
             checked: !!page.draft?.pin
             onToggled: v => page.setDraft("pin", v)
         }
@@ -334,7 +335,8 @@ WPage {
             visible: Config.options.extras.windowsStyle !== false
             icon: "title"
             title: "No title bar"
-            description: "Hide the title bar with the close, maximize and minimize buttons for this app"
+            keywords: "close maximize minimize"
+            description: "Hides the title bar and its buttons"
             checked: !!page.draft?.noTitleBar
             onToggled: v => page.setDraft("noTitleBar", v)
         }

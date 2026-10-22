@@ -94,7 +94,7 @@ Singleton {
                 if (done && done.notify && !done.flags.includes("needmode")) {
                     const body = done.msgs.length > 0 ? done.msgs.join("\n") : (done.ok ? done.doneText : done.failText);
                     Quickshell.execDetached(["notify-send", "-a", "Phoenix", ...(done.ok ? [] : ["-u", "critical"]),
-                        done.ok ? `${done.title}: done` : `${done.title}: needs attention`, body || (done.ok ? "Finished." : "See Settings for details.")]);
+                        done.ok ? `${done.title}: done` : `${done.title}: needs attention`, body || (done.ok ? "Finished" : "Details in Settings")]);
                 }
                 root.finished(proc.jobId, code === 0);
                 proc.destroy();

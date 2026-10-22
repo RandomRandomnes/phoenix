@@ -449,7 +449,7 @@ ColumnLayout {
                 }
                 WCSpin {
                     icon: "av_timer"
-                    text: Translation.tr("Timeout duration (if not defined by notification) (ms)")
+                    text: Translation.tr("Default timeout (ms)")
                     value: Config.options.notifications.timeout
                     from: 1000
                     to: 60000
@@ -523,7 +523,7 @@ ColumnLayout {
                     Layout.fillWidth: true
                     buttonIcon: "folder_open"
                     text: Translation.tr("Custom icons folder")
-                    placeholderText: Translation.tr("Leave empty to use the built-in icons, e.g. ~/Pictures/icons")
+                    placeholderText: Translation.tr("Empty = built-in icons")
                     value: Config.options.custom.iconsPath
                     onValueChanged: iconsPathDebounce.restart()
 

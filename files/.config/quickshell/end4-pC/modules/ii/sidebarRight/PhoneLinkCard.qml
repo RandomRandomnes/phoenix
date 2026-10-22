@@ -122,7 +122,7 @@ Rectangle {
             }
             RoundButton {
                 symbol: root.expanded ? "expand_less" : "expand_more"
-                tip: root.expanded ? "Less" : "Notifications, photos and media from your phone"
+                tip: root.expanded ? "Less" : "More"
                 onClicked: root.expanded = !root.expanded
             }
         }
@@ -178,9 +178,9 @@ Rectangle {
                 wrapMode: Text.Wrap
                 font.pixelSize: Appearance.font.pixelSize.smaller
                 color: Appearance.colors.colSubtext
-                text: !root.online ? "Connect the phone to see its notifications."
-                    : (root.phone?.plugins?.kdeconnect_notifications === false ? "Phone notifications are off (Settings › Bluetooth & devices › Phone)."
-                    : "No notifications. If they never show up, allow notification access in the KDE Connect app on the phone.")
+                text: !root.online ? "Phone not connected"
+                    : (root.phone?.plugins?.kdeconnect_notifications === false ? "Phone notifications are off in Settings"
+                    : "No notifications. None ever? Allow notification access in KDE Connect")
             }
             Repeater {
                 model: (root.phone?.notifications ?? []).slice(-3).reverse()
@@ -298,9 +298,9 @@ Rectangle {
                 wrapMode: Text.Wrap
                 font.pixelSize: Appearance.font.pixelSize.smaller
                 color: Appearance.colors.colSubtext
-                text: !root.online ? "Connect the phone to see its photos."
-                    : PhoneLink.photosLoading ? "Getting photos from the phone…"
-                    : "No photos found. Allow storage access in the KDE Connect app on the phone, then expand this card again."
+                text: !root.online ? "Phone not connected"
+                    : PhoneLink.photosLoading ? "Getting photos…"
+                    : "No photos. Allow storage access in KDE Connect"
             }
 
             Rectangle {   // what the phone plays

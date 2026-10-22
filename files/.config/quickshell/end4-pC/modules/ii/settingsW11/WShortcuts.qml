@@ -237,7 +237,7 @@ WPage {
                     TextField {
                         id: addName
                         Layout.fillWidth: true
-                        placeholderText: "Name (e.g. Spotify)"
+                        placeholderText: "Name"
                         color: Appearance.colors.colOnLayer2
                         font.family: Appearance.font.family.main
                         background: Rectangle { radius: 10; color: Appearance.colors.colLayer4 }
@@ -246,14 +246,14 @@ WPage {
                     TextField {
                         id: addCmd
                         Layout.fillWidth: true
-                        placeholderText: "Command (e.g. spotify, or gtk-launch org.kde.dolphin)"
+                        placeholderText: "Command"
                         color: Appearance.colors.colOnLayer2
                         font.family: Appearance.font.family.monospace
                         background: Rectangle { radius: 10; color: Appearance.colors.colLayer4 }
                     }
                 }
                 StyledText {
-                    text: "Press the new keys. Esc cancels."
+                    text: "Press the new keys (Esc cancels)"
                     font.pixelSize: Appearance.font.pixelSize.small
                     color: Appearance.colors.colSubtext
                 }
@@ -294,7 +294,7 @@ WPage {
                         id: warn
                         anchors { left: parent.left; right: parent.right; verticalCenter: parent.verticalCenter; margins: 14 }
                         wrapMode: Text.Wrap
-                        text: `${capture.combo} already does “${capture.conflict}”. Use anyway: that one is switched off (you can give it other keys).`
+                        text: `${capture.combo} is used by “${capture.conflict}”. Use anyway turns that one off`
                         font.pixelSize: Appearance.font.pixelSize.small
                         color: Appearance.colors.colOnErrorContainer
                     }

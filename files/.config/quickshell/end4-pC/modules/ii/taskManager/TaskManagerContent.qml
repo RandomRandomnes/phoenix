@@ -592,7 +592,7 @@ Item {
                         elide: Text.ElideRight
                         font.pixelSize: Appearance.font.pixelSize.smaller
                         color: root.forceOffer ? Appearance.colors.colOnErrorContainer : Appearance.colors.colSubtext
-                        text: root.forceOffer ? `${root.pending?.name ?? ""} didn't close. Force end closes it right away; unsaved work is lost.`
+                        text: root.forceOffer ? `${root.pending?.name ?? ""} didn't close. Force end loses unsaved work`
                             : root.selected ? `PID ${root.selected.pid} · ${root.selected.user} · ${root.selected.count} process${root.selected.count > 1 ? "es" : ""} · ${root.selected.cmd || root.selected.name}` : ""
                     }
                     WButton {
@@ -847,11 +847,11 @@ Item {
             }
             WSection {
                 visible: StartupItems.scriptExists
-                title: "Your own startup script (runs after you unlock)"
+                title: "Your startup script"
                 WCard {
                     icon: "description"
                     title: StartupItems.scriptPrograms.length > 0 ? StartupItems.scriptPrograms.join(", ") : "Nothing"
-                    description: "Commands in ~/.config/hypr/custom/scripts/autostart-user.sh. Edit the script to change them"
+                    description: "~/.config/hypr/custom/scripts/autostart-user.sh"
                     WButton { buttonText: "Edit script"; onClicked: Quickshell.execDetached([`${Quickshell.env("HOME")}/.local/bin/phoenix-open`, "editor", StartupItems.scriptPath]) }
                 }
             }
@@ -948,7 +948,7 @@ Item {
             }
             StyledText {
                 Layout.leftMargin: 6
-                text: `${svc.shown.length} services · yours first; starting or stopping a system service asks for your password`
+                text: `${svc.shown.length} services · system services ask for your password`
                 font.pixelSize: Appearance.font.pixelSize.smaller
                 color: Appearance.colors.colSubtext
             }

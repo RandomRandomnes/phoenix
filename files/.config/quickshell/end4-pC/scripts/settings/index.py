@@ -5,7 +5,7 @@ Prints JSON: [{"title", "page", "sub", "keywords"}] for every card, switch, list
 modules/ii/settingsW11/P*.qml (and the S*.qml pages they include), so the search in Settings and in the Super menu
 finds every setting and can jump to it. Replaces a hand-written list of ~90 entries that missed most settings.
 page = the category (system, personalization, …), sub = the sub-page ("" = the category's main page), keywords = the
-card's description and the section it is in.
+card's description, its hidden `keywords:` (search words the short description left out) and its section.
 """
 import json
 import os
@@ -96,7 +96,7 @@ def scan(src, page, sub, section, out, seen_files):
             continue
         title = prop(body, "title") or prop(body, "text")
         if title and "${" not in title and len(title) < 90:
-            words = " ".join(x for x in (prop(body, "description"), section) if x)
+            words = " ".join(x for x in (prop(body, "description"), prop(body, "keywords"), section) if x)
             out.append({"title": title, "page": page, "sub": sub, "keywords": words.lower()})
         # cards inside cards (rare) are found too
         scan(body[1:-1], page, sub, section, out, seen_files)

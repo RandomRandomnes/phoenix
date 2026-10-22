@@ -18,7 +18,7 @@ ColumnLayout {
 
             WCGroup {
                 WCSwitch {
-                    text: Translation.tr("Use Levenshtein distance-based algorithm instead of fuzzy")
+                    text: Translation.tr("Levenshtein matching instead of fuzzy")
                     checked: Config.options.search.sloppy
                     onToggled: checked => {
                         Config.options.search.sloppy = checked;

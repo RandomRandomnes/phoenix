@@ -491,7 +491,7 @@ ColumnLayout {
             WCNotice {
                 Layout.fillWidth: true
                 Layout.topMargin: 15
-                text: Translation.tr("Animation presets require a require line in your hyprland.lua. Add the following line to enable presets:") + '\n\nrequire("hyprland/shellOverrides/animations")'
+                text: Translation.tr("Animation presets need this line in hyprland.lua:") + '\n\nrequire("hyprland/shellOverrides/animations")'
 
                 Item { Layout.fillWidth: true }
 

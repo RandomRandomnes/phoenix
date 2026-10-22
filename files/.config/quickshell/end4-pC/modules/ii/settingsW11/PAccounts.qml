@@ -85,7 +85,7 @@ WPage {
         WCard {
             icon: "photo_camera"
             title: "Choose a photo"
-            description: "Shown on the lock screen, settings and sidebar"
+            description: "On the lock screen and sidebar"
             WButton { buttonText: "Browse files"; onClicked: pickProc.running = true }
             WButton {
                 visible: Config.options.profile.avatarPicture !== ""
@@ -96,7 +96,7 @@ WPage {
         WCard {
             icon: "badge"
             title: "Display name"
-            description: `Leave empty to use your username (${SystemInfo.username})`
+            description: `Empty: ${SystemInfo.username}`
             Rectangle {
                 implicitWidth: 240; implicitHeight: 34
                 radius: 12
@@ -138,7 +138,7 @@ WPage {
             property bool messageOk: false
             icon: "password"
             title: "Change your password"
-            description: pwCard.message !== "" ? pwCard.message : "Type the current password, then the new one twice"
+            description: pwCard.message !== "" ? pwCard.message : ""
             WButton {
                 visible: !pwCard.open
                 buttonText: "Change"
@@ -206,10 +206,10 @@ WPage {
             title: "Sign-in at startup"
             description: busy ? "Changing…"
                 : lsState === "on" ? (lsMode === "lock"
-                        ? "Lock screen: your desktop starts behind it, so it's ready as soon as you type your password"
-                        : "Login screen: the PC starts at the Phoenix login screen and asks for your password")
+                        ? "Lock screen: the desktop loads behind it"
+                        : "Login screen: asks for your password at startup")
                     + (updateReady ? ". An update is ready" : "")
-                : lsState === "off" ? (otherDm ? `Off: the PC uses another login screen (${otherDm})` : "Off: the PC signs you in automatically, no password")
+                : lsState === "off" ? (otherDm ? `Off: another login screen is used (${otherDm})` : "Off: signs in automatically")
                 : "Checking…"
             model: [
                 { displayName: "Lock screen (fastest)", value: "lock" },
@@ -251,8 +251,8 @@ WPage {
                 onClicked: loginScreen.run("install")
             }
         }
-        WLink { icon: "key"; title: "Sign-in options"; description: "Lock screen, keyring, password requirements"; page: "privacy" }
-        WLink { icon: "group"; title: "Other users"; description: "Add or manage user accounts"; chevronIcon: "open_in_new"; action: () => Quickshell.execDetached(["bash", "-c", Config.options.apps.manageUser]) }
+        WLink { icon: "key"; title: "Sign-in options"; keywords: "password"; description: "Lock screen, keyring"; page: "privacy" }
+        WLink { icon: "group"; title: "Other users"; keywords: "accounts add manage"; chevronIcon: "open_in_new"; action: () => Quickshell.execDetached(["bash", "-c", Config.options.apps.manageUser]) }
     }
     WJob { jobId: "login-screen" }
 }

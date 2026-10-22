@@ -210,6 +210,12 @@ GREETER_SRC="$HOME/.local/share/phoenix/greeter"
 GREETER_DIR=/usr/share/phoenix-greeter
 LS_SAVE=/etc/phoenix-login-screen
 GETTY_D=/etc/systemd/system/getty@tty1.service.d   # tty1 autologin drop-ins (Phoenix's installer: ovveride.conf)
+# The login screen in the lock screen's look (2026-10-22): phoenix-greeter-build puts shell.qml + copies of the lock
+# screen styles together; the single-file greeter.qml stays installed next to it as the fallback entry.
+greeter_build() {   # greeter_build DIR: 0 when DIR holds a complete login screen
+    [ -x "$HOME/.local/bin/phoenix-greeter-build" ] && "$HOME/.local/bin/phoenix-greeter-build" "$1" >/dev/null 2>&1 && [ -f "$1/shell.qml" ]
+}
+greeter_entry() { [ -f "$GREETER_DIR/shell.qml" ] && echo "$GREETER_DIR/shell.qml" || echo "$GREETER_DIR/greeter.qml"; }
 autologin_files() { grep -lE -- "--autologin|(^|[[:space:]])-a[[:space:]]" "$GETTY_D"/*.conf 2>/dev/null; }
 # The keyboard layout for the login screen (QA 2026-10-08: it always used US, so other layouts typed wrong passwords
 # that counted towards the lockout): Hyprland's input settings, else the system's X11 keymap (localectl).
@@ -227,6 +233,16 @@ greeter_xkb_env() {
         [ -n "$v" ] && out+=" XKB_DEFAULT_${o^^}=$v"
     done
     printf '%s' "$out"
+}
+greeter_current() {   # the installed login screen = what phoenix-greeter-build makes from this Phoenix version
+    local t; t=$(mktemp -d)
+    if greeter_build "$t/g"; then
+        cp "$GREETER_DIR/greeter.qml" "$t/g/greeter.qml" 2>/dev/null
+        diff -rq "$t/g" "$GREETER_DIR" >/dev/null 2>&1 && grep -q "$GREETER_DIR/shell.qml" /etc/greetd/config.toml; local r=$?
+    else
+        local r=0   # can't build one here: keep whatever is installed
+    fi
+    rm -rf "$t"; return $r
 }
 cmd_login_screen() {
     local me="${USER:-$(id -un)}"
@@ -248,6 +264,15 @@ cmd_login_screen() {
             echo "Installing the Phoenix login screen (asks for your password)."
             sudo pacman -S --needed --noconfirm greetd cage || die "installing greetd and cage failed"
             command -v cage >/dev/null && command -v qs >/dev/null || die "cage or Quickshell is missing; nothing was changed"
+            local build; build=$(mktemp -d)
+            if greeter_build "$build/greeter"; then
+                sudo rm -rf "${GREETER_DIR:?}" && sudo mkdir -p "$GREETER_DIR" && sudo cp -r "$build/greeter/." "$GREETER_DIR/" \
+                    && sudo chown -R root:root "$GREETER_DIR" || { rm -rf "$build"; die "copying the login screen failed"; }
+            else
+                echo "Note: the login screen in the lock screen's look couldn't be put together; using the classic one."
+                sudo rm -rf "${GREETER_DIR:?}"
+            fi
+            rm -rf "$build"
             sudo install -D -m 644 -o root -g root "$GREETER_SRC/greeter.qml" "$GREETER_DIR/greeter.qml" \
                 && sudo install -D -m 755 -o root -g root "$GREETER_SRC/phoenix-session" /usr/local/bin/phoenix-session \
                 || die "copying the login screen failed"
@@ -285,7 +310,7 @@ cmd_login_screen() {
             {
                 printf '%s\n' "# Written by \`phoenix login-screen install\` (the Phoenix login screen). \`phoenix login-screen remove\` puts back what was here." \
                     "[terminal]" "vt = 1" "" "[default_session]" \
-                    "command = \"sh -c 'exec env QT_WAYLAND_DISABLE_WINDOWDECORATION=1$(greeter_xkb_env) cage -s -m last -- qs -p $GREETER_DIR/greeter.qml >/var/lib/phoenix-greeter/state/greeter.log 2>&1'\"" "user = \"greeter\""
+                    "command = \"sh -c 'exec env QT_WAYLAND_DISABLE_WINDOWDECORATION=1$(greeter_xkb_env) cage -s -m last -- qs -p $(greeter_entry) >/var/lib/phoenix-greeter/state/greeter.log 2>&1'\"" "user = \"greeter\""
                 if [ "$mode" = lock ]; then
                     printf '%s\n' "" "# Lock-screen sign-in: once per boot the desktop starts behind the lock screen (phoenix-session locks first)" \
                         "[initial_session]" "command = \"/usr/local/bin/phoenix-session\"" "user = \"$me\""
@@ -332,7 +357,8 @@ cmd_login_screen() {
                 # the running copies are root's: a Phoenix update only changes the ones in your home (QA 2026-10-08)
                 if ! cmp -s "$GREETER_SRC/greeter.qml" "$GREETER_DIR/greeter.qml" || ! cmp -s "$GREETER_SRC/phoenix-session" /usr/local/bin/phoenix-session \
                     || { [ -f "$GREETER_SRC/phoenix-greeter-blank.service" ] && ! cmp -s "$GREETER_SRC/phoenix-greeter-blank.service" /etc/systemd/system/phoenix-greeter-blank.service; } \
-                    || ! grep -q "greeter.log" /etc/greetd/config.toml || grep -q "=(unset)" /etc/greetd/config.toml; then
+                    || ! grep -q "greeter.log" /etc/greetd/config.toml || grep -q "=(unset)" /etc/greetd/config.toml \
+                    || ! greeter_current; then
                     echo "Login screen: on (asks for the password at startup)$how; an update is ready: phoenix login-screen install"
                 else
                     echo "Login screen: on (asks for the password at startup)$how"

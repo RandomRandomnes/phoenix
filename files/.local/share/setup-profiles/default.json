@@ -2,7 +2,7 @@
     "format": "end4-setup-profile",
     "version": 1,
     "name": "Default",
-    "description": "Windows-style desktop with the standard illogical-impulse appearance: floating windows with title bars, minimizing to the dock, an application grid in the Super menu, a static wallpaper and monochrome colors. Additional features can be enabled in Settings \u203a Extras.",
+    "description": "Windows-style windows with title bars, an app grid, a still wallpaper and monochrome colors",
     "author": "RandomRandomnes",
     "look": "stock",
     "features": {

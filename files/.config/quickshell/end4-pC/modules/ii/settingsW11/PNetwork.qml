@@ -66,7 +66,7 @@ Item {
                             color: Appearance.colors.colOnLayer2
                         }
                         StyledText {
-                            text: root.connected ? `Connected, secured${Network.ipAddress ? " · " + Network.ipAddress : ""}` : "You're not connected to any networks"
+                            text: root.connected ? `Connected, secured${Network.ipAddress ? " · " + Network.ipAddress : ""}` : "Not connected"
                             font.pixelSize: Appearance.font.pixelSize.smaller
                             color: Appearance.colors.colSubtext
                         }
@@ -89,7 +89,7 @@ Item {
                     checked: root.hasWifi && root.wifiOn
                     onToggled: v => Network.enableWifi(v)
                 }
-                WLink { visible: root.hasWifi; icon: "wifi_find"; title: "Show available networks"; description: "Connect to a Wi-Fi network"; sub: "wifi" }
+                WLink { visible: root.hasWifi; icon: "wifi_find"; title: "Show available networks"; keywords: "wi-fi connect"; sub: "wifi" }
                 WCard {
                     visible: Network.ethernet
                     icon: "lan"
@@ -99,7 +99,8 @@ Item {
                 WToggle {
                     icon: "airplanemode_active"
                     title: "Airplane mode"
-                    description: "Stop all wireless communication (Wi-Fi and Bluetooth)"
+                    keywords: "wireless"
+                    description: "Turns off Wi-Fi and Bluetooth"
                     checked: !root.wifiOn && !BluetoothStatus.enabled
                     onToggled: v => root.setAirplane(v)
                 }
@@ -140,7 +141,7 @@ Item {
 
             WSection {
                 title: "Related settings"
-                WLink { icon: "settings_ethernet"; title: "Advanced network settings"; description: "Connections, DNS, proxy, VPN profiles"; chevronIcon: "open_in_new"; action: () => Quickshell.execDetached(["bash", "-c", Config.options.apps.network]) }
+                WLink { icon: "settings_ethernet"; title: "Advanced network settings"; keywords: "connections"; description: "DNS, proxy, VPN"; chevronIcon: "open_in_new"; action: () => Quickshell.execDetached(["bash", "-c", Config.options.apps.network]) }
                 WLink { icon: "public"; title: "Open sign-in page for public Wi-Fi"; chevronIcon: "open_in_new"; action: () => Network.openPublicWifiPortal() }
             }
         }
@@ -159,7 +160,7 @@ Item {
                     icon: "wifi"
                     title: "Wi-Fi"
                     enabled: root.hasWifi
-                    description: root.hasWifi ? "" : "No Wi-Fi adapter. With a network cable plugged in, nothing needs to be done."
+                    description: root.hasWifi ? "" : "No Wi-Fi adapter"
                     checked: root.hasWifi && root.wifiOn
                     onToggled: v => Network.enableWifi(v)
                 }

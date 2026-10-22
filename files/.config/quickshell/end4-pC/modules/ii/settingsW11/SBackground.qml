@@ -423,7 +423,7 @@ ColumnLayout {
                         Layout.fillWidth: true
                         wrapMode: Text.Wrap
                         color: Appearance.colors.colSubtext
-                        text: Translation.tr("Arrange the tiles from the desktop while widgets are unlocked: split, remove, change the image and drag the borders. The starred tile sets the colors and the blurred backdrop.")
+                        text: Translation.tr("Unlock widgets to arrange the tiles on the desktop. The starred tile sets the colors")
                     }
                     RippleButton {
                         implicitWidth: resetLabel.implicitWidth + 24

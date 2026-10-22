@@ -41,46 +41,46 @@ ApplicationWindow {
     readonly property var steps: [
         { id: "welcome",   title: "Welcome",           icon: "waving_hand",
           heading: "Welcome to Phoenix",
-          text: "This assistant configures the system in a few steps. Each step can be skipped and changed later in Settings (Super+I)." },
+          text: "Every step can be skipped and changed later in Settings (Super+I)" },
         { id: "wifi",      title: "Wi-Fi",             icon: "wifi", sub: "wifi",
           heading: "Network connection",
-          text: "Select a Wi-Fi network. If a network cable is connected, no action is required. Installing applications, drivers and updates requires an internet connection." },
+          text: "Pick a Wi-Fi network (not needed with a cable). Apps, drivers and updates need internet" },
         { id: "bluetooth", title: "Bluetooth",         icon: "bluetooth", sub: "bluetooth",
           heading: "Bluetooth devices",
-          text: "Pair a mouse, keyboard, headphones or game controller." },
+          text: "Pair a mouse, keyboard, headphones or controller" },
         { id: "region",    title: "Time and region",   icon: "schedule", sub: "datetime",
           heading: "Time zone and weather",
-          text: "Confirm the time zone and select the location used for the weather display on the taskbar." },
+          text: "Time zone, and the location for the taskbar weather" },
         { id: "keyboard",  title: "Keyboard",          icon: "keyboard", sub: "keyboard",
           heading: "Keyboard layout",
-          text: "Select the keyboard layout and the key repeat settings." },
+          text: "Layout and key repeat" },
         { id: "display",   title: "Display",           icon: "desktop_windows", sub: "display",
           heading: "Display",
-          text: "Set the resolution, refresh rate and scale. A larger scale improves readability on laptops and high-resolution displays." },
+          text: "Resolution, refresh rate and scale" },
         { id: "profile",   title: "Your setup",        icon: "tune",
           heading: "Setup profile",
-          text: "A setup profile determines the appearance and which additional features are enabled. Select a profile, or use a profile file." },
+          text: "Sets the look and which extra features are on" },
         { id: "colors",    title: "Colors",            icon: "palette", sub: "colors",
           heading: "Appearance",
-          text: "Select light or dark mode. Colors are derived from the wallpaper; an accent color can also be selected." },
+          text: "Light or dark; colors follow the wallpaper" },
         { id: "wallpaper", title: "Wallpaper",         icon: "wallpaper", sub: "background",
           heading: "Wallpaper",
-          text: "Select a desktop wallpaper." },
+          text: "" },
         { id: "account",   title: "Account",           icon: "account_circle",
           heading: "User account",
-          text: "Set the profile picture and the display name. Your password is the one chosen during installation; to change it, use Change your password below. Login screen at startup chooses whether the PC asks for your password when it starts or signs you in automatically (the default)." },
+          text: "Picture, name, password, and how the PC signs you in" },
         { id: "apps",      title: "Apps",              icon: "apps",
           heading: "Applications",
-          text: "Firefox is installed by default. Select additional applications to install. Installation runs in the background and asks for the administrator password." },
+          text: "Firefox is already installed. Installing asks for your password" },
         { id: "system",    title: "Drivers and updates", icon: "memory",
           heading: "Drivers and updates",
-          text: "Install available updates and any required graphics drivers, and choose how the computer starts." },
+          text: "Updates, graphics drivers and the boot menu" },
         { id: "shortcuts", title: "Shortcuts",         icon: "keyboard_command_key",
           heading: "Keyboard shortcuts",
-          text: "The Super key is the Windows key. Super+/ displays all shortcuts at any time." },
+          text: "Super is the Windows key. Super+/ shows every shortcut" },
         { id: "done",      title: "All set",           icon: "check_circle",
           heading: "Setup complete",
-          text: "The system is ready to use." },
+          text: "" },
     ]
     property int step: 0
     readonly property var cur: steps[step]
@@ -106,7 +106,7 @@ ApplicationWindow {
     // "unknown" (check switched off) or no nmcli counts as online, so nothing is blocked by mistake.
     property bool online: true
     readonly property var onlineSteps: ["apps", "system"]
-    readonly property string offlineNote: "No internet connection. Connect in the Wi-Fi step, or do this later in Settings."
+    readonly property string offlineNote: "No internet: connect in the Wi-Fi step, or do it later in Settings"
 
     // hardware
     property string gpuText: ""
@@ -126,14 +126,14 @@ ApplicationWindow {
     readonly property string bootNote: {
         const c = root.bootChoice
         if (!root.online && (c === "grub" || c === "refind") && c !== root.boot.current) return `${c === "grub" ? "GRUB" : "rEFInd"} is downloaded when it is installed. ` + root.offlineNote
-        if (root.boot.current === "other" && c === "direct") return "The computer currently starts something else first (for example after a firmware update reset the boot order). Apply to start Arch Linux directly again."
-        if (c === root.boot.current && c !== "direct") return "In use. To install a fresh copy, choose another option first, or run boot-loader in a terminal."
-        if (c === "direct") return "The computer starts Arch Linux directly. Other systems, such as Windows, start from the firmware boot menu (often F8, F11 or F12 at power-on)."
-        if (c === "grub") return root.boot.secureBoot ? "Not available while Secure Boot is on: the current GRUB cannot start the signed system without shim. Choose systemd-boot or rEFInd."
-            : "A text menu at startup that lists Arch Linux, the fallback image and Windows. Downloaded fresh; requires an internet connection."
-        if (c === "systemd-boot") return root.boot.windowsSeparate ? "A simple menu at startup. Windows is on a separate partition and is not listed; it starts from the firmware boot menu."
-            : "A simple menu at startup that lists Arch Linux, the fallback image and Windows."
-        if (c === "refind") return "A graphical menu with icons at startup that finds Arch Linux and Windows automatically. Downloaded fresh; requires an internet connection."
+        if (root.boot.current === "other" && c === "direct") return "Something else starts first now. Apply to start Arch Linux directly"
+        if (c === root.boot.current && c !== "direct") return "In use"
+        if (c === "direct") return "No menu. Other systems start from the firmware boot menu (F8, F11 or F12)"
+        if (c === "grub") return root.boot.secureBoot ? "Not available with Secure Boot on"
+            : "Text menu: Arch Linux, fallback, Windows. Needs internet"
+        if (c === "systemd-boot") return root.boot.windowsSeparate ? "Simple menu. Windows (separate partition) starts from the firmware menu"
+            : "Simple menu: Arch Linux, fallback, Windows"
+        if (c === "refind") return "Graphical menu that finds Arch Linux and Windows. Needs internet"
         return ""
     }
 
@@ -181,7 +181,7 @@ ApplicationWindow {
             return
         }
         if (root.cur.id === "apps" && root.picked.length > 0 && !root.online) {   // offline: keep the picks, move on
-            root.appsStatus = "Not installed: no internet connection. Come back to this step after connecting, or install them later in Settings › Apps."
+            root.appsStatus = "Not installed: no internet. Retry after connecting, or later in Settings › Apps"
             root.go(root.step + 1)
             return
         }
@@ -198,8 +198,8 @@ ApplicationWindow {
         root.confirmingApps = false
         const ids = root.picked
         root.picked = []   // handed over; picking more later queues another installation
-        root.appsStatus = termProc.running ? "Waiting: the installation starts when the current job is done."
-                                           : "Installing in the background… you can keep going."
+        root.appsStatus = termProc.running ? "Waiting for the current job"
+                                           : "Installing in the background…"
         root.terminal([`${root.bin}/setup-apps`, "install", ...ids], "Installing applications")
         root.go(root.step + 1)
     }
@@ -304,15 +304,15 @@ ApplicationWindow {
         id: termProc
         property string jobTitle: ""
         onExited: (code, status) => {
-            root.appsStatus = root.appsStatus === "Installing in the background… you can keep going."
-                ? (code === 0 ? "Installation finished." : "Some applications couldn't be installed. Try again from Settings › Extras.") : root.appsStatus
+            root.appsStatus = root.appsStatus === "Installing in the background…"
+                ? (code === 0 ? "Installed" : "Some apps couldn't be installed. Retry in Settings › Extras") : root.appsStatus
             root.sysStatus = root.sysStatus.endsWith("…") ? "Completed." : root.sysStatus
             installedProc.running = true
             bootProc.running = true
             if (root.termQueue.length > 0) {
                 const job = root.termQueue[0]
                 root.termQueue = root.termQueue.slice(1)
-                if (job.title === "Installing applications") root.appsStatus = "Installing in the background… you can keep going."
+                if (job.title === "Installing applications") root.appsStatus = "Installing in the background…"
                 root.terminal(job.args, job.title)
             }
         }
@@ -535,6 +535,7 @@ ApplicationWindow {
                 StyledText {
                     Layout.fillWidth: true
                     wrapMode: Text.WordWrap
+                    visible: text !== ""
                     text: root.cur.text
                     font.pixelSize: Appearance.font.pixelSize.normal
                     color: Appearance.colors.colSubtext
@@ -639,7 +640,7 @@ ApplicationWindow {
                 visible: Config.options.bar.weather.enable
                 icon: "location_on"
                 title: "City"
-                description: "Leave empty to determine the location automatically"
+                description: "Empty: found automatically"
                 MaterialTextField {
                     Layout.preferredWidth: 220
                     placeholderText: "e.g. San Antonio"
@@ -724,9 +725,9 @@ ApplicationWindow {
                 WCard {
                     icon: "download"
                     title: root.picked.length === 0 ? "No applications selected" : `${root.picked.length} application${root.picked.length === 1 ? "" : "s"} selected`
-                    description: root.picked.length === 0 ? (root.appsStatus || "Selected applications are installed when Next is pressed")
+                    description: root.picked.length === 0 ? (root.appsStatus || "Picked apps install when you press Next")
                         : !root.online ? root.picked.map(id => root.appById(id).name).join(", ") + ". " + root.offlineNote
-                        : root.picked.map(id => root.appById(id).name).join(", ") + ". Installation starts when Next is pressed"
+                        : root.picked.map(id => root.appById(id).name).join(", ") + ". Installs when you press Next"
                 }
             }
             Repeater {
@@ -805,10 +806,8 @@ ApplicationWindow {
                     StyledText {
                         Layout.fillWidth: true
                         wrapMode: Text.WordWrap
-                        text: "Updates and bug fixes for the desktop shell and the custom features of this system (taskbar, Settings, this assistant, Wallpaper Engine and others); without them the shell stays as it is now. "
-                            + "Releases are digitally signed, so only authentic releases are installed, and they are applied together with regular updates. "
-                            + "Personal settings and files are not modified. This choice can be changed later in Settings › Update. "
-                            + "System fixes, needed after Arch, Hyprland or Quickshell updates, are always installed and are not part of this choice."
+                        text: "Signed updates for the desktop shell and Phoenix's features, installed with regular updates. Your settings and files aren't touched. "
+                            + "Without them the shell stays as it is. Changeable in Settings › Update"
                         color: Appearance.colors.colOnPrimaryContainer
                     }
                     RowLayout {
@@ -843,9 +842,9 @@ ApplicationWindow {
                 WCard {
                     icon: "developer_board"
                     title: root.needsDriver ? "Graphics driver" : "Graphics driver: no action required"
-                    description: root.needsDriver && !root.online ? "NVIDIA or Intel graphics detected. " + root.offlineNote
-                        : root.needsDriver ? "NVIDIA or Intel graphics detected. Install the driver for full performance; a restart is required afterwards."
-                        : "AMD and generic graphics are supported without additional drivers."
+                    description: root.needsDriver && !root.online ? "NVIDIA or Intel graphics. " + root.offlineNote
+                        : root.needsDriver ? "NVIDIA or Intel graphics: install the driver, then restart"
+                        : "AMD graphics work without a driver"
                     WButton {
                         visible: root.needsDriver
                         enabled: !termProc.running && root.online
@@ -897,7 +896,7 @@ ApplicationWindow {
                     icon: "system_update_alt"
                     title: "Install all updates"
                     description: root.sysStatus !== "" ? root.sysStatus : !root.online ? root.offlineNote
-                        : "Recommended after installation. Runs in the background and asks for the administrator password."
+                        : "Recommended now. Asks for your password"
                     WButton {
                         accent: true
                         enabled: !termProc.running && root.online
@@ -948,10 +947,10 @@ ApplicationWindow {
                 WCard {
                     icon: "menu_book"
                     title: "Phoenix Quick Start"
-                    description: "A short guide to keyboard shortcuts, window management, updates and additional features. It opens after Finish and remains available in the application menu"
+                    description: "Opens after Finish; also in the app menu"
                 }
-                WCard { icon: "settings"; title: "Settings"; description: "Super+I. Extra features, profile files and this setup are under Extras" }
-                WCard { icon: "ios_share"; title: "Share your setup"; description: "Settings › Extras › Share my setup saves it as a file a friend can use" }
+                WCard { icon: "settings"; title: "Settings"; description: "Super+I. Extra features are under Extras" }
+                WCard { icon: "ios_share"; title: "Share your setup"; description: "Settings › Extras › Share my setup" }
             }
         }
     }
@@ -987,7 +986,7 @@ ApplicationWindow {
                 StyledText {
                     Layout.fillWidth: true
                     wrapMode: Text.WordWrap
-                    text: "The following applications will be installed in the background. The administrator password is asked; setup can continue in the meantime."
+                    text: "Installs in the background and asks for your password"
                     color: Appearance.colors.colSubtext
                 }
                 StyledFlickable {

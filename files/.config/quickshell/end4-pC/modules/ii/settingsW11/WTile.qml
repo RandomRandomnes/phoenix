@@ -8,6 +8,7 @@ Rectangle {
     id: root
     property string title: ""
     property string description: ""
+    property string keywords: ""            // extra search words (Settings search only, not shown)
     property string linkText: ""
     signal linkClicked()
     default property alias content: body.data

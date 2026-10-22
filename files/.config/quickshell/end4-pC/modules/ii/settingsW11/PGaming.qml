@@ -18,14 +18,15 @@ WPage {
         WToggle {
             icon: "sports_esports"
             title: "Game Mode"
-            description: "Turns off animations, blur, shadows, gaps and rounded corners, and allows tearing for the lowest latency"
+            description: "Turns off animations and effects for lower latency"
+            keywords: "blur shadows gaps rounded corners tearing"
             checked: gameMode.toggled
             onToggled: gameMode.mainAction()
         }
         WToggle {
             icon: "auto_mode"
             title: "Turn on Game Mode automatically"
-            description: "While a fullscreen game has the focus; it turns off again when you leave the game"
+            description: "While a fullscreen game is focused"
             checked: Config.options.extras.gameModeAuto
             onToggled: v => Config.options.extras.gameModeAuto = v
         }
@@ -33,7 +34,7 @@ WPage {
             visible: Config.options.extras.wallpaperEngine
             icon: "wallpaper"
             title: "Stop Wallpaper Engine in Game Mode"
-            description: "Frees the graphics card for the game; the wallpaper comes back when Game Mode turns off"
+            description: "Frees the graphics card for the game"
             checked: Config.options.extras.gameModeWallpaper
             onToggled: v => Config.options.extras.gameModeWallpaper = v
         }
@@ -41,7 +42,7 @@ WPage {
             visible: PowerProfiles.hasPerformanceProfile
             icon: "speed"
             title: "Best performance power mode in Game Mode"
-            description: "Your power mode comes back when Game Mode turns off"
+            description: "Restored when Game Mode turns off"
             checked: Config.options.extras.gameModePerformance
             onToggled: v => Config.options.extras.gameModePerformance = v
         }
@@ -63,7 +64,8 @@ WPage {
         WToggle {
             icon: "do_not_disturb_on"
             title: "Do not disturb while playing"
-            description: "Silences notification pop-ups while a fullscreen game has the focus. They still arrive in the notification center."
+            keywords: "pop-ups"
+            description: "Still kept in the notification center"
             checked: Config.options.extras.autoDnd
             onToggled: v => Config.options.extras.autoDnd = v
         }
@@ -72,7 +74,7 @@ WPage {
             opacity: enabled ? 1 : 0.5
             icon: "screen_share"
             title: "Also while sharing your screen"
-            description: "Screen sharing or recording, e.g. in Discord or OBS"
+            keywords: "discord obs"
             checked: Config.options.extras.autoDndScreenShare
             onToggled: v => Config.options.extras.autoDndScreenShare = v
         }
@@ -83,7 +85,8 @@ WPage {
         WToggle {
             icon: "bolt"
             title: "Allow screen tearing in games"
-            description: "Lower input latency for fullscreen games that request it (immediate mode)"
+            keywords: "immediate"
+            description: "Lower input latency in games that ask for it"
             checked: !!tearing.value
             onToggled: v => { tearing.value = v; tearing.setValue(v ? 1 : 0); }
         }
@@ -101,7 +104,7 @@ WPage {
         WToggle {
             icon: "my_location"
             title: "Crosshair overlay"
-            description: "Draws a crosshair in the middle of the screen"
+            description: "In the middle of the screen"
             checked: GlobalStates.crosshairOpen
             onToggled: v => GlobalStates.crosshairOpen = v
         }
@@ -130,6 +133,6 @@ WPage {
     WSection {
         title: "Related"
         WLink { icon: "sports_esports"; title: "Open Steam"; chevronIcon: "open_in_new"; action: () => { Quickshell.execDetached(["steam"]); GlobalStates.settingsOpen = false; } }
-        WLink { icon: "notifications_off"; title: "Do not disturb"; description: "Silence notifications while you play"; page: "system"; sub: "notifications" }
+        WLink { icon: "notifications_off"; title: "Do not disturb"; page: "system"; sub: "notifications" }
     }
 }

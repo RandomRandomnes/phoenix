@@ -231,7 +231,7 @@ Rectangle {
             id: search
             Layout.fillWidth: true
             visible: root.expanded && root.searchVisible
-            placeholderText: `Search ${root.wallpapers.length} wallpapers (or scene / video / web)`
+            placeholderText: `Search ${root.wallpapers.length} wallpapers`
             onTextChanged: root.query = text
         }
 

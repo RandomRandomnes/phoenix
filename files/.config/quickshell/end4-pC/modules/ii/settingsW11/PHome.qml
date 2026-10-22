@@ -129,7 +129,6 @@ WPage {
         WTile {
             Layout.alignment: Qt.AlignTop
             title: "Recommended settings"
-            description: "Recent and commonly used settings"
             WToggle { icon: "dark_mode"; title: "Dark mode"; minHeight: 52; checked: darkMode.toggled; onToggled: darkMode.mainAction() }
             WToggle { icon: "nightlight"; title: "Night light"; minHeight: 52; checked: nightLight.toggled; onToggled: nightLight.mainAction() }
             WToggle { icon: "do_not_disturb_on"; title: "Do not disturb"; minHeight: 52; checked: !notif.toggled; onToggled: notif.mainAction() }
@@ -139,7 +138,6 @@ WPage {
         WTile {
             Layout.alignment: Qt.AlignTop
             title: "Personalize your device"
-            description: "Change your background and color mode"
             linkText: "Browse more backgrounds"
             onLinkClicked: GlobalStates.wallpaperSelectorOpen = true
             RowLayout {
@@ -183,7 +181,6 @@ WPage {
         WTile {
             Layout.alignment: Qt.AlignTop
             title: "Your dock"
-            description: "Apps pinned to the dock at the bottom of the screen"
             linkText: "Edit pinned apps"
             onLinkClicked: WState.go("personalization", "dock")
             Flow {

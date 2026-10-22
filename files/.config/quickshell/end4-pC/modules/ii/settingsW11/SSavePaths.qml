@@ -43,7 +43,7 @@ ColumnLayout {
                     Layout.fillWidth: true
                     fieldWidth: 250
                     buttonIcon: "screenshot_monitor"
-                    text: Translation.tr("Screenshot Path (leave empty to just copy)")
+                    text: Translation.tr("Screenshot folder (empty = copy only)")
                     value: Config.options.screenSnip.savePath
                     onValueChanged: {
                         screenshotPathDebounceTimer.restart();

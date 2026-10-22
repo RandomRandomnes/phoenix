@@ -36,7 +36,7 @@ WPage {
     function askApply(id) {
         if (page.confirmId === id) {
             page.confirmId = ""
-            page.runProfile(["apply", id, "--yes"], "Profile applied. Your previous settings were backed up.")
+            page.runProfile(["apply", id, "--yes"], "Profile applied; old settings backed up")
         } else {
             page.confirmId = id
             confirmTimer.restart()
@@ -70,7 +70,7 @@ WPage {
                 let f = text.trim()
                 if (f === "") return
                 if (!f.endsWith(".json")) f += ".json"
-                page.runProfile(["export", f, "--name", `${SystemInfo.username}'s setup`], `Saved your setup to ${f}. Share that file; it can be applied here or chosen in the installer.`)
+                page.runProfile(["export", f, "--name", `${SystemInfo.username}'s setup`], `Saved to ${f}`)
             }
         }
     }
@@ -80,7 +80,8 @@ WPage {
         WCard {
             icon: "menu_book"
             title: "Quick Start"
-            description: "A short guide to keyboard shortcuts, windows, updates, additional features and troubleshooting"
+            keywords: "guide"
+            description: "Shortcuts, windows, updates, troubleshooting"
             WButton {
                 buttonText: "Open"
                 onClicked: Quickshell.execDetached([`${Quickshell.env("HOME")}/.local/bin/phoenix-open`, "quickstart"])
@@ -89,7 +90,8 @@ WPage {
         WCard {
             icon: "assistant"
             title: "Run the first-time setup again"
-            description: "Opens the setup assistant: network, Bluetooth, setup profile, applications and updates"
+            keywords: "assistant"
+            description: "Network, Bluetooth, profile, apps, updates"
             WButton {
                 buttonText: "Open"
                 onClicked: Quickshell.execDetached(["bash", "-c", `mkdir -p ~/.local/state/setup-wizard && touch ~/.local/state/setup-wizard/pending && qs -p ${Quickshell.shellPath("setup-wizard.qml")}`])
@@ -98,7 +100,7 @@ WPage {
         WCard {
             icon: "upload_file"
             title: page.importPath === "" ? "Use a profile file" : page.importPath.split("/").pop()
-            description: page.importPath === "" ? "Apply a setup profile from a file (.json)" : page.importPath
+            description: page.importPath === "" ? "A setup profile (.json)" : page.importPath
             WButton {
                 buttonText: "Choose file…"
                 onClicked: importPicker.running = true
@@ -113,7 +115,8 @@ WPage {
         WCard {
             icon: "ios_share"
             title: "Share my setup"
-            description: "Save the current setup as a profile file. It can be applied during the first-time setup or on this page"
+            keywords: "save export"
+            description: "Saves your setup as a profile file"
             WButton {
                 buttonText: "Save as file…"
                 onClicked: exportPicker.running = true
@@ -128,7 +131,7 @@ WPage {
             visible: page.importApps.length > 0
             icon: "download"
             title: "This profile includes applications"
-            description: page.importApps.join(", ") + ". Applications that are already installed are skipped"
+            description: page.importApps.join(", ") + ". Installed ones are skipped"
             WButton {
                 accent: true
                 buttonText: Tasks.isRunning("apps") ? "Installing…" : "Install"
@@ -147,19 +150,19 @@ WPage {
             key: "windowsStyle"
             icon: "select_window"
             title: "Windows-style windows"
-            description: "New windows float instead of tiling and have a title bar (close, maximize, minimize). When off: standard tiling without title bars"
+            description: "Floating windows with title bars. Off: tiling"
         }
         Switch {
             key: "minimizeToDock"
             icon: "minimize"
             title: "Minimize to the dock"
-            description: "The minimize button hides a window; clicking it in the dock restores it. Turning this off restores all minimized windows"
+            description: "Click the app in the dock to restore"
         }
         Switch {
             key: "workspaceGroups"
             icon: "view_carousel"
             title: "Own workspaces for each screen"
-            description: "The first screen uses workspaces 1-10, the second 11-20, the third 21-30. Super+1…0 work on the screen you're on"
+            description: "Screen 1: 1-10, screen 2: 11-20, and so on"
         }
     }
 
@@ -169,13 +172,13 @@ WPage {
             key: "wallpaperEngine"
             icon: "animated_images"
             title: "Wallpaper Engine background"
-            description: "Animated Wallpaper Engine wallpapers (requires Wallpaper Engine from Steam). When off: a static picture wallpaper"
+            description: "Needs Wallpaper Engine from Steam"
         }
         Switch {
             key: "appGrid"
             icon: "apps"
             title: "App grid in the Super menu"
-            description: "Shows all applications below the workspaces when Super is pressed"
+            description: "Apps below the workspaces when you press Super"
         }
         WLink {
             visible: page.ex.appGrid
@@ -191,19 +194,19 @@ WPage {
             key: "resourceGraphs"
             icon: "monitoring"
             title: "Live system graphs on the taskbar"
-            description: "CPU, GPU and memory graphs with clock speeds, temperatures and power, plus a detailed popup. When off: the standard round gauges"
+            description: "CPU, GPU and memory graphs. Off: round gauges"
         }
         Switch {
             key: "powerMenuKde"
             icon: "swap_horiz"
             title: "\"Switch to KDE\" in the power menu"
-            description: "Replaces Hibernate with a button that switches to the KDE Plasma desktop"
+            description: "Replaces Hibernate"
         }
         Switch {
             key: "updatesScript"
             icon: "deployed_code_update"
             title: "One-click full update"
-            description: "The update button also updates the desktop shell while keeping these customizations. When off: standard system update only"
+            description: "Off: plain system update only"
         }
     }
 
@@ -214,19 +217,19 @@ WPage {
             visible: page.ex.wallpaperEngine
             icon: "wallpaper"
             title: "Wallpaper Engine picker"
-            description: "Current wallpaper, mute, search and shuffle, and a grid of the installed Wallpaper Engine wallpapers"
+            description: "Pick, shuffle and mute live wallpapers"
         }
         Switch {
             key: "deviceBatteries"; group: Config.options.sidebar
             icon: "battery_full"
             title: "Device batteries"
-            description: "Battery levels of wireless mice, headphones, controllers and other devices"
+            description: "Mouse, headset and controller batteries"
         }
         Switch {
             key: "desktopSwitch"; group: Config.options.sidebar
             icon: "swap_horiz"
             title: "Switch to KDE Plasma button"
-            description: "A button in the sidebar header that switches to the KDE Plasma desktop"
+            description: "Header button that switches to KDE Plasma"
         }
     }
 
@@ -236,13 +239,13 @@ WPage {
             key: "claudeCodeAi"
             icon: "smart_toy"
             title: "Claude Code in the AI sidebar"
-            description: "Adds Claude Code as a model in the left sidebar (requires the Claude Code application and a Claude subscription)"
+            description: "In the left sidebar. Needs Claude Code and a subscription"
         }
         Switch {
             key: "steamTray"
             icon: "sports_esports"
             title: "Start Steam at login"
-            description: "Steam starts minimized to the system tray after login"
+            description: "Starts in the tray after sign-in"
         }
     }
 

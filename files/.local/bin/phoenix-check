@@ -104,36 +104,34 @@ def classify(ups):
         u = ups[pkg]
         found.append({"pkg": pkg, "from": u["from"], "to": u["to"], "level": level, "why": why, "after": after})
     if "qt6-base" in ups and minor(ups["qt6-base"]["from"]) != minor(ups["qt6-base"]["to"]):
-        add("qt6-base", "high", f"New Qt version {minor(ups['qt6-base']['to'])}: Quickshell, which draws the whole "
-            "desktop shell, is built for the old Qt and has to be rebuilt; until then the shell may not start.",
-            "Rebuild Quickshell for the new Qt (on 6.11 -> 6.12 this needed a patch); check `qs log` for \"built against Qt\".")
+        add("qt6-base", "high", f"New Qt {minor(ups['qt6-base']['to'])}: Quickshell must be rebuilt or the shell may not start.",
+            "Rebuild Quickshell; check `qs log` for \"built against Qt\".")
     for qs in ("quickshell", "quickshell-git", "illogical-impulse-quickshell-git"):
         if qs in ups:
-            add(qs, "high", "Quickshell itself (the program that draws the shell) changes.",
-                "Restart the shell and check it starts without errors.")
+            add(qs, "high", "Quickshell (draws the shell) changes.",
+                "Restart the shell and check it starts.")
     if "hyprland" in ups:
         f, t = ups["hyprland"]["from"], ups["hyprland"]["to"]
         bars = ups.get("hyprland-plugin-hyprbars", {}).get("to") or installed("hyprland-plugin-hyprbars")
         bars_ok = bars and bare(bars) == bare(t)
         if minor(f) != minor(t):
-            add("hyprland", "high", f"New Hyprland version {minor(t)}: its Lua configuration can change, so Phoenix's "
-                "settings may need a system fix" + ("" if bars_ok else "; the title bar plugin isn't available for it yet")
-                + ".", "Log out and in; check `hyprctl configerrors` and that windows have title bars.")
+            add("hyprland", "high", f"New Hyprland {minor(t)}: settings may need a system fix"
+                + ("" if bars_ok else "; no title bar plugin for it yet")
+                + ".", "Log out and in; check `hyprctl configerrors` and title bars.")
         else:
             add("hyprland", "medium" if not bars_ok else "info",
-                "Hyprland update" + ("" if bars_ok else ": the title bar plugin isn't built for this version yet, so "
-                                     "windows lose their title bars until it is") + ".",
+                "Hyprland update" + ("" if bars_ok else ": no title bars until the plugin catches up") + ".",
                 "Log out and in once the update is done.")
     for dep in ("aquamarine", "hyprutils", "hyprlang", "hyprgraphics", "hyprcursor", "hyprwayland-scanner"):
         if dep in ups and "hyprland" not in ups:
-            add(dep, "medium", f"A Hyprland library ({dep}) changes without a Hyprland update; Hyprland or the title "
-                "bar plugin may then fail to start.", "Log out and in; check that windows have title bars.")
+            add(dep, "medium", f"Hyprland library {dep} changes alone; Hyprland or title bars may fail.",
+                "Log out and in; check title bars.")
     for g in ("mesa", "nvidia", "nvidia-open", "nvidia-open-dkms", "nvidia-dkms", "nvidia-utils"):
         if g in ups:
-            add(g, "medium", "Graphics driver update.", "Restart the computer after updating.")
+            add(g, "medium", "Graphics driver update.", "Restart afterwards.")
     for k in ("linux", "linux-lts", "linux-zen", "linux-hardened"):
         if k in ups:
-            add(k, "info", "Kernel update.", "Restart the computer after updating.")
+            add(k, "info", "Kernel update.", "Restart afterwards.")
     return found
 
 
@@ -148,7 +146,7 @@ def health():
         errs = errs.strip()
         if rc == 0 and errs and errs.lower() != "no errors":
             probs.append({"id": "config", "level": "high", "text": "Hyprland reports configuration errors:\n" + errs[:600],
-                          "fix": "Usually after a Hyprland update; a Phoenix system fix follows. Restore points undo the update."})
+                          "fix": "A system fix usually follows; a restore point undoes the update."})
         try:
             feats = open(FEATURES).read()
         except OSError:
@@ -158,7 +156,7 @@ def health():
             if rc == 0 and "hyprbars" not in plugins:
                 hv, bv = installed("hyprland"), installed("hyprland-plugin-hyprbars")
                 probs.append({"id": "hyprbars", "level": "high",
-                              "text": "Windows have no title bars: the title bar plugin isn't loaded"
+                              "text": "No title bars: the plugin isn't loaded"
                                       + (f" (Hyprland {bare(hv)}, plugin built for {bare(bv)})" if hv and bv and bare(hv) != bare(bv) else "") + ".",
                               "fix": "Update the plugin (`yay -S hyprland-plugin-hyprbars`), then log out and in."})
     # count running shells with Quickshell's own instance list: after Quickshell restarts itself from a crash its

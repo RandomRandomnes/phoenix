@@ -451,7 +451,7 @@ Singleton {
                 execute: () => {
                     root.query = "";
                     GlobalStates.overviewOpen = false;
-                    GlobalStates.settingsOpen = true;
+                    GlobalStates.openSettings();
                     WState.go(entry.page, entry.sub, entry.highlight ?? "");
                 }
             });

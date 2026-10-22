@@ -13,6 +13,7 @@ Rectangle {
     property string icon: ""
     property string title: ""
     property string description: ""
+    property string keywords: ""            // extra search words (Settings search only, not shown)
     property bool clickable: false
     property bool chevron: false
     property string chevronIcon: "chevron_right"

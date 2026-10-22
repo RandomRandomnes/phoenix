@@ -59,7 +59,7 @@ WPage {
         WToggle {
             icon: "flare"
             title: "Anti-flashbang"
-            description: "Dim the screen briefly when a very bright window appears"
+            description: "Dims the screen briefly when a bright window opens"
             checked: Config.options.light.antiFlashbang.enable
             onToggled: v => Config.options.light.antiFlashbang.enable = v
         }
@@ -79,7 +79,7 @@ WPage {
             checked: Config.options.interactions.scrolling.fasterTouchpadScroll
             onToggled: v => Config.options.interactions.scrolling.fasterTouchpadScroll = v
         }
-        WLink { icon: "mouse"; title: "Mouse"; description: "Pointer speed, primary button, scrolling"; page: "devices"; sub: "mouse" }
+        WLink { icon: "mouse"; title: "Mouse"; description: "Speed, buttons, scrolling"; page: "devices"; sub: "mouse" }
         WLink { icon: "keyboard"; title: "Keyboard"; description: "Repeat delay and rate"; page: "devices"; sub: "keyboard" }
     }
 
@@ -94,7 +94,7 @@ WPage {
         WToggle {
             icon: "hearing"
             title: "Volume protection"
-            description: "Prevent sudden loud volume jumps"
+            description: "Blocks sudden loud jumps"
             checked: Config.options.audio.protection.enable
             onToggled: v => Config.options.audio.protection.enable = v
         }

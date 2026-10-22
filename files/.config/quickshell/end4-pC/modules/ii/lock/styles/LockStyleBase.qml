@@ -16,6 +16,8 @@ MouseArea {
     required property LockContext context
     property Item passwordField: null            // the style's LockPasswordInput: gets the keyboard focus
     property bool preview: false                 // the preview (modules/ii/lock/LockPreview.qml): no password check, no power actions
+    // the Phoenix login screen shows these styles too (2026-10-22, ~/.local/share/phoenix/greeter): there nothing is locked yet
+    readonly property bool atLogin: Config.options.lock.atLogin ?? false
 
     readonly property bool requirePasswordToPower: Config.options.lock.security.requirePasswordToPower
     readonly property MprisPlayer player: MprisController.activePlayer

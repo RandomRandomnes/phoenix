@@ -62,7 +62,7 @@ Item {
                     StyledText {
                         Layout.fillWidth: true
                         wrapMode: Text.Wrap
-                        text: "Your colors follow your wallpaper. Pick light or dark, or change the wallpaper to get a new palette."
+                        text: "Colors follow your wallpaper"
                         color: Appearance.colors.colSubtext
                         font.pixelSize: Appearance.font.pixelSize.smaller
                     }
@@ -70,23 +70,23 @@ Item {
                 }
             }
             WSection {
-                WLink { icon: "wallpaper"; title: "Background"; description: "Background image, shuffle, slideshow"; sub: "background" }
-                WLink { icon: "palette"; title: "Colors"; description: "Light/dark mode, color style, transparency"; sub: "colors" }
-                WLink { icon: "toast"; title: "Taskbar"; description: "Taskbar position, items, behaviors, system tray"; sub: "taskbar" }
+                WLink { icon: "wallpaper"; title: "Background"; description: "Picture, slideshow"; sub: "background" }
+                WLink { icon: "palette"; title: "Colors"; description: "Dark mode, color style"; sub: "colors" }
+                WLink { icon: "toast"; title: "Taskbar"; description: "Position, items, tray"; sub: "taskbar" }
                 WLink { icon: "dock_to_bottom"; title: "Dock"; description: "Pinned apps, size, auto-hide"; sub: "dock" }
-                WLink { icon: "apps"; title: "Start"; description: "Pinned apps in the launcher, search"; sub: "start" }
-                WLink { icon: "grid_view"; title: "Super menu apps"; description: "Choose which apps show in the app grid when you press Super"; sub: "appgrid" }
-                WLink { icon: "lock"; title: "Lock screen"; description: "Lock screen look and behavior"; sub: "lockscreen" }
-                WLink { icon: "widgets"; title: "Desktop widgets"; description: "Clock, calendar, notes, to-do and more on your desktop"; sub: "widgets" }
-                WLink { icon: "right_panel_open"; title: "Sidebar"; description: "Show or hide the extras in the right sidebar"; sub: "sidebar" }
+                WLink { icon: "apps"; title: "Start"; keywords: "launcher"; description: "Pinned apps, search"; sub: "start" }
+                WLink { icon: "grid_view"; title: "Super menu apps"; keywords: "choose"; description: "Apps in the Super menu grid"; sub: "appgrid" }
+                WLink { icon: "lock"; title: "Lock screen"; description: "Style, behavior"; sub: "lockscreen" }
+                WLink { icon: "widgets"; title: "Desktop widgets"; description: "Clock, calendar, notes, to-do"; sub: "widgets" }
+                WLink { icon: "right_panel_open"; title: "Sidebar"; description: "Extras in the right sidebar"; sub: "sidebar" }
             }
             WSection {
                 title: "More"
-                WLink { icon: "font_download"; title: "Fonts"; description: "The fonts the desktop uses"; sub: "fonts" }
+                WLink { icon: "font_download"; title: "Fonts"; sub: "fonts" }
             }
             WSection {
                 title: "More"
-                WLink { icon: "select_window_2"; title: "Windows & effects"; description: "Gaps, borders, rounding, blur, shadows, animations, focus"; sub: "windows" }
+                WLink { icon: "select_window_2"; title: "Windows & effects"; keywords: "rounding shadows focus"; description: "Gaps, borders, blur, animations"; sub: "windows" }
             }
         }
     }
@@ -159,7 +159,7 @@ Item {
                     visible: bp.recent.length === 0
                     Layout.fillWidth: true
                     Layout.topMargin: 4
-                    text: `No pictures in ${Wallpapers.effectiveDirectory} yet. Use "Browse photos" to pick one from another folder.`
+                    text: `No pictures in ${Wallpapers.effectiveDirectory}`
                     wrapMode: Text.Wrap
                     font.pixelSize: Appearance.font.pixelSize.small
                     color: Appearance.colors.colSubtext
@@ -226,14 +226,15 @@ Item {
                 WToggle {
                     icon: "fullscreen"
                     title: "Hide wallpaper behind fullscreen apps"
-                    description: "Saves GPU while gaming or watching video"
+                    keywords: "gaming video"
+                    description: "Saves GPU power"
                     checked: Config.options.background.hideWhenFullscreen
                     onToggled: v => Config.options.background.hideWhenFullscreen = v
                 }
             }
             WSection {
                 title: "More"
-                WLink { icon: "tune"; title: "More background settings"; description: "Wallpaper options, several wallpapers at once, the wallpaper picker"; sub: "background-more" }
+                WLink { icon: "tune"; title: "More background settings"; keywords: "several wallpapers"; description: "Wallpapers per screen, picker"; sub: "background-more" }
             }
         }
     }
@@ -246,7 +247,6 @@ Item {
                 WCard {
                     icon: "contrast"
                     title: "Choose your mode"
-                    description: "Change the colors that appear in the shell and your apps"
                     ModeButtons {}
                 }
                 WCombo {
@@ -287,7 +287,7 @@ Item {
                 WToggle {
                     icon: "opacity"
                     title: "Transparency effects"
-                    description: "Windows and surfaces appear slightly see-through"
+                    keywords: "see-through"
                     checked: Config.options.appearance.transparency.enable
                     onToggled: v => Config.options.appearance.transparency.enable = v
                 }
@@ -344,7 +344,7 @@ Item {
             }
             WSection {
                 title: "More"
-                WLink { icon: "tune"; title: "More color settings"; description: "Color schemes, transparency, colors for apps and the terminal"; sub: "colors-more" }
+                WLink { icon: "tune"; title: "More color settings"; keywords: "transparency"; description: "Schemes, app and terminal colors"; sub: "colors-more" }
             }
         }
     }
@@ -412,8 +412,8 @@ Item {
                 WCombo {
                     icon: "monitor"
                     title: "Show items on"
-                    description: tp.screenKey === "" ? "Changes apply to the taskbar on every screen"
-                        : "Changes apply to this screen only; items stay in the same order on every screen"
+                    description: tp.screenKey === "" ? "Every screen"
+                        : "This screen only; the order is shared"
                     model: [{ displayName: "All screens", value: "" }].concat(Quickshell.screens.map(sc => ({
                         displayName: `${sc.model || sc.name} (${sc.name}, ${sc.width}×${sc.height})`, value: tp.keyFor(sc) })))
                     currentValue: tp.screenKey
@@ -455,7 +455,8 @@ Item {
                 WToggle {
                     icon: "inbox"
                     title: "System tray"
-                    description: "Icons from background apps (Discord, Steam…)"
+                    description: "Icons from background apps"
+                    keywords: "discord steam"
                     checked: tp.shown("sysTray")
                     onToggled: v => tp.setShown("sysTray", v, "right")
                 }
@@ -468,7 +469,7 @@ Item {
                 WToggle {
                     icon: "toggle_on"
                     title: "Quick buttons"
-                    description: "Screenshot, mic, dark mode and other shortcut buttons"
+                    description: "Screenshot, mic, dark mode buttons"
                     checked: tp.shown("utilButtons")
                     onToggled: v => tp.setShown("utilButtons", v, "right")
                 }
@@ -497,7 +498,8 @@ Item {
                 WToggle {
                     icon: "system_update"
                     title: "System icons"
-                    description: "Network, Bluetooth, volume and notification status"
+                    description: "Network, Bluetooth, volume"
+                    keywords: "notification status"
                     checked: tp.shown("systemIcons")
                     onToggled: v => tp.setShown("systemIcons", v, "right")
                 }
@@ -543,11 +545,11 @@ Item {
                     checked: Config.options.bar.tooltips.enable
                     onToggled: v => Config.options.bar.tooltips.enable = v
                 }
-                WLink { icon: "style"; title: "Taskbar style"; description: "Corner style, grouping, frame, dynamic island"; sub: "taskbar-more" }
+                WLink { icon: "style"; title: "Taskbar style"; keywords: "frame"; description: "Corners, grouping, dynamic island"; sub: "taskbar-more" }
             }
             WSection {
                 title: "More"
-                WLink { icon: "tune"; title: "More taskbar settings"; description: "Layout, workspaces, resources, utility buttons, frame, dynamic island, tray"; sub: "taskbar-more" }
+                WLink { icon: "tune"; title: "More taskbar settings"; keywords: "utility buttons frame dynamic island"; description: "Layout, workspaces, resources, tray"; sub: "taskbar-more" }
             }
         }
     }
@@ -560,7 +562,6 @@ Item {
                 WToggle {
                     icon: "dock_to_bottom"
                     title: "Show the dock"
-                    description: "App dock at the bottom of the screen"
                     checked: Config.options.dock.enable
                     onToggled: v => Config.options.dock.enable = v
                 }
@@ -573,7 +574,7 @@ Item {
                     Layout.fillWidth: true
                     Layout.leftMargin: 2
                     Layout.bottomMargin: 2
-                    text: "These appear on the dock in this order, left to right. Open apps that aren't pinned show after a separator."
+                    text: "Shown in this order; other open apps follow"
                     color: Appearance.colors.colSubtext
                     font.pixelSize: Appearance.font.pixelSize.smaller
                     wrapMode: Text.Wrap
@@ -591,7 +592,8 @@ Item {
                 WToggle {
                     icon: "visibility_off"
                     title: "Automatically hide the dock"
-                    description: "Hidden while a window is focused; reappears on the desktop or when you hover the bottom edge"
+                    keywords: "hover edge"
+                    description: "Hides while a window is focused"
                     checked: !Config.options.dock.pinnedOnStartup
                     onToggled: v => Config.options.dock.pinnedOnStartup = !v
                 }
@@ -654,7 +656,7 @@ Item {
                 StyledText {
                     Layout.fillWidth: true
                     Layout.leftMargin: 2
-                    text: "Windows from these apps never appear on the dock. Matches the window class (regular expressions allowed)."
+                    text: "Never shown on the dock. Matches the window class (regex)"
                     color: Appearance.colors.colSubtext
                     font.pixelSize: Appearance.font.pixelSize.smaller
                     wrapMode: Text.Wrap
@@ -705,7 +707,7 @@ Item {
             }
             WSection {
                 title: "More"
-                WLink { icon: "tune"; title: "More dock settings"; description: "Position, size, style, previews, colors"; sub: "dock-more" }
+                WLink { icon: "tune"; title: "More dock settings"; keywords: "size colors"; description: "Position, style, previews"; sub: "dock-more" }
             }
         }
     }
@@ -720,7 +722,7 @@ Item {
                     Layout.fillWidth: true
                     Layout.leftMargin: 2
                     Layout.bottomMargin: 2
-                    text: "Apps pinned to the top of the app launcher (Super)."
+                    text: "Shown at the top of the launcher"
                     color: Appearance.colors.colSubtext
                     font.pixelSize: Appearance.font.pixelSize.smaller
                     wrapMode: Text.Wrap
@@ -785,7 +787,8 @@ Item {
                 WToggle {
                     icon: "new_releases"
                     title: "Add new apps automatically"
-                    description: "Apps you install (packages, Flatpaks, Steam games) join the grid with a dot until you open them. Right-click an app in the grid for more options"
+                    description: "New apps join the grid, marked with a dot"
+                    keywords: "install flatpak steam games"
                     checked: Config.options.overview.appGridAddNew
                     onToggled: v => Config.options.overview.appGridAddNew = v
                 }
@@ -798,7 +801,7 @@ Item {
                     Layout.fillWidth: true
                     Layout.leftMargin: 2
                     Layout.bottomMargin: 2
-                    text: "These apps don't show in the Super menu app grid. You can still find them by typing in the search bar."
+                    text: "Hidden from the grid; search still finds them"
                     color: Appearance.colors.colSubtext
                     font.pixelSize: Appearance.font.pixelSize.smaller
                     wrapMode: Text.Wrap
@@ -820,7 +823,7 @@ Item {
                     Layout.fillWidth: true
                     Layout.leftMargin: 2
                     Layout.bottomMargin: 2
-                    text: "Only these apps show in the app grid, in this order. Search still finds every app."
+                    text: "Only these show, in this order; search finds every app"
                     color: Appearance.colors.colSubtext
                     font.pixelSize: Appearance.font.pixelSize.smaller
                     wrapMode: Text.Wrap
@@ -835,7 +838,7 @@ Item {
                 WAppListEditor {
                     apps: Config.options.overview.appGridApps
                     addLabel: "Add an app"
-                    emptyText: "No apps chosen yet, so the app grid is empty"
+                    emptyText: "No apps chosen: the grid is empty"
                     addedText: "Already in the Super menu"
                     onEdited: l => Config.options.overview.appGridApps = l
                 }
@@ -854,7 +857,8 @@ Item {
                     id: lockStyle
                     icon: "style"
                     title: "Lock screen style"
-                    description: "The screen you see when the PC is locked, and when you sign in at startup"
+                    keywords: "login"
+                    description: "Also used for the login screen"
                     model: [
                         { displayName: "Original (illogical-impulse)", value: "original" },
                         { displayName: "Material islands", value: "islands" },
@@ -868,7 +872,14 @@ Item {
                         { displayName: "Plain dark", value: "plain" },
                     ]
                     currentValue: Config.options.lock.style ?? "original"
-                    onSelected: v => Config.options.lock.style = v
+                    onSelected: v => { Config.options.lock.style = v; greeterSync.restart(); }
+                    // the login screen copies the look at sign-in; a change here goes to it right away (2026-10-22;
+                    // phoenix-greeter-theme does nothing when the login screen isn't installed). After the config is saved.
+                    Timer {
+                        id: greeterSync
+                        interval: 1500
+                        onTriggered: Quickshell.execDetached([Quickshell.env("HOME") + "/.local/bin/phoenix-greeter-theme"])
+                    }
                     WButton {
                         buttonText: "Preview"
                         // a window of the shell (modules/ii/lock/LockPreview.qml, 2026-10-16)
@@ -882,7 +893,7 @@ Item {
                     icon: "blur_on"
                     title: "Blur the background"
                     checked: Config.options.lock.blur.enable
-                    onToggled: v => Config.options.lock.blur.enable = v
+                    onToggled: v => { Config.options.lock.blur.enable = v; greeterSync.restart(); }
                 }
                 WToggle {
                     visible: (Config.options.lock.style ?? "original") === "original"   // only the original lock screen has this
@@ -930,7 +941,8 @@ Item {
                 WToggle {
                     icon: "key"
                     title: "Unlock the keyring when you sign in"
-                    description: "Saved passwords (browser, Wi-Fi) become available after unlocking"
+                    keywords: "browser wi-fi"
+                    description: "Makes saved passwords available after unlocking"
                     checked: Config.options.lock.security.unlockKeyring
                     onToggled: v => Config.options.lock.security.unlockKeyring = v
                 }
@@ -958,7 +970,8 @@ Item {
                 WToggle {
                     icon: "lock"
                     title: "Lock widgets in place"
-                    description: "Turn off to drag widgets around your desktop"
+                    keywords: "drag"
+                    description: "Turn off to move widgets"
                     checked: Config.options.background.widgetsLocked
                     onToggled: v => Config.options.background.widgetsLocked = v
                 }
@@ -986,7 +999,7 @@ Item {
             }
             WSection {
                 title: "More"
-                WLink { icon: "tune"; title: "More widget settings"; description: "Clock styles, custom image, visualizer, text and every desktop widget"; sub: "widgets-more" }
+                WLink { icon: "tune"; title: "More widget settings"; description: "Clock styles, image, visualizer, text"; sub: "widgets-more" }
             }
         }
     }
@@ -1000,21 +1013,23 @@ Item {
                 WToggle {
                     icon: "wallpaper"
                     title: "Wallpaper Engine picker"
-                    description: "Current wallpaper, mute, search and shuffle, and a grid of the installed Wallpaper Engine wallpapers"
+                    keywords: "grid search"
+                    description: "Pick, shuffle and mute live wallpapers"
                     checked: Config.options.sidebar.wallpaperEngineCard
                     onToggled: v => Config.options.sidebar.wallpaperEngineCard = v
                 }
                 WToggle {
                     icon: "battery_full"
                     title: "Device batteries"
-                    description: "Battery levels of wireless mice, headphones, controllers and other devices, below the media controls"
+                    keywords: "headphones controllers wireless"
+                    description: "Mouse, headset and controller batteries"
                     checked: Config.options.sidebar.deviceBatteries
                     onToggled: v => Config.options.sidebar.deviceBatteries = v
                 }
                 WToggle {
                     icon: "swap_horiz"
                     title: "Switch to KDE Plasma button"
-                    description: "A button in the sidebar header that switches to the KDE Plasma desktop"
+                    description: "Header button that switches to KDE Plasma"
                     checked: Config.options.sidebar.desktopSwitch
                     onToggled: v => Config.options.sidebar.desktopSwitch = v
                 }

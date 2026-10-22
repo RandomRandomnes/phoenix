@@ -21,7 +21,7 @@ WPage {
         WToggle {
             icon: "key"
             title: "Unlock the keyring when you unlock the screen"
-            description: "Makes saved passwords available to apps after sign-in"
+            description: "Makes saved passwords available to apps"
             checked: Config.options.lock.security.unlockKeyring
             onToggled: v => Config.options.lock.security.unlockKeyring = v
         }
@@ -33,17 +33,18 @@ WPage {
         WCard {
             icon: micActive ? "mic" : "mic_none"
             title: "Microphone"
-            description: micActive ? "An app is using your microphone right now" : "No apps are using your microphone"
+            description: micActive ? "In use by an app" : "Not in use"
         }
         WCard {
             icon: screenSharing ? "screen_share" : "stop_screen_share"
             title: "Screen sharing"
-            description: screenSharing ? "Your screen is being shared or recorded" : "Nothing is capturing your screen"
+            description: screenSharing ? "Being shared or recorded" : "Not being captured"
         }
         WToggle {
             icon: "location_on"
             title: "Location for weather"
-            description: "Use GPS/Wi-Fi location instead of a fixed city"
+            keywords: "gps wi-fi"
+            description: "Instead of a fixed city"
             checked: Config.options.bar.weather.enableGPS
             onToggled: v => Config.options.bar.weather.enableGPS = v
         }
@@ -65,7 +66,7 @@ WPage {
         WToggle {
             icon: "wallpaper"
             title: "Hide NSFW wallpapers on public networks"
-            description: "When connected to networks like cafés, campuses and airports"
+            description: "On café, campus or airport networks"
             checked: Config.options.workSafety.enable.wallpaper
             onToggled: v => Config.options.workSafety.enable.wallpaper = v
         }

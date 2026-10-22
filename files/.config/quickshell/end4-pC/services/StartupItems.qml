@@ -76,7 +76,7 @@ Singleton {
                      on: ex.steamTray !== false, set: v => ex.steamTray = v });
         if (root.installed.wallpaperEngine)
             l.push({ key: "phoenix:we", name: "Wallpaper Engine", icon: "", symbol: "animated_images",
-                     source: "Phoenix · animated wallpapers (switching it also starts or stops it now)",
+                     source: "Phoenix · animated wallpapers",
                      on: ex.wallpaperEngine === true, set: v => ex.wallpaperEngine = v });
         if (root.installed.phoneLink)
             l.push({ key: "phoenix:phone", name: "Phone Link", icon: "", symbol: "smartphone", source: "Phoenix · KDE Connect, after you unlock",

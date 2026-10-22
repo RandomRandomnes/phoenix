@@ -19,6 +19,13 @@ Singleton {
     property bool mediaControlsOpen: false
     property bool osdBrightnessOpen: false
     property bool settingsOpen: false
+    // Phoenix (2026-10-22): open and toggle Settings through these two. When Settings is already open (on another
+    // workspace, or behind a window), "open" brings it to the current workspace and to the front instead of doing
+    // nothing, and "toggle" only closes it when it is already in front of you (it used to close the hidden window).
+    property bool settingsInFront: false       // set by the Settings window (W11Settings.qml)
+    signal settingsForwardRequested()
+    function openSettings() { if (settingsOpen) settingsForwardRequested(); else settingsOpen = true; }
+    function toggleSettings() { if (settingsOpen && settingsInFront) settingsOpen = false; else openSettings(); }
     property bool taskManagerOpen: false     // the Task Manager window (modules/ii/taskManager, Phoenix 2026-10-16)
     property string taskManagerPage: ""
     property bool osdVolumeOpen: false

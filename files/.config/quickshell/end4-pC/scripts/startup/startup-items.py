@@ -38,8 +38,10 @@ def script_programs(text):
             toks = line.split()
         start = True
         for t in toks:
-            if t in (";", "&&", "||", "|", "&", "do", "then", "else"):
+            if t in (";", "&&", "||", "|", "&", "do", "then", "else", "(", "{", "!"):
                 start = True
+                continue
+            if t in (")", "}") or re.match(r"^(\d*[<>]|&>)", t):   # subshell ends and redirections aren't programs
                 continue
             if start:
                 start = False
@@ -47,7 +49,7 @@ def script_programs(text):
                     start = True      # VAR=value: the command follows
                     continue
                 name = os.path.basename(t.replace("$HOME", HOME))
-                name = re.sub(r"[;&|]+$", "", name)
+                name = re.sub(r"[;&|)]+$", "", re.sub(r"^[({!]+", "", name))
                 if name and name not in SHELL_WORDS and not name.startswith("$") and name not in progs:
                     progs.append(name)
             if t.endswith((";", "&")):

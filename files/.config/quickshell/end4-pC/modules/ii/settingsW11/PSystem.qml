@@ -45,14 +45,14 @@ Item {
         WPage {
             WSection {
                 WLink { icon: "desktop_windows"; title: "Display"; description: "Brightness, night light, scale, resolution"; sub: "display" }
-                WLink { icon: "volume_up"; title: "Sound"; description: "Volume levels, output, input, sound devices"; sub: "sound" }
-                WLink { icon: "notifications"; title: "Notifications"; description: "Alerts from apps and system, do not disturb"; sub: "notifications" }
+                WLink { icon: "volume_up"; title: "Sound"; keywords: "devices"; description: "Volume, output, input"; sub: "sound" }
+                WLink { icon: "notifications"; title: "Notifications"; description: "Per-app alerts, do not disturb"; sub: "notifications" }
                 WLink { icon: "power_settings_new"; title: "Power"; description: "Power mode, screen and sleep" + (Battery.available ? ", battery" : ""); sub: "power" }
-                WLink { icon: "hard_drive"; title: "Storage"; description: "Storage space, drives, cleanup"; sub: "storage" }
-                WLink { icon: "view_quilt"; title: "Multitasking"; description: "Window layout, gaps, workspaces, title bars"; sub: "multitasking" }
-                WLink { icon: "content_paste"; title: "Clipboard"; description: "Clipboard history"; sub: "clipboard" }
-                WLink { icon: "info"; title: "About"; description: "Device specifications, rename this PC"; sub: "about" }
-                WLink { icon: "bug_report"; title: "Report a problem"; description: "Send the Phoenix project a report with your system details"; sub: "report" }
+                WLink { icon: "hard_drive"; title: "Storage"; keywords: "space"; description: "Drives, cleanup"; sub: "storage" }
+                WLink { icon: "view_quilt"; title: "Multitasking"; keywords: "title bars windows"; description: "Layout, gaps, workspaces"; sub: "multitasking" }
+                WLink { icon: "content_paste"; title: "Clipboard"; description: "History"; sub: "clipboard" }
+                WLink { icon: "info"; title: "About"; keywords: "device specifications"; description: "Specs, rename this PC"; sub: "about" }
+                WLink { icon: "bug_report"; title: "Report a problem"; description: "Send a report with your system details"; sub: "report" }
             }
             WSection {
                 title: "More"
@@ -96,14 +96,14 @@ Item {
                     visible: (dp.bright?.ready ?? false) && (dp.bright.isDdc || Battery.available)
                     icon: "brightness_6"
                     title: "Brightness"
-                    description: "Adjust the brightness of the built-in or DDC display"
+                    keywords: "ddc"
                     value: dp.bright?.brightness ?? 0
                     onMoved: v => dp.bright.setBrightness(v)
                 }
                 WToggle {
                     icon: "nightlight"
                     title: "Night light"
-                    description: "Use warmer colors to help block blue light"
+                    description: "Warmer colors to reduce blue light"
                     checked: nightLight.toggled
                     onToggled: nightLight.mainAction()
                 }
@@ -119,7 +119,7 @@ Item {
                 WToggle {
                     icon: "schedule"
                     title: "Schedule night light"
-                    description: Config.options.light.night.automatic ? `On from ${Hyprsunset.from} to ${Hyprsunset.to}` : "Turn on automatically at set hours"
+                    description: Config.options.light.night.automatic ? `On from ${Hyprsunset.from} to ${Hyprsunset.to}` : ""
                     checked: Config.options.light.night.automatic
                     onToggled: v => Config.options.light.night.automatic = v
                 }
@@ -153,7 +153,7 @@ Item {
                 WToggle {
                     icon: "flare"
                     title: "Anti-flashbang"
-                    description: "Dim the screen briefly when a very bright window appears"
+                    description: "Dims the screen briefly when a bright window opens"
                     checked: Config.options.light.antiFlashbang.enable
                     onToggled: v => Config.options.light.antiFlashbang.enable = v
                 }
@@ -165,7 +165,7 @@ Item {
                 WCombo {
                     icon: "zoom_in"
                     title: "Scale"
-                    description: "Change the size of text, apps, and other items"
+                    keywords: "size text zoom"
                     model: [1, 1.25, 1.5, 1.6, 1.75, 2, 2.5, 3].map(s => ({ displayName: `${Math.round(s * 100)}%` + (s === 1.5 ? " (Recommended)" : ""), value: s }))
                     currentValue: dp.mon?.scale ?? 1
                     onSelected: v => dp.apply({ scale: v })
@@ -173,7 +173,6 @@ Item {
                 WCombo {
                     icon: "aspect_ratio"
                     title: "Display resolution & refresh rate"
-                    description: "Adjust the resolution to fit your connected display"
                     fieldWidth: 280
                     model: (dp.mon?.availableModes ?? []).map(m => ({ displayName: m, value: m }))
                     currentValue: dp.mon?.currentMode ?? ""
@@ -195,7 +194,8 @@ Item {
                 WToggle {
                     icon: "speed"
                     title: "Variable refresh rate"
-                    description: "Adaptive sync (FreeSync / G-Sync) for smoother games and video"
+                    description: "FreeSync / G-Sync"
+                    keywords: "adaptive sync vrr"
                     checked: dp.mon?.vrr ?? false
                     onToggled: v => dp.apply({ vrr: v })
                 }
@@ -248,7 +248,7 @@ Item {
                 WToggle {
                     icon: "switch_video"
                     title: "Switch automatically"
-                    description: "When displays are plugged in or out, use the profile saved for exactly those displays"
+                    description: "Uses the profile saved for the displays plugged in"
                     checked: Config.options.extras.displayProfilesAuto !== false
                     onToggled: v => Config.options.extras.displayProfilesAuto = v
                 }
@@ -259,7 +259,7 @@ Item {
                     MaterialTextField {
                         id: dpName
                         Layout.preferredWidth: 170
-                        placeholderText: "Name, e.g. Desk"
+                        placeholderText: "Name"
                     }
                     WButton {
                         accent: true
@@ -295,11 +295,11 @@ Item {
 
             WSection {
                 title: "Related settings"
-                WLink { icon: "hdr_on"; title: "Advanced display"; description: "Arrange displays, position, HDR, color management"; sub: "display-more" }
+                WLink { icon: "hdr_on"; title: "Advanced display"; keywords: "arrange displays position"; description: "Arrangement, HDR, color management"; sub: "display-more" }
             }
             WSection {
                 title: "More"
-                WLink { icon: "tune"; title: "More display settings"; description: "Arrange screens, resolution, refresh rate, scaling per screen"; sub: "display-more" }
+                WLink { icon: "tune"; title: "More display settings"; keywords: "arrange refresh rate"; description: "Per-screen resolution and scaling"; sub: "display-more" }
             }
         }
     }
@@ -408,7 +408,7 @@ Item {
                 WToggle {
                     icon: "hearing"
                     title: "Volume protection"
-                    description: "Prevent sudden loud volume jumps"
+                    description: "Blocks sudden loud jumps"
                     checked: Config.options.audio.protection.enable
                     onToggled: v => Config.options.audio.protection.enable = v
                 }
@@ -419,7 +419,7 @@ Item {
                     currentValue: Config.options.sounds.theme
                     onSelected: v => Config.options.sounds.theme = v
                 }
-                WLink { icon: "tune"; title: "More sound settings"; description: "Open the full volume control app"; action: () => Quickshell.execDetached(["bash", "-c", Config.options.apps.volumeMixer]) ; chevronIcon: "open_in_new" }
+                WLink { icon: "tune"; title: "More sound settings"; description: "Opens the volume control app"; action: () => Quickshell.execDetached(["bash", "-c", Config.options.apps.volumeMixer]) ; chevronIcon: "open_in_new" }
             }
             WSection {
                 title: "More"
@@ -438,12 +438,12 @@ Item {
                     icon: "do_not_disturb_on"
                     title: "Do not disturb"
                     description: GameAssist.autoDndActive
-                        ? "On by itself while a fullscreen game or screen sharing is running. Notifications go straight to the notification center"
-                        : "Notifications go straight to the notification center, no pop-ups"
+                        ? "On automatically during a game or screen sharing"
+                        : "No pop-ups; notifications wait in the center"
                     checked: Notifications.silent
                     onToggled: v => Notifications.silent = v
                 }
-                WLink { icon: "sports_esports"; title: "Turn on do not disturb automatically"; description: "While playing a fullscreen game or sharing your screen"; page: "gaming" }
+                WLink { icon: "sports_esports"; title: "Turn on do not disturb automatically"; description: "During games and screen sharing"; page: "gaming" }
             }
             WSection {
                 title: "Banners"
@@ -476,7 +476,7 @@ Item {
                 WToggle {
                     icon: "volume_up"
                     title: "Play a sound when a notification arrives"
-                    description: "Not during Do not disturb. Can be turned off for single apps below."
+                    description: "Not during Do not disturb; set per app below"
                     checked: Config.options.notifications.playSound
                     onToggled: v => Config.options.notifications.playSound = v
                 }
@@ -501,7 +501,7 @@ Item {
                     visible: NotificationRules.appList.length === 0
                     icon: "apps"
                     title: "No apps yet"
-                    description: "Apps show up here after they send a notification"
+                    description: "Apps appear after their first notification"
                 }
                 Repeater {
                     model: NotificationRules.appList
@@ -534,7 +534,7 @@ Item {
                             Layout.leftMargin: 36
                             icon: "web_asset"
                             title: "Show notification banners"
-                            description: "Off: they go straight to the notification center"
+                            description: "Off: only in the notification center"
                             checked: appRow.modelData.banners !== false
                             onToggled: v => NotificationRules.setOption(appRow.modelData.name, "banners", v)
                         }
@@ -544,7 +544,7 @@ Item {
                             Layout.leftMargin: 36
                             icon: "volume_up"
                             title: "Play a sound"
-                            description: Config.options.notifications.playSound ? "" : "Turn on \"Play a sound when a notification arrives\" above first"
+                            description: Config.options.notifications.playSound ? "" : "Turn on sounds above first"
                             checked: appRow.modelData.sound !== false
                             onToggled: v => NotificationRules.setOption(appRow.modelData.name, "sound", v)
                         }
@@ -554,7 +554,7 @@ Item {
                             Layout.leftMargin: 36
                             icon: "delete"
                             title: "Remove from this list"
-                            description: "Its settings are reset; it comes back with its next notification"
+                            description: "Resets its settings"
                             WButton { buttonText: "Remove"; onClicked: { appsSection.expanded = ""; NotificationRules.forget(appRow.modelData.name) } }
                         }
                     }
@@ -570,7 +570,7 @@ Item {
             }
             WSection {
                 title: "More"
-                WLink { icon: "tune"; title: "More notification settings"; description: "On-screen display (volume and brightness popups)"; sub: "notifications-more" }
+                WLink { icon: "tune"; title: "More notification settings"; keywords: "on-screen display osd"; description: "Volume and brightness popups"; sub: "notifications-more" }
             }
         }
     }
@@ -607,7 +607,7 @@ Item {
                 WCombo {
                     icon: "bolt"
                     title: "Power mode"
-                    description: "Optimize for energy use or performance"
+                    keywords: "energy performance"
                     model: [
                         { displayName: "Best power efficiency", value: PowerProfile.PowerSaver },
                         { displayName: "Balanced", value: PowerProfile.Balanced },
@@ -619,7 +619,7 @@ Item {
                 WToggle {
                     icon: "coffee"
                     title: "Keep awake"
-                    description: "Don't lock, turn off the screen, or sleep while this is on"
+                    description: "No lock, screen off or sleep while on"
                     checked: Idle.inhibit
                     onToggled: v => Idle.inhibit = v
                 }
@@ -661,7 +661,7 @@ Item {
             }
             WSection {
                 title: "More"
-                WLink { icon: "tune"; title: "More power settings"; description: "Battery warnings, device batteries, idle timers"; sub: "power-more" }
+                WLink { icon: "tune"; title: "More power settings"; keywords: "device batteries"; description: "Battery warnings, idle timers"; sub: "power-more" }
             }
         }
     }
@@ -743,7 +743,7 @@ Item {
                 WCard {
                     icon: "inventory_2"
                     title: "Package cache"
-                    description: `${sp.pkgCache} of downloaded packages. Keeps the last 2 versions of each.`
+                    description: `${sp.pkgCache} of downloaded packages; the last 2 versions are kept`
                     WButton { buttonText: Tasks.isRunning("cleanup") ? "Working…" : "Clean up"; enabled: !Tasks.isRunning("cleanup"); onClicked: sp.runJob("sudo paccache -rk2", "Cleaning the package cache") }
                 }
                 WCard {
@@ -790,7 +790,7 @@ Item {
                 WCombo {
                     icon: "dashboard"
                     title: "Tiling layout"
-                    description: "How tiled windows are arranged (new windows float by default in your setup)"
+                    description: "For tiled windows; new windows float by default"
                     model: [{ displayName: "Dwindle (split)", value: "dwindle" }, { displayName: "Master & stack", value: "master" }]
                     currentValue: Config.options.hyprland.general.layout
                     onSelected: v => { Config.options.hyprland.general.layout = v; HyprlandConfig.set("general:layout", v); }
@@ -804,7 +804,7 @@ Item {
                 WCombo {
                     icon: "ads_click"
                     title: "Focus follows mouse"
-                    description: "Focus the window under the pointer"
+                    keywords: "pointer"
                     model: [{ displayName: "Off (click to focus)", value: 0 }, { displayName: "Always", value: 1 }, { displayName: "Loose", value: 2 }, { displayName: "Strict", value: 3 }]
                     currentValue: Config.options.hyprland.input.followMouse
                     onSelected: v => { Config.options.hyprland.input.followMouse = v; HyprlandConfig.set("input:follow_mouse", v); }
@@ -875,13 +875,14 @@ Item {
                 WCard {
                     icon: "history"
                     title: "Clipboard history"
-                    description: `${Cliphist.entries.length} items saved. Open it with Super+V.`
+                    description: `${Cliphist.entries.length} items · Super+V`
                     WButton { buttonText: "Clear"; onClicked: Cliphist.wipe() }
                 }
                 WToggle {
                     icon: "visibility_off"
                     title: "Hide sensitive clipboard items on public networks"
-                    description: "Work safety: hides matching clipboard content when on networks like cafés or campuses"
+                    description: "On café or campus networks"
+                    keywords: "work safety"
                     checked: Config.options.workSafety.enable.clipboard
                     onToggled: v => Config.options.workSafety.enable.clipboard = v
                 }
@@ -936,7 +937,7 @@ Item {
                 visible: false
                 icon: "edit"
                 title: "New device name"
-                description: "Letters, numbers and hyphens. You'll be asked for your password."
+                description: "Letters, numbers and hyphens; asks for your password"
                 Rectangle {
                     implicitWidth: 220; implicitHeight: 34
                     radius: 12
@@ -1020,9 +1021,9 @@ Item {
             WSection {
                 title: "Related"
                 WLink { icon: "monitoring"; title: "Task manager"; chevronIcon: "open_in_new"; action: () => Quickshell.execDetached(["bash", "-c", Config.options.apps.taskManager]) }
-                WLink { icon: "local_fire_department"; title: "About Phoenix"; description: "Project page, updates, setup profiles"; chevronIcon: "open_in_new"; action: () => Quickshell.execDetached(["xdg-open", "https://github.com/RandomRandomnes/phoenix"]) }
-                WLink { icon: "info"; title: "About illogical-impulse"; description: "The desktop shell Phoenix is built on (opens its project page)"; chevronIcon: "open_in_new"; action: () => Qt.openUrlExternally("https://github.com/end-4/dots-hyprland") }
-                WLink { icon: "bug_report"; title: "Report a problem"; description: "Something not working? Send a report"; sub: "report" }
+                WLink { icon: "local_fire_department"; title: "About Phoenix"; keywords: "updates"; description: "Project page"; chevronIcon: "open_in_new"; action: () => Quickshell.execDetached(["xdg-open", "https://github.com/RandomRandomnes/phoenix"]) }
+                WLink { icon: "info"; title: "About illogical-impulse"; keywords: "desktop shell"; description: "The shell Phoenix is built on"; chevronIcon: "open_in_new"; action: () => Qt.openUrlExternally("https://github.com/end-4/dots-hyprland") }
+                WLink { icon: "bug_report"; title: "Report a problem"; sub: "report" }
             }
         }
     }

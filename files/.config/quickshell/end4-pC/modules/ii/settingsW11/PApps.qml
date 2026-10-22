@@ -33,13 +33,13 @@ Item {
         WPage {
             WSection {
                 WLink { icon: "apps"; title: "Installed apps"; description: "Uninstall and open apps"; sub: "installed" }
-                WLink { icon: "app_registration"; title: "Default apps"; description: "Defaults for files and links: browser, file manager, media"; sub: "defaults" }
-                WLink { icon: "rocket_launch"; title: "Startup"; description: "Apps that start automatically when you sign in"; sub: "startup" }
-                WLink { icon: "select_window"; title: "Window rules"; description: "How an app's windows open: floating, size, position, workspace, opacity"; sub: "rules" }
+                WLink { icon: "app_registration"; title: "Default apps"; keywords: "files links"; description: "Browser, file manager, media"; sub: "defaults" }
+                WLink { icon: "rocket_launch"; title: "Startup"; description: "Apps that start when you sign in"; sub: "startup" }
+                WLink { icon: "select_window"; title: "Window rules"; keywords: "floating size position workspace opacity"; description: "How an app's windows open"; sub: "rules" }
             }
             WSection {
                 title: "Related"
-                WLink { icon: "storefront"; title: "Get more apps"; description: "Opens Discover if installed, otherwise the Arch package search"; chevronIcon: "open_in_new"; action: () => Quickshell.execDetached(["bash", "-c", "command -v plasma-discover >/dev/null && plasma-discover || xdg-open https://archlinux.org/packages/"]) }
+                WLink { icon: "storefront"; title: "Get more apps"; description: "Discover, or the Arch package search"; chevronIcon: "open_in_new"; action: () => Quickshell.execDetached(["bash", "-c", "command -v plasma-discover >/dev/null && plasma-discover || xdg-open https://archlinux.org/packages/"]) }
                 WLink { icon: "terminal"; title: "Default terminal"; description: Config.options.apps.terminal; sub: "defaults" }
             }
         }
@@ -291,13 +291,13 @@ Item {
                 WCard {
                     icon: "description"
                     title: StartupItems.scriptPrograms.length > 0 ? StartupItems.scriptPrograms.join(", ") : "Nothing"
-                    description: "Runs after you unlock: ~/.config/hypr/custom/scripts/autostart-user.sh"
+                    description: "~/.config/hypr/custom/scripts/autostart-user.sh"
                     WButton { buttonText: "Edit script"; onClicked: Quickshell.execDetached([`${Quickshell.env("HOME")}/.local/bin/phoenix-open`, "editor", StartupItems.scriptPath]) }
                 }
             }
             WSection {
                 title: "More"
-                WLink { icon: "tune"; title: "Startup apps in detail"; description: "Edit each command, its workspace and the wait after it"; sub: "autostart" }
+                WLink { icon: "tune"; title: "Startup apps in detail"; description: "Command, workspace and delay per app"; sub: "autostart" }
             }
         }
     }

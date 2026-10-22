@@ -35,8 +35,7 @@ WPage {
         WCard {
             icon: "bug_report"
             title: "Report a problem"
-            description: "Describe what went wrong. Phoenix adds details about your system and removes personal data "
-                + "(user name, computer name, network and drive names, addresses). You see the whole report before anything is posted."
+            description: "System details are added, personal data removed. You see it before posting"
         }
     }
 
@@ -48,7 +47,7 @@ WPage {
             Layout.fillWidth: true
             Layout.minimumHeight: 120
             wrapMode: TextEdit.Wrap
-            placeholderText: "What happened, what you expected, and what you did just before (the first line becomes the title)"
+            placeholderText: "What happened? (the first line is the title)"
         }
         RowLayout {
             Layout.fillWidth: true
@@ -106,9 +105,8 @@ WPage {
             wrapMode: Text.Wrap
             color: Appearance.colors.colSubtext
             font.pixelSize: Appearance.font.pixelSize.small
-            text: "Open on GitHub starts a new public issue with this report filled in"
-                + (page.report?.paste ? " (it's long, so it is copied to your clipboard: paste it into the issue)" : "")
-                + ". Posting needs a free GitHub account. A copy is kept in ~/.local/state/phoenix/reports."
+            text: "Opens a public GitHub issue (needs a GitHub account)"
+                + (page.report?.paste ? ". Too long for the link: it's on your clipboard to paste" : "")
         }
         RowLayout {
             Layout.fillWidth: true

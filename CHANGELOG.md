@@ -1,5 +1,11 @@
 # Changelog
 
+## custom 2.484 (2026-10-22, fix)
+- The login screen at startup now uses your lock screen style (Settings › Personalization › Lock screen); after updating, run: phoenix login-screen install
+- Opening Settings when it's already open brings it to your workspace and to the front (it used to look like Settings had disappeared)
+- Shorter, clearer option texts across Settings, the setup assistant, Quick Start, the Task Manager and the sidebar
+- The Task Manager's startup list no longer shows bits of script code as programs
+
 ## custom 2.474 (2026-10-22, fix)
 - Bluetooth pairing works again on Hyprland: a pairing helper starts with the session (new pairings failed with "Authentication Failed" since Blueman was removed)
 - Connect on a device that isn't paired now pairs it first, then connects (it used to connect for a second and drop)

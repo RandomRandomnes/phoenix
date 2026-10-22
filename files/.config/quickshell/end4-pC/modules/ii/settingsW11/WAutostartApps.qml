@@ -119,7 +119,7 @@ ColumnLayout {
         wrapMode: Text.Wrap
         color: Appearance.colors.colSubtext
         font.pixelSize: Appearance.font.pixelSize.small
-        text: Translation.tr("No apps yet. Each app opens on its workspace when the shell starts.")
+        text: Translation.tr("No apps yet")
     }
 
     Repeater {
@@ -173,7 +173,7 @@ ColumnLayout {
                     Layout.fillWidth: true
                     buttonIcon: "terminal"
                     text: Translation.tr("Command")
-                    placeholderText: Translation.tr("e.g. firefox")
+                    placeholderText: Translation.tr("firefox")
                     fieldWidth: 320
                     value: model.cmd
 

@@ -99,7 +99,6 @@ ColumnLayout {
     WCard {
         icon: "add_circle"
         title: root.addLabel
-        description: "Search your installed apps"
         Rectangle {
             implicitWidth: 280
             implicitHeight: 36

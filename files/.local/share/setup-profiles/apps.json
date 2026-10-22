@@ -29,7 +29,7 @@
             "id": "gaming-pack",
             "name": "Gaming pack",
             "icon": "sports_esports",
-            "description": "Steam, MangoHud (FPS overlay), GameMode and ProtonUp-Qt (newer Proton versions) in one go",
+            "description": "Steam, MangoHud, GameMode, ProtonUp-Qt",
             "apps": [
                 "steam",
                 "mangohud",
@@ -41,7 +41,7 @@
             "id": "productivity-pack",
             "name": "Productivity pack",
             "icon": "work",
-            "description": "LibreOffice (documents, spreadsheets, slides), Thunderbird (email and calendar), Obsidian (notes), Code - OSS (code editor) and KeePassXC (passwords)",
+            "description": "LibreOffice, Thunderbird, Obsidian, Code - OSS, KeePassXC",
             "apps": [
                 "libreoffice",
                 "thunderbird",
@@ -57,7 +57,7 @@
             "group": "internet",
             "name": "Chromium",
             "icon": "public",
-            "description": "Open-source web browser (Firefox is already installed)",
+            "description": "Web browser",
             "kind": "pacman",
             "packages": [
                 "chromium"
@@ -129,7 +129,7 @@
             "group": "games",
             "name": "Steam",
             "icon": "sports_esports",
-            "description": "Valve's game store and launcher (also needed for Wallpaper Engine)",
+            "description": "Game store; needed for Wallpaper Engine",
             "kind": "pacman",
             "packages": [
                 "steam"
@@ -202,7 +202,7 @@
             "group": "games",
             "name": "ProtonUp-Qt",
             "icon": "upgrade",
-            "description": "Install newer Proton/Wine versions for Steam and Lutris",
+            "description": "Newer Proton and Wine versions",
             "kind": "flatpak",
             "packages": [
                 "net.davidotek.pupgui2"
@@ -226,7 +226,7 @@
             "group": "media",
             "name": "VLC",
             "icon": "play_circle",
-            "description": "Plays almost any video or audio file",
+            "description": "Video and audio player",
             "kind": "pacman",
             "packages": [
                 "vlc"
@@ -358,7 +358,7 @@
             "group": "tools",
             "name": "Mission Center",
             "icon": "monitoring",
-            "description": "Task manager: CPU, memory, disk and GPU use per app",
+            "description": "System monitor",
             "kind": "pacman",
             "packages": [
                 "mission-center"
@@ -418,7 +418,7 @@
             "group": "tools",
             "name": "Ollama",
             "icon": "smart_toy",
-            "description": "Run AI models locally (for the AI sidebar)",
+            "description": "Local AI models for the AI sidebar",
             "kind": "pacman",
             "packages": [
                 "ollama"

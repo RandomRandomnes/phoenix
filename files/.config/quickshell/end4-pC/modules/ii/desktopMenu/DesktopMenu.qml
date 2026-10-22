@@ -69,7 +69,7 @@ Scope {
     function openSettings(page, sub) {
         root.close()
         WState.go(page, sub ?? "")
-        GlobalStates.settingsOpen = true
+        GlobalStates.openSettings()
     }
 
     // Other pictures in the current wallpaper's folder, for "Next desktop background"

@@ -47,6 +47,6 @@ log "$act: calling ${cmd[*]}"
 if ! "${cmd[@]}" && ! loginctl "${cmd[@]:1}"; then
     log "$act: FAILED (systemctl and loginctl refused)"
     notify-send -a Phoenix -u critical "Couldn't $( [ "$act" = poweroff ] && echo "shut down" || echo restart)" \
-        "The system refused or the password prompt was cancelled. Try again from the power menu." 2>/dev/null
+        "Refused, or the password prompt was cancelled" 2>/dev/null
     exit 1
 fi

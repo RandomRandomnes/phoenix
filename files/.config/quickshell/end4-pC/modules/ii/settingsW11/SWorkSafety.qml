@@ -27,7 +27,7 @@ ColumnLayout {
             WCGroup {
                 WCSwitch {
                     buttonIcon: "assignment"
-                    text: Translation.tr("Hide clipboard images copied from sussy sources")
+                    text: Translation.tr("Hide clipboard images from unsafe sources")
                     checked: Config.options.workSafety.enable.clipboard
                     onToggled: checked => {
                         Config.options.workSafety.enable.clipboard = checked;

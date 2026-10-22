@@ -19,7 +19,7 @@ WSection {
         title: !root.job ? "" : root.job.running ? `${root.job.title}: ${root.job.step || "starting"}…`
             : root.job.ok ? `${root.job.title}: done` : `${root.job.title}: needs attention`
         description: !root.job ? "" : root.job.running ? (root.job.log.filter(l => !l.startsWith("==>")).slice(-1)[0] ?? "")
-            : (root.job.msgs.length > 0 ? root.job.msgs.join("\n") : root.job.ok ? "Finished." : `Stopped (exit code ${root.job.exitCode}). See the details.`)
+            : (root.job.msgs.length > 0 ? root.job.msgs.join("\n") : root.job.ok ? "Finished" : `Stopped (exit code ${root.job.exitCode}): see Details`)
         WButton {
             buttonText: root.showLog ? "Hide details" : "Details"
             onClicked: root.showLog = !root.showLog
