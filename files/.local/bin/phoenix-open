@@ -9,11 +9,22 @@
 #   phoenix-open volume                the volume mixer (config apps.volumeMixer)
 #   phoenix-open settings [page [sub]] Phoenix Settings (in KDE Plasma: KDE's System Settings)
 #   phoenix-open quickstart [page]     the Quick Start guide (a window of the shell; its own program without one)
+#   phoenix-open code | office         the first installed code editor / office suite (Super+C, Ctrl+Super+Shift+Alt+W);
+#                                      none installed = a notification saying where to get one
 CONFIG="$HOME/.config/illogical-impulse/config.json"
 app() {   # config apps.<key>
     python3 -c 'import json,sys
 try: print(json.load(open(sys.argv[1]))["apps"][sys.argv[2]])
 except Exception: print("")' "$CONFIG" "$1" 2>/dev/null
+}
+first_installed() {   # what, then candidate commands (the first word is the program); none → a notification
+    local what="$1" c; shift
+    for c in "$@"; do
+        command -v "${c%% *}" >/dev/null 2>&1 && exec bash -c "$c"
+    done
+    notify-send -a Phoenix -i dialog-information "No $what installed" \
+        "Get one in the setup assistant (Shift+Super+Alt+/ › Apps) or Discover." 2>/dev/null
+    exit 1
 }
 launch_default() {   # mime type, fallback command, args…
     local mime="$1" fallback="$2"; shift 2
@@ -37,6 +48,11 @@ case "$what" in
         exec xdg-open "${1:-https://}" ;;
     editor)
         launch_default text/plain "kitty -1 vim" "$@" ;;
+    code)     # 2026-10-22: was illogical-impulse's list, which did nothing at all when none was installed
+        first_installed "code editor" code code-oss codium cursor zed zeditor windsurf kate gnome-text-editor emacs \
+            "kitty -1 nvim" "kitty -1 micro" ;;
+    office)
+        first_installed "office suite" libreoffice onlyoffice-desktopeditors wps ;;
     taskmanager)
         exec "$HOME/.local/bin/phoenix-task-manager" --configured ;;
     volume)

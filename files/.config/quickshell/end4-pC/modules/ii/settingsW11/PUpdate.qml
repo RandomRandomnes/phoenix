@@ -574,6 +574,13 @@ date -r /var/lib/pacman/sync/core.db '+%b %-d, %-I:%M %p' 2>/dev/null`]
 
     WSection {
         title: "Advanced options"
+        WToggle {
+            icon: "deployed_code_update"
+            title: "One-click full update"
+            description: "Off: plain system update only"
+            checked: Config.options.extras.updatesScript
+            onToggled: v => Config.options.extras.updatesScript = v
+        }
         WCombo {
             icon: "rule"
             title: "How updates install"

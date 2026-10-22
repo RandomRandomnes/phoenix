@@ -1,4 +1,12 @@
-hl.bind("CTRL+SUPER+ALT+Slash", hl.dsp.exec_cmd("xdg-open ~/.config/hypr/custom/keybinds.lua"), {description = "Edit user keybinds"} )
+-- Phoenix (2026-10-22): change shortcuts in Settings (yours go to user-keybinds.lua, which updates never touch); this
+-- file is Phoenix's own and is replaced by updates. Ctrl+Super+P (cycle panel family) is gone: this shell has one.
+hl.bind("CTRL+SUPER+ALT+Slash", hl.dsp.exec_cmd("phoenix-open settings devices shortcuts"), {description = "Shell: Keyboard shortcuts in Settings"} )
+hl.unbind("CTRL + SUPER + P")
+-- Code editor and office suite through phoenix-open (it says so when none is installed instead of doing nothing)
+hl.unbind("SUPER + C")
+hl.bind("SUPER + C", hl.dsp.exec_cmd("phoenix-open code"), { description = "App: Code editor" })
+hl.unbind("CTRL + SUPER + SHIFT + ALT + W")
+hl.bind("CTRL + SUPER + SHIFT + ALT + W", hl.dsp.exec_cmd("phoenix-open office"), { description = "App: Office software" })
 
 
 

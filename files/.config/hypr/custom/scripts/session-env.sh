@@ -15,4 +15,14 @@ for u in xdg-desktop-portal.service xdg-desktop-portal-kde.service plasma-xdg-de
     since=$(date -d "$(systemctl --user show "$u" -p ActiveEnterTimestamp --value)" +%s 2>/dev/null || echo 0)
     [ "$since" -lt "$hypr_start" ] && systemctl --user stop "$u"
 done
+# 2026-10-22: KDE Plasma's own services that outlived a Plasma session (power management, its password prompt, night
+# light, tray bridge, kded6, KRunner, the file indexer…) kept running here and fought Phoenix's own (two password
+# prompts, two night lights, Plasma's power settings over Phoenix's). Plasma starts them again when it starts.
+# PHOENIX_SESSION_ENV_DRYRUN=1: only print what would be stopped (testing).
+for u in $(systemctl --user list-units --type=service --state=active --no-legend --plain 'plasma-*' 'kde-baloo.service' 2>/dev/null | awk '{print $1}'); do
+    case "$u" in plasma-xdg-desktop-portal-kde.service|plasma-dolphin.service) continue ;; esac   # restarted above
+    since=$(date -d "$(systemctl --user show "$u" -p ActiveEnterTimestamp --value)" +%s 2>/dev/null || echo 0)
+    [ "$since" -lt "$hypr_start" ] || continue
+    if [ -n "${PHOENIX_SESSION_ENV_DRYRUN:-}" ]; then echo "would stop $u"; else systemctl --user stop "$u"; fi
+done
 exit 0

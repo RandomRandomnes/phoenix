@@ -23,7 +23,8 @@ Item {
         const all = AppSearch.list;
         if (!o.appGridShowAll)
             return o.appGridApps.map(id => ({ app: all.find(e => matches(e, id)), key: id })).filter(x => x.app);
-        const shown = all.filter(e => !o.appGridHidden.some(id => matches(e, id)));
+        const shown = all.filter(e => !o.appGridHidden.some(id => matches(e, id))
+            && !(o.appGridHideSystem && AppSearch.isSystemApp(e.id)));
         const rank = e => {
             const i = o.appGridOrder.findIndex(id => matches(e, id));
             return i < 0 ? o.appGridOrder.length : i;
@@ -38,7 +39,9 @@ Item {
     readonly property int columns: Math.max(1, Math.min(8, entries.length))
 
     // The grid shows appModel, not entries directly: a JS array model rebuilds every icon on any change (all of them
-    // replay the fade-in, which flashed after each drop). appModel only gets moves, so a reorder keeps the icons alive.
+    // replay the fade-in, which flashed after each drop). appModel only gets the changes themselves: moves, and since
+    // 2026-10-22 single removals and insertions too (an app removed from the menu or newly installed used to rebuild
+    // the whole grid, so every icon jumped); the other icons slide to their new places.
     readonly property var appByKey: {
         const m = {};
         for (const x of entries) m[x.key] = x.app;
@@ -47,18 +50,22 @@ Item {
     ListModel { id: appModel }
     function syncModel() {
         const keys = entries.map(x => x.key);
+        // apps that left: removed back to front, so the indexes still to visit stay right
+        for (let i = appModel.count - 1; i >= 0; i--)
+            if (!keys.includes(appModel.get(i).key)) appModel.remove(i, 1);
         const cur = [];
         for (let i = 0; i < appModel.count; i++) cur.push(appModel.get(i).key);
-        if (cur.length !== keys.length || !keys.every(k => cur.includes(k))) {
-            appModel.clear();
-            for (const k of keys) appModel.append({ key: k });
-            return;
-        }
+        // then walk the wanted order: a key already further down moves up, a key not there yet is inserted
         for (let i = 0; i < keys.length; i++) {
             if (cur[i] === keys[i]) continue;
             const j = cur.indexOf(keys[i], i + 1);
-            appModel.move(j, i, 1);
-            cur.splice(i, 0, cur.splice(j, 1)[0]);
+            if (j < 0) {
+                appModel.insert(i, { key: keys[i] });
+                cur.splice(i, 0, keys[i]);
+            } else {
+                appModel.move(j, i, 1);
+                cur.splice(i, 0, cur.splice(j, 1)[0]);
+            }
         }
     }
     onEntriesChanged: syncModel()

@@ -210,6 +210,17 @@ Item {
             }
 
             WSection {
+                title: "Live wallpaper"
+                WToggle {
+                    icon: "animated_images"
+                    title: "Wallpaper Engine background"
+                    description: "Needs Wallpaper Engine from Steam"
+                    checked: Config.options.extras.wallpaperEngine
+                    onToggled: v => Config.options.extras.wallpaperEngine = v
+                }
+            }
+
+            WSection {
                 title: "Effects"
                 WToggle {
                     icon: "blur_on"
@@ -507,6 +518,13 @@ Item {
 
             WSection {
                 title: "Taskbar behaviors"
+                WToggle {
+                    icon: "monitoring"
+                    title: "Live system graphs"
+                    description: "CPU, GPU and memory graphs. Off: round gauges"
+                    checked: Config.options.extras.resourceGraphs
+                    onToggled: v => Config.options.extras.resourceGraphs = v
+                }
                 WCombo {
                     icon: "vertical_align_top"
                     title: "Taskbar position"
@@ -776,6 +794,14 @@ Item {
         WPage {
             WSection {
                 WToggle {
+                    icon: "grid_view"
+                    title: "App grid in the Super menu"
+                    description: "Apps below the workspaces when you press Super"
+                    checked: Config.options.extras.appGrid
+                    onToggled: v => Config.options.extras.appGrid = v
+                }
+                WToggle {
+                    visible: Config.options.extras.appGrid
                     icon: "apps"
                     title: "Show all installed apps"
                     description: Config.options.overview.appGridShowAll
@@ -791,6 +817,14 @@ Item {
                     keywords: "install flatpak steam games"
                     checked: Config.options.overview.appGridAddNew
                     onToggled: v => Config.options.overview.appGridAddNew = v
+                }
+                WToggle {
+                    icon: "visibility_off"
+                    title: "Hide system apps"
+                    description: "Developer tools, helpers and KDE apps Phoenix replaces; search still finds them"
+                    keywords: "kde background helper tools qt"
+                    checked: Config.options.overview.appGridHideSystem
+                    onToggled: v => Config.options.overview.appGridHideSystem = v
                 }
             }
 
@@ -1032,6 +1066,16 @@ Item {
                     description: "Header button that switches to KDE Plasma"
                     checked: Config.options.sidebar.desktopSwitch
                     onToggled: v => Config.options.sidebar.desktopSwitch = v
+                }
+            }
+            WSection {
+                title: "Left sidebar"
+                WToggle {
+                    icon: "smart_toy"
+                    title: "Claude Code in the AI sidebar"
+                    description: "Needs Claude Code and a subscription"
+                    checked: Config.options.extras.claudeCodeAi
+                    onToggled: v => Config.options.extras.claudeCodeAi = v
                 }
             }
             WSection {

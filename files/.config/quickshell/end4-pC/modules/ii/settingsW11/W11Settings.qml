@@ -45,6 +45,7 @@ Scope {
         implicitHeight: Math.min(820, monH - 120)
         // back in Settings (focus returns to it): pages reload what they read once (WState.refreshTick)
         readonly property bool focused: GlobalStates.settingsOpen && ToplevelManager.activeToplevel?.title === "Settings"
+            && ToplevelManager.activeToplevel?.appId === "org.quickshell"   // not some other app's "Settings" window
             && ToplevelManager.activeToplevel?.appId === "org.quickshell"
         onFocusedChanged: if (focused) WState.refresh()
         // measured while Settings is closed, so the size is right before the window appears (measuring when it became

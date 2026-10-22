@@ -7,19 +7,12 @@ import qs.services
 import qs.modules.common
 import qs.modules.common.widgets
 
-// Extras (2026-10-03, ours): every custom feature of this setup with an on/off switch. Off falls back to the stock
-// illogical-impulse behaviour. The switches are Config.options.extras (+ a few sidebar ones); services/Extras.qml
-// applies the Hyprland side through ~/.local/bin/setup-features. Setup profiles set the same switches.
+// Extras (2026-10-03, ours): setup profiles, and a list of Phoenix's features. Their on/off switches
+// (Config.options.extras + a few sidebar ones) moved to the pages they affect on 2026-10-22; services/Extras.qml
+// still applies the Hyprland side through ~/.local/bin/setup-features. Setup profiles set the same switches.
 WPage {
     id: page
     readonly property var ex: Config.options.extras
-
-    component Switch: WToggle {
-        required property string key
-        property var group: Config.options.extras
-        checked: group[key]
-        onToggled: v => group[key] = v
-    }
 
     // ── Setup profiles (~/.local/bin/setup-profile) ──
     property string confirmId: ""       // profile waiting for a second click
@@ -144,109 +137,21 @@ WPage {
         WJob { jobId: "apps" }
     }
 
+    // Phoenix's features (2026-10-22): each switch now lives on the page of what it changes; this list says what's
+    // on and opens that page
     WSection {
-        title: "Windows"
-        Switch {
-            key: "windowsStyle"
-            icon: "select_window"
-            title: "Windows-style windows"
-            description: "Floating windows with title bars. Off: tiling"
-        }
-        Switch {
-            key: "minimizeToDock"
-            icon: "minimize"
-            title: "Minimize to the dock"
-            description: "Click the app in the dock to restore"
-        }
-        Switch {
-            key: "workspaceGroups"
-            icon: "view_carousel"
-            title: "Own workspaces for each screen"
-            description: "Screen 1: 1-10, screen 2: 11-20, and so on"
-        }
-    }
-
-    WSection {
-        title: "Desktop"
-        Switch {
-            key: "wallpaperEngine"
-            icon: "animated_images"
-            title: "Wallpaper Engine background"
-            description: "Needs Wallpaper Engine from Steam"
-        }
-        Switch {
-            key: "appGrid"
-            icon: "apps"
-            title: "App grid in the Super menu"
-            description: "Apps below the workspaces when you press Super"
-        }
-        WLink {
-            visible: page.ex.appGrid
-            icon: "grid_view"
-            title: "Choose the applications in the grid"
-            page: "personalization"; sub: "appgrid"
-        }
-    }
-
-    WSection {
-        title: "Taskbar and menus"
-        Switch {
-            key: "resourceGraphs"
-            icon: "monitoring"
-            title: "Live system graphs on the taskbar"
-            description: "CPU, GPU and memory graphs. Off: round gauges"
-        }
-        Switch {
-            key: "powerMenuKde"
-            icon: "swap_horiz"
-            title: "\"Switch to KDE\" in the power menu"
-            description: "Replaces Hibernate"
-        }
-        Switch {
-            key: "updatesScript"
-            icon: "deployed_code_update"
-            title: "One-click full update"
-            description: "Off: plain system update only"
-        }
-    }
-
-    WSection {
-        title: "Right sidebar"
-        Switch {
-            key: "wallpaperEngineCard"; group: Config.options.sidebar
-            visible: page.ex.wallpaperEngine
-            icon: "wallpaper"
-            title: "Wallpaper Engine picker"
-            description: "Pick, shuffle and mute live wallpapers"
-        }
-        Switch {
-            key: "deviceBatteries"; group: Config.options.sidebar
-            icon: "battery_full"
-            title: "Device batteries"
-            description: "Mouse, headset and controller batteries"
-        }
-        Switch {
-            key: "desktopSwitch"; group: Config.options.sidebar
-            icon: "swap_horiz"
-            title: "Switch to KDE Plasma button"
-            description: "Header button that switches to KDE Plasma"
-        }
-    }
-
-    WSection {
-        title: "Applications"
-        Switch {
-            key: "claudeCodeAi"
-            icon: "smart_toy"
-            title: "Claude Code in the AI sidebar"
-            description: "In the left sidebar. Needs Claude Code and a subscription"
-        }
-        Switch {
-            key: "steamTray"
-            icon: "sports_esports"
-            title: "Start Steam at login"
-            description: "Starts in the tray after sign-in"
-        }
+        title: "Phoenix features"
+        WLink { icon: "select_window"; title: "Windows-style windows"; description: (Config.options.extras.windowsStyle ? "On" : "Off") + " · System › Multitasking"; page: "system"; sub: "multitasking"; keywords: "title bars floating" }
+        WLink { icon: "minimize"; title: "Minimize to the dock"; description: (Config.options.extras.minimizeToDock ? "On" : "Off") + " · System › Multitasking"; page: "system"; sub: "multitasking" }
+        WLink { icon: "view_carousel"; title: "Own workspaces for each screen"; description: (Config.options.extras.workspaceGroups ? "On" : "Off") + " · System › Multitasking"; page: "system"; sub: "multitasking" }
+        WLink { icon: "animated_images"; title: "Wallpaper Engine background"; description: (Config.options.extras.wallpaperEngine ? "On" : "Off") + " · Personalization › Background"; page: "personalization"; sub: "background" }
+        WLink { icon: "grid_view"; title: "App grid in the Super menu"; description: (Config.options.extras.appGrid ? "On" : "Off") + " · Personalization › Super menu apps"; page: "personalization"; sub: "appgrid" }
+        WLink { icon: "monitoring"; title: "Live system graphs"; description: (Config.options.extras.resourceGraphs ? "On" : "Off") + " · Personalization › Taskbar"; page: "personalization"; sub: "taskbar" }
+        WLink { icon: "swap_horiz"; title: "Switch to KDE"; description: (Config.options.extras.powerMenuKde ? "On" : "Off") + " in the power menu · System › Power"; page: "system"; sub: "power" }
+        WLink { icon: "right_panel_open"; title: "Sidebar extras"; description: "Wallpaper Engine picker, device batteries, KDE button · Personalization › Sidebar"; page: "personalization"; sub: "sidebar" }
+        WLink { icon: "smart_toy"; title: "Claude Code in the AI sidebar"; description: (Config.options.extras.claudeCodeAi ? "On" : "Off") + " · Personalization › Sidebar"; page: "personalization"; sub: "sidebar" }
+        WLink { icon: "deployed_code_update"; title: "One-click full update"; description: (Config.options.extras.updatesScript ? "On" : "Off") + " · Update"; page: "update" }
+        WLink { icon: "sports_esports"; title: "Start Steam at sign-in"; description: (Config.options.extras.steamTray ? "On" : "Off") + " · Apps › Startup"; page: "apps"; sub: "startup" }
     }
 
     // Phoenix (2026-10-15): settings moved here from illogical-impulse's original settings

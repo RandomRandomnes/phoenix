@@ -1,5 +1,12 @@
 # Changelog
 
+## custom 2.494 (2026-10-22, fix)
+- The Super menu no longer jumps when apps are added or removed
+- Settings and Task Manager are in the Super menu; developer tools and KDE apps Phoenix replaces are hidden from it (Settings › Super menu apps)
+- Phoenix's switches moved from Extras to the pages they change; Extras lists them with links
+- Ctrl+Super+Shift+D switches light/dark mode; Super+C and the office shortcut say when nothing is installed
+- KDE Plasma's leftover services no longer keep running after switching back to Phoenix
+
 ## custom 2.484 (2026-10-22, fix)
 - The login screen at startup now uses your lock screen style (Settings › Personalization › Lock screen); after updating, run: phoenix login-screen install
 - Opening Settings when it's already open brings it to your workspace and to the front (it used to look like Settings had disappeared)

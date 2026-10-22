@@ -83,7 +83,8 @@ Singleton {
 
     function copy(entry) {
         if (root.cliphistBinary.includes("cliphist")) // Classic cliphist
-            Quickshell.execDetached(["bash", "-c", `printf '${StringUtils.shellSingleQuoteEscape(entry)}' | ${root.cliphistBinary} decode | wl-copy`]);
+            // Phoenix (2026-10-22): '%s', so % and \ in the copied text aren't read as printf codes
+            Quickshell.execDetached(["bash", "-c", `printf '%s' '${StringUtils.shellSingleQuoteEscape(entry)}' | ${root.cliphistBinary} decode | wl-copy`]);
         else { // Stash
             const entryNumber = entry.split("\t")[0];
             Quickshell.execDetached(["bash", "-c", `${root.cliphistBinary} decode ${entryNumber} | wl-copy`]);
@@ -92,7 +93,7 @@ Singleton {
 
     function paste(entry) {
         if (root.cliphistBinary.includes("cliphist")) // Classic cliphist
-            Quickshell.execDetached(["bash", "-c", `printf '${StringUtils.shellSingleQuoteEscape(entry)}' | ${root.cliphistBinary} decode | wl-copy && wl-paste`]);
+            Quickshell.execDetached(["bash", "-c", `printf '%s' '${StringUtils.shellSingleQuoteEscape(entry)}' | ${root.cliphistBinary} decode | wl-copy && wl-paste`]);
         else { // Stash
             const entryNumber = entry.split("\t")[0];
             Quickshell.execDetached(["bash", "-c", `${root.cliphistBinary} decode ${entryNumber} | wl-copy; ${root.pressPasteCommand}`]);

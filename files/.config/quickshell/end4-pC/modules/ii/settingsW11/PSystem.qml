@@ -623,6 +623,13 @@ Item {
                     checked: Idle.inhibit
                     onToggled: v => Idle.inhibit = v
                 }
+                WToggle {
+                    icon: "swap_horiz"
+                    title: "\"Switch to KDE\" in the power menu"
+                    description: "Replaces Hibernate"
+                    checked: Config.options.extras.powerMenuKde
+                    onToggled: v => Config.options.extras.powerMenuKde = v
+                }
             }
 
             WSection {
@@ -787,6 +794,28 @@ Item {
         WPage {
             WSection {
                 title: "Windows"
+                // Phoenix's window switches (moved here from Extras, 2026-10-22); services/Extras.qml applies them
+                WToggle {
+                    icon: "select_window"
+                    title: "Windows-style windows"
+                    description: "Floating windows with title bars. Off: tiling"
+                    checked: Config.options.extras.windowsStyle
+                    onToggled: v => Config.options.extras.windowsStyle = v
+                }
+                WToggle {
+                    icon: "minimize"
+                    title: "Minimize to the dock"
+                    description: "Click the app in the dock to restore"
+                    checked: Config.options.extras.minimizeToDock
+                    onToggled: v => Config.options.extras.minimizeToDock = v
+                }
+                WToggle {
+                    icon: "view_carousel"
+                    title: "Own workspaces for each screen"
+                    description: "Screen 1: 1-10, screen 2: 11-20, and so on"
+                    checked: Config.options.extras.workspaceGroups
+                    onToggled: v => Config.options.extras.workspaceGroups = v
+                }
                 WCombo {
                     icon: "dashboard"
                     title: "Tiling layout"

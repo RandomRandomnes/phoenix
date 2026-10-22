@@ -128,6 +128,20 @@ print(json.dumps(hidden))`]
     }
 
     // Deduped list to fix double icons
+    // Phoenix (2026-10-22): apps that aren't opened by hand on Phoenix, kept out of the Super menu grid (search still
+    // finds them; Settings › Personalization › Super menu apps › "Hide system apps", overview.appGridHideSystem):
+    // developer and helper tools that packages bring along, and KDE / GTK apps whose job Phoenix does itself.
+    readonly property var systemApps: [
+        // developer and helper tools
+        "assistant", "designer", "linguist", "qdbusviewer", "qv4l2", "qvidcap", "lstopo", "uuctl", "cmake-gui",
+        "avahi-discover", "bssh", "bvnc", "org.kde.drkonqi.coredump.gui", "org.kde.heaptrack", "org.gnome.Sysprof",
+        // replaced by Phoenix: Task Manager, Phone Link, Settings › Network / Bluetooth / Sound, kitty, screenshots
+        "org.kde.plasma-systemmonitor", "org.kde.kdeconnect.app", "org.kde.kdeconnect.nonplasma", "org.kde.kdeconnect.sms",
+        "nm-connection-editor", "blueman-manager", "blueman-adapters", "pavucontrol-qt", "pavucontrol",
+        "org.kde.konsole", "org.kde.spectacle"
+    ]
+    function isSystemApp(id) { return root.systemApps.indexOf(id) !== -1 }
+
     readonly property list<DesktopEntry> list: Array.from(DesktopEntries.applications.values)
         .filter((app, index, self) => 
             index === self.findIndex((t) => (

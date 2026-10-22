@@ -273,6 +273,14 @@ Singleton {
         }
     }
 
+    // Phoenix (2026-10-22): Ctrl+Super+Shift+D, illogical-impulse's "Toggle light/dark mode", had no handler in this shell
+    CompositorGlobalShortcut {
+        name: "toggleLightDark"
+        description: "Toggles light and dark mode"
+        onPressed: Quickshell.execDetached([Directories.wallpaperSwitchScriptPath, "--mode",
+            Appearance.m3colors.darkmode ? "light" : "dark", "--noswitch"])
+    }
+
      CompositorGlobalShortcut {
         name: "centeredWallpaperToggle"
         description: "Toggles centered wallpaper"

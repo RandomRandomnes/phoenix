@@ -36,6 +36,17 @@ Singleton {
             adapter.seen = root.appIds.slice()
             return
         }
+        // once (2026-10-22): Phoenix's own Settings and Task Manager into a hand-picked grid; they existed before the
+        // first run, so they never counted as new. Removed by hand afterwards = stays removed.
+        if (!adapter.phoenixAppsAdded) {
+            adapter.phoenixAppsAdded = true
+            const o0 = Config.options.overview
+            if (!o0.appGridShowAll) {
+                const have0 = o0.appGridApps.map(x => x.toLowerCase())
+                const ours = ["phoenix-settings", "phoenix-task-manager"].filter(id => root.appIds.indexOf(id) !== -1 && have0.indexOf(id) === -1)
+                if (ours.length > 0) o0.appGridApps = o0.appGridApps.concat(ours)
+            }
+        }
         const added = root.appIds.filter(id => seen.indexOf(id) === -1)
         if (added.length === 0) return
         adapter.seen = seen.concat(added)
@@ -44,7 +55,7 @@ Singleton {
         const o = Config.options.overview
         if (!o.appGridShowAll) {
             const have = o.appGridApps.map(x => x.toLowerCase())
-            const more = added.filter(id => have.indexOf(id.toLowerCase()) === -1)
+            const more = added.filter(id => have.indexOf(id.toLowerCase()) === -1 && !(o.appGridHideSystem && AppSearch.isSystemApp(id)))
             if (more.length > 0) o.appGridApps = o.appGridApps.concat(more)
         }
     }
@@ -62,6 +73,7 @@ Singleton {
             id: adapter
             property list<string> seen: []
             property list<string> fresh: []
+            property bool phoenixAppsAdded: false
         }
     }
 }
