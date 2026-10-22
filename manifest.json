@@ -59,22 +59,23 @@
   "format": "custom-fixes",
   "line": "custom",
   "version": 2.99,
-  "label": "2.464",
-  "kind": "minor",
+  "label": "2.474",
+  "kind": "fix",
   "date": "2026-10-22",
   "publisher": "RandomRandomnes",
   "notes": [
-    "Developer test hooks: the battery and system stats can read pretend hardware on a development PC (does nothing on normal installs); a pretend battery never suspends the PC"
+    "Bluetooth pairing works again on Hyprland: a pairing helper starts with the session (new pairings failed with \"Authentication Failed\" since Blueman was removed)",
+    "Connect on a device that isn't paired now pairs it first, then connects (it used to connect for a second and drop)"
   ],
   "payload": "fixes.tar.gz",
-  "payloadSha256": "157f4e176a11c51acccbf612be45c939eefc883ae1134de4e469b2d9928b33f0",
+  "payloadSha256": "38952e4b9dacef2c39307d4ceae19c9b230d7e46ab43d0387cd2a2f1ffbaf4be",
   "files": {
     ".config/hypr/custom/env.lua": "b97ee35362ed653cec2880f9adfdf81698e2f55577aef1dffcb321e4d713794f",
     ".config/hypr/custom/execs.lua": "64197ff280790bc529a0dd1938985c42783a1b17f59ec709ff515f8fa0f5d6b2",
     ".config/hypr/custom/general.lua": "e5622221a80a5b98e4f6a85845149150ddbcd29f1481880d960f3805edcf93aa",
     ".config/hypr/custom/keybinds.lua": "913752a92ff2ba903078583760f4f1a097a1d2ffa77071e479d7ba462cdf4bc5",
     ".config/hypr/custom/rules.lua": "322a34e00f2d38a280d9c8c4b5df461f7c5ada414c9da7b765e2500486417741",
-    ".config/hypr/custom/scripts/autostart.sh": "22c9107b9297f4a2793f1a7ab9659f795bb242e0697e941cd60f907ba45d05f4",
+    ".config/hypr/custom/scripts/autostart.sh": "b65ebacadd2e9818fc1fd08eb848d5000bc052eb626237c6abf67cf1d2d6ea42",
     ".config/hypr/custom/scripts/hb.sh": "e0f841a85cceed0425333d8946884b684edc76a13c35a152ef8ef41fb0206675",
     ".config/hypr/custom/scripts/session-env.sh": "5ae069e5ad330bdf0fb6c2a4c165d55c5e0e98836bff32dc578f4c25f0f28cbe",
     ".config/hypr/custom/variables.lua": "3859ea1ee32e82cdc61364c2d24248acf1d5a8063244f3dc96be9c39fb803337",
@@ -602,7 +603,7 @@
     ".config/quickshell/end4-pC/modules/ii/settingsW11/PAccessibility.qml": "a8713fddea50bc7f75127c745fcccf34044a90cd17532a8d48ee743201e682f9",
     ".config/quickshell/end4-pC/modules/ii/settingsW11/PAccounts.qml": "0f486aa0f4243ee6dbac989006bf820b71d49d96d3c988224490137255eef3d1",
     ".config/quickshell/end4-pC/modules/ii/settingsW11/PApps.qml": "030e139eb7e1500093b0b9f6da1d8daa5f2df8570bd19a4aa128979534f28f2c",
-    ".config/quickshell/end4-pC/modules/ii/settingsW11/PDevices.qml": "7788d37e7ef4ffde4138ac907d1a0ce33137bc300c905483d776cebcbcec12d4",
+    ".config/quickshell/end4-pC/modules/ii/settingsW11/PDevices.qml": "2cfbb7ba311c4faa7b484d015152592a340bc8d9097c487e6616814e05c0c77d",
     ".config/quickshell/end4-pC/modules/ii/settingsW11/PExtras.qml": "bea9e4b7dea9c85268ccc9bdcbadd4ac475115afa6869e10f214bfd880fa9285",
     ".config/quickshell/end4-pC/modules/ii/settingsW11/PGaming.qml": "efb7b5378c3dd08825674dd2ef6a4cdefbe260701b84b53e6eaf1456b3e7d807",
     ".config/quickshell/end4-pC/modules/ii/settingsW11/PHome.qml": "e59ed2708ccc6b6b2028ac0e7b789b1196e41d9024ae86c95e352dd9168b279a",
@@ -702,7 +703,7 @@
     ".config/quickshell/end4-pC/modules/ii/sidebarRight/SidebarRight.qml": "e5febdc1d697e92eaa98a509d1bf41421bd49bcab79ac8d2ae30dc4955e64bc0",
     ".config/quickshell/end4-pC/modules/ii/sidebarRight/SidebarRightContent.qml": "6afe603f9943e93ce65f96a8577c7600c49413ae22502e96b928dd6b63dc77ca",
     ".config/quickshell/end4-pC/modules/ii/sidebarRight/WallpaperEngineCard.qml": "a344801c9ad7baadfcefb214f04b920087c22c03ad2b3abdb02fd6d0503752d2",
-    ".config/quickshell/end4-pC/modules/ii/sidebarRight/bluetoothDevices/BluetoothDeviceItem.qml": "d8ddd18ea85eb44562ba6d65f37eb3441315c62fe29000bda6aeb31514d76655",
+    ".config/quickshell/end4-pC/modules/ii/sidebarRight/bluetoothDevices/BluetoothDeviceItem.qml": "4b7c972074883f7f6a6fabd75c50eaf1716194a590eba186c65078008527d673",
     ".config/quickshell/end4-pC/modules/ii/sidebarRight/bluetoothDevices/BluetoothDialog.qml": "02a5a51db05ab4cc6a31c2134ab36690664c3f93ab61fb24e6eae1c94b27b44b",
     ".config/quickshell/end4-pC/modules/ii/sidebarRight/calendar/CalendarDayButton.qml": "9ab20576647cd002a18e69629bf2fc83d865b4595aa79676d925ae79f05fa695",
     ".config/quickshell/end4-pC/modules/ii/sidebarRight/calendar/CalendarHeaderButton.qml": "33b5cf52b7cf071dc2c906b195d2cd5ebd7048191750313f4ac6dbcf1460ba96",
@@ -780,6 +781,7 @@
     ".config/quickshell/end4-pC/scripts/ai/show-installed-ollama-models.sh": "6340bf24fd2c65a4984e235a3775231112e713feb282a0a22f1abaa67adefccb",
     ".config/quickshell/end4-pC/scripts/ai/show-running-vllm-models.sh": "fb79219c04dacdc87e384ce2af05e2d4a099c49111c5fb81938c2f553cd19161",
     ".config/quickshell/end4-pC/scripts/askpass-bin/sudo": "4f49687846048908ec1387d20d467bbdbe060c60af009637877bad7a530fd39e",
+    ".config/quickshell/end4-pC/scripts/bluetooth/agent.py": "18621da2b067ccf0f1579f9fd126cfae08be20a95dcaeb6154b649996e5c5ba6",
     ".config/quickshell/end4-pC/scripts/cava/raw_output_config.txt": "f9d94f626d0b09c738f67f56d191a6b4793b06433838e2bff87b58de118dc62d",
     ".config/quickshell/end4-pC/scripts/colors/applycolor.sh": "157c0981f78b8a407fb6b9acc94e08feca7151eeae54a01e1b454f9f5161d880",
     ".config/quickshell/end4-pC/scripts/colors/code/material-code-set-color.sh": "acc6839897d678aea1c1bae8f216f8ec97f3bc5d150ab73bb7f5d54c02ecf41c",
@@ -862,7 +864,7 @@
     ".config/quickshell/end4-pC/services/AppSearch.qml": "0cc9436ba4cdd3013e300ea9a2690acc8a01d09da28969f1bf112b0552be7906",
     ".config/quickshell/end4-pC/services/Audio.qml": "d34b257a74a8fa68990ef2a49f780ec5720e8099a162a3998d9073882eacef90",
     ".config/quickshell/end4-pC/services/Battery.qml": "e6546927ecb97e105455720efbf7ce8e6f486325b7c676045434ee06499383d7",
-    ".config/quickshell/end4-pC/services/BluetoothStatus.qml": "7f51481a1f30db5293260de0376db88d26363c4075d7e97cb9822b71922c704a",
+    ".config/quickshell/end4-pC/services/BluetoothStatus.qml": "2d50ec6329c131f7a7d709792c8481d66b18d38d9525036d292d75cd83497c4c",
     ".config/quickshell/end4-pC/services/Booru.qml": "4ada0a73a20182378328a51c5766166e600d49b3fc23c68254a272d6a9e6476b",
     ".config/quickshell/end4-pC/services/BooruResponseData.qml": "7045c2353fe03fa047778e1a86b1c09550ac06453ddfb8da90c24c104410c74f",
     ".config/quickshell/end4-pC/services/Brightness.qml": "7bb36e419af361825a2e17493eae5fabfee29ae9224ebb5dc272aeab4e486b6d",
@@ -1084,8 +1086,11 @@
     ".local/share/setup-profiles/stock-config.json": "5814a18a9aa1038cd74764efc268ca12b0ba8599dd7255799d8729bc5b80a9f8"
   },
   "changed": [
-    ".config/quickshell/end4-pC/scripts/sysstats/sysstats.py",
-    ".config/quickshell/end4-pC/services/Battery.qml"
+    ".config/hypr/custom/scripts/autostart.sh",
+    ".config/quickshell/end4-pC/modules/ii/settingsW11/PDevices.qml",
+    ".config/quickshell/end4-pC/modules/ii/sidebarRight/bluetoothDevices/BluetoothDeviceItem.qml",
+    ".config/quickshell/end4-pC/scripts/bluetooth/agent.py",
+    ".config/quickshell/end4-pC/services/BluetoothStatus.qml"
   ],
   "test": false
 }

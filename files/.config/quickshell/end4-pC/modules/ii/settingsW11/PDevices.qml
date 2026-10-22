@@ -35,7 +35,7 @@ Item {
         WButton {
             buttonText: dc.connected ? "Disconnect" : "Connect"
             accent: !dc.connected
-            onClicked: dc.connected ? dc.device.disconnect() : dc.device.connect()
+            onClicked: dc.connected ? dc.device.disconnect() : BluetoothStatus.connectDevice(dc.device)
         }
         WButton {
             visible: dc.device?.paired ?? false
@@ -45,7 +45,7 @@ Item {
         WButton {
             visible: !(dc.device?.paired ?? true)
             buttonText: "Pair"
-            onClicked: { dc.device.trusted = true; dc.device.pair(); }
+            onClicked: BluetoothStatus.connectDevice(dc.device)
         }
     }
 

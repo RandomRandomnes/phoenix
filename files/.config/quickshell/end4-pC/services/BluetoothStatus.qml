@@ -49,6 +49,34 @@ Singleton {
         ...unpairedDevices
     ]
 
+    // Connect like Windows does (2026-10-22): a device that isn't paired is paired first, then connected. A plain
+    // connect() to an unpaired device gets an unauthenticated link that headphones drop after a second ("connected"
+    // for a moment, then nothing); it happened to every device after switching Bluetooth controllers.
+    property var pendingConnect: ({})          // address -> time pairing started
+    function connectDevice(device) {
+        if (!device) return;
+        if (device.paired) { device.connect(); return; }
+        device.trusted = true;
+        const p = Object.assign({}, root.pendingConnect);
+        p[device.address] = Date.now();
+        root.pendingConnect = p;
+        device.pair();
+    }
+    Timer {   // finishes what connectDevice started: connect once the pairing is done (gives up after 60 s)
+        running: Object.keys(root.pendingConnect).length > 0
+        repeat: true
+        interval: 500
+        onTriggered: {
+            const p = Object.assign({}, root.pendingConnect);
+            for (const addr of Object.keys(p)) {
+                const d = Bluetooth.devices.values.find(x => x.address === addr);
+                if (!d || Date.now() - p[addr] > 60000) { delete p[addr]; continue; }
+                if (d.paired && !d.pairing) { delete p[addr]; if (!root.isConnected(d)) d.connect(); }
+            }
+            root.pendingConnect = p;
+        }
+    }
+
     function hasBattery(device): bool {
         return !!device && device.batteryAvailable && Number.isFinite(Number(device.battery));
     }

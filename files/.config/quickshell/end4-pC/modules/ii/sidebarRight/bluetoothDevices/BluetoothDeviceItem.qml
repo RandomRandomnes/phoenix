@@ -97,7 +97,7 @@ DialogListItem {
                     if (device.paired) {
                         device.forget();
                     } else {
-                        device.pair();
+                        BluetoothStatus.connectDevice(device);   // trusted, paired, then connected
                     }
                 }
             }
@@ -112,7 +112,7 @@ DialogListItem {
                     if (BluetoothStatus.isConnected(device)) {
                         device.disconnect();
                     } else {
-                        device.connect();
+                        BluetoothStatus.connectDevice(device);   // pairs first when needed
                     }
                 }
             }

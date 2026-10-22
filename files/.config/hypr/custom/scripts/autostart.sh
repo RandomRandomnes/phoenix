@@ -45,6 +45,12 @@ if python3 -c "import Xlib" 2>/dev/null && ! pgrep -f "[x]minimize.py" >/dev/nul
   python3 "$HOME/.config/quickshell/end4-pC/scripts/hyprland/xminimize.py" >/dev/null 2>&1 &
 fi
 
+# Bluetooth pairing agent (2026-10-22): without one, every new pairing fails ("Authentication Failed"; Blueman's agent
+# went with Blueman on 2026-10-15). KDE has its own (bluedevil); this runs only in the Hyprland session.
+if ! pgrep -f "[b]luetooth/agent.py" >/dev/null; then
+  python3 "$HOME/.config/quickshell/end4-pC/scripts/bluetooth/agent.py" >/dev/null 2>&1 &
+fi
+
 i=0
 while [ $i -lt 60 ]; do
   hyprctl layers | grep -q "quickshell:background" && break

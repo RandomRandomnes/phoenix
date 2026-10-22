@@ -1,5 +1,9 @@
 # Changelog
 
+## custom 2.474 (2026-10-22, fix)
+- Bluetooth pairing works again on Hyprland: a pairing helper starts with the session (new pairings failed with "Authentication Failed" since Blueman was removed)
+- Connect on a device that isn't paired now pairs it first, then connects (it used to connect for a second and drop)
+
 ## custom 2.464 (2026-10-22, minor)
 - Developer test hooks: the battery and system stats can read pretend hardware on a development PC (does nothing on normal installs); a pretend battery never suspends the PC
 
