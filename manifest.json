@@ -59,15 +59,15 @@
   "format": "custom-fixes",
   "line": "custom",
   "version": 2.99,
-  "label": "2.463",
-  "kind": "fix",
-  "date": "2026-10-17",
+  "label": "2.464",
+  "kind": "minor",
+  "date": "2026-10-22",
   "publisher": "RandomRandomnes",
   "notes": [
-    "Task Manager \u203a Performance shows every disk with a mounted drive (Disk 0, Disk 1\u2026): model, type, temperature, read/write speed, busy, and space per drive with a fill bar"
+    "Developer test hooks: the battery and system stats can read pretend hardware on a development PC (does nothing on normal installs); a pretend battery never suspends the PC"
   ],
   "payload": "fixes.tar.gz",
-  "payloadSha256": "8b89d507028eb08facf7931288c2c132b4a0fdc93ea8b68d4da42d70a650cf8a",
+  "payloadSha256": "157f4e176a11c51acccbf612be45c939eefc883ae1134de4e469b2d9928b33f0",
   "files": {
     ".config/hypr/custom/env.lua": "b97ee35362ed653cec2880f9adfdf81698e2f55577aef1dffcb321e4d713794f",
     ".config/hypr/custom/execs.lua": "64197ff280790bc529a0dd1938985c42783a1b17f59ec709ff515f8fa0f5d6b2",
@@ -843,7 +843,7 @@
     ".config/quickshell/end4-pC/scripts/search/files.py": "881e3969ac1c09ae74ff3782ff1903eb3bcc6103a0d152974757939307480dde",
     ".config/quickshell/end4-pC/scripts/settings/index.py": "bf301c7fb21704f1d169a98e38e085518d391b8f2a56895a42c9f9fcf17a0563",
     ".config/quickshell/end4-pC/scripts/startup/startup-items.py": "1d4b6759de0080a8466eeebe2bfe6b1b0c7666396ee74d8c82353f5a68596efb",
-    ".config/quickshell/end4-pC/scripts/sysstats/sysstats.py": "7d10761a1068d9652ef57b35c54115e341379606993970659d0f4c5df7ba46c0",
+    ".config/quickshell/end4-pC/scripts/sysstats/sysstats.py": "7dd004bfd4a4f2b5aa334cefbefd5bef76e6936594f70d38a3ff1ca0e8c5096f",
     ".config/quickshell/end4-pC/scripts/system-appearance.sh": "377e2415c38db1cf54634a35c7ae4e3f108d673c3cd4ac882421d175bd954de0",
     ".config/quickshell/end4-pC/scripts/taskmanager/procs.py": "6a5f1badb35a9492b0c4003f810a09a9a484fe363701bd2cd969fee02ba7b245",
     ".config/quickshell/end4-pC/scripts/theming/set-cursor-theme.sh": "7c5d850b32680a257bc7ff406b29ad61508d43dc40279f3e1ca43ab5973b9c68",
@@ -861,7 +861,7 @@
     ".config/quickshell/end4-pC/services/Ai.qml": "49b05dc4ae48304a57814f1efa0b450775b5b12393899baa70d5c20f792fde5d",
     ".config/quickshell/end4-pC/services/AppSearch.qml": "0cc9436ba4cdd3013e300ea9a2690acc8a01d09da28969f1bf112b0552be7906",
     ".config/quickshell/end4-pC/services/Audio.qml": "d34b257a74a8fa68990ef2a49f780ec5720e8099a162a3998d9073882eacef90",
-    ".config/quickshell/end4-pC/services/Battery.qml": "c7856ed62f9e1afb7793c3263c05802fffdbd2ebc4648caaeb5ab8fa4b94f37b",
+    ".config/quickshell/end4-pC/services/Battery.qml": "e6546927ecb97e105455720efbf7ce8e6f486325b7c676045434ee06499383d7",
     ".config/quickshell/end4-pC/services/BluetoothStatus.qml": "7f51481a1f30db5293260de0376db88d26363c4075d7e97cb9822b71922c704a",
     ".config/quickshell/end4-pC/services/Booru.qml": "4ada0a73a20182378328a51c5766166e600d49b3fc23c68254a272d6a9e6476b",
     ".config/quickshell/end4-pC/services/BooruResponseData.qml": "7045c2353fe03fa047778e1a86b1c09550ac06453ddfb8da90c24c104410c74f",
@@ -1084,8 +1084,8 @@
     ".local/share/setup-profiles/stock-config.json": "5814a18a9aa1038cd74764efc268ca12b0ba8599dd7255799d8729bc5b80a9f8"
   },
   "changed": [
-    ".config/quickshell/end4-pC/modules/ii/taskManager/TaskManagerContent.qml",
-    ".config/quickshell/end4-pC/scripts/taskmanager/procs.py"
+    ".config/quickshell/end4-pC/scripts/sysstats/sysstats.py",
+    ".config/quickshell/end4-pC/services/Battery.qml"
   ],
   "test": false
 }

@@ -1,5 +1,8 @@
 # Changelog
 
+## custom 2.464 (2026-10-22, minor)
+- Developer test hooks: the battery and system stats can read pretend hardware on a development PC (does nothing on normal installs); a pretend battery never suspends the PC
+
 ## custom 2.463 (2026-10-17, fix)
 - Task Manager › Performance shows every disk with a mounted drive (Disk 0, Disk 1…): model, type, temperature, read/write speed, busy, and space per drive with a fill bar
 

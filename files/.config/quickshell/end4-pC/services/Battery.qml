@@ -9,11 +9,22 @@ import Quickshell.Io
 
 Singleton {
     id: root
-    property bool available: UPower.displayDevice.isLaptopBattery
+    // Phoenix Dev's fake hardware (DEV copy only; the file never exists on a normal install): a pretend laptop battery
+    // for testing the battery widgets on a desktop PC (2026-10-22)
+    property var fakeBattery: null
+    FileView {
+        path: `${Directories.home.replace("file://", "")}/.local/state/phoenix-dev/fake-hw.json`
+        watchChanges: true
+        printErrors: false
+        onFileChanged: reload()
+        onLoaded: { try { root.fakeBattery = JSON.parse(text()).battery ?? null } catch (e) { root.fakeBattery = null } }
+        onLoadFailed: root.fakeBattery = null
+    }
+    property bool available: fakeBattery ? (fakeBattery.present ?? true) : UPower.displayDevice.isLaptopBattery
     property var chargeState: UPower.displayDevice.state
-    property bool isCharging: chargeState == UPowerDeviceState.Charging
-    property bool isPluggedIn: isCharging || chargeState == UPowerDeviceState.PendingCharge
-    property real percentage: UPower.displayDevice?.percentage ?? 1
+    property bool isCharging: fakeBattery ? !!fakeBattery.charging : chargeState == UPowerDeviceState.Charging
+    property bool isPluggedIn: fakeBattery ? !!(fakeBattery.charging || fakeBattery.pluggedIn) : (isCharging || chargeState == UPowerDeviceState.PendingCharge)
+    property real percentage: fakeBattery ? (fakeBattery.percent ?? 50) / 100 : (UPower.displayDevice?.percentage ?? 1)
     readonly property bool allowAutomaticSuspend: Config.options.battery.automaticSuspend
     readonly property bool soundEnabled: Config.options.sounds.battery
 
@@ -24,14 +35,14 @@ Singleton {
 
     property bool isLowAndNotCharging: isLow && !isCharging
     property bool isCriticalAndNotCharging: isCritical && !isCharging
-    property bool isSuspendingAndNotCharging: allowAutomaticSuspend && isSuspending && !isCharging
+    property bool isSuspendingAndNotCharging: allowAutomaticSuspend && isSuspending && !isCharging && !fakeBattery   // a pretend battery never suspends the PC
     property bool isFullAndCharging: isFull && isCharging
 
     property real energyRate: UPower.displayDevice.changeRate
     property real timeToEmpty: UPower.displayDevice.timeToEmpty
     property real timeToFull: UPower.displayDevice.timeToFull
 
-    property real health: (function() {
+    property real health: fakeBattery?.health ?? (function() {
         const devList = UPower.devices.values;
         for (let i = 0; i < devList.length; ++i) {
             const dev = devList[i];

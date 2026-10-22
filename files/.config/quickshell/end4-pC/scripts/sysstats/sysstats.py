@@ -82,6 +82,7 @@ if not k10:
         if cpu_zone:
             break
 rapl = "/sys/class/powercap/intel-rapl:0"
+FAKE_HW = os.path.join(os.path.expanduser("~"), ".local/state/phoenix-dev/fake-hw.json")
 rapl_max = read_int(os.path.join(rapl, "max_energy_range_uj"), 0)
 
 # GPU: AMD, NVIDIA or Intel (scripts/gpu/gpustats.py, shared with the classic widget)
@@ -254,4 +255,15 @@ while True:
             "powerMeasured": measured, "powerOther": OTHER_SYSTEM_W, "powerEstimate": measured + OTHER_SYSTEM_W,
         },
     }
+    # Phoenix Dev's fake hardware (DEV copy only; the file never exists on a normal install): test the GPU/CPU widgets
+    # with hardware this PC doesn't have (2026-10-22)
+    if os.path.exists(FAKE_HW):
+        try:
+            with open(FAKE_HW) as f:
+                fake = json.load(f)
+            for key in ("cpu", "gpu"):
+                if isinstance(fake.get(key), dict):
+                    sample[key] = {**(sample.get(key) or {}), **fake[key]}
+        except (OSError, ValueError):
+            pass
     print(json.dumps(sample, separators=(",", ":")), flush=True)
