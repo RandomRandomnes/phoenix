@@ -6,7 +6,7 @@ import Quickshell
 Scope {
     id: root
 
-    enum ActionEnum { Unlock, Poweroff, Reboot, SwitchUser }
+    enum ActionEnum { Unlock, Poweroff, Reboot, SwitchUser, SwitchDesktop }   // same values as the desktop's LockContext
 
     signal shouldReFocus()
     signal unlocked(targetAction: var)

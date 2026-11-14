@@ -1,5 +1,8 @@
 # Changelog
 
+## custom 2.504 (2026-11-13, fix)
+- Lock screens: 'Switch to KDE Plasma' on Phoenix's lock screen and Phoenix's look + 'Switch to Phoenix' on KDE's lock screen (phoenix kde-lock install). Both ask for the password first; the login screen asks again after a switch, on purpose.
+
 ## custom 2.494 (2026-10-22, fix)
 - The Super menu no longer jumps when apps are added or removed
 - Settings and Task Manager are in the Super menu; developer tools and KDE apps Phoenix replaces are hidden from it (Settings › Super menu apps)

@@ -70,6 +70,12 @@ Scope {
                 // Phoenix (2026-10-15): sign out; greetd then shows the login screen, where another account signs in
                 Session.logout();
                 return;
+            } else if (targetAction == LockContext.ActionEnum.SwitchDesktop) {
+                // Phoenix (2026-11-13): remember KDE Plasma for the next sign-in, then sign out like "Switch user". The lock
+                // stays up until Hyprland exits; the login screen asks for the password again (a hand-over without it
+                // could be faked by any program running as this user, which would get past the lock).
+                switchDesktopProc.running = true;
+                return;
             }
 
             // Unlock the keyring if configured to do so
@@ -120,6 +126,14 @@ Scope {
         }
     }
     Process { id: btLock }
+
+    // the lock screen's "Switch to KDE Plasma" (2026-11-13): switch-desktop only writes the choice here; signing out is
+    // the same as "Switch user" (apps close first). If writing fails, sign out anyway: the login screen has the chip too.
+    Process {
+        id: switchDesktopProc
+        command: [`${Quickshell.env("HOME")}/.local/bin/switch-desktop`, "--prepare", "plasma"]
+        onExited: Session.logout()
+    }
 
     // ---- Phoenix lock-screen sign-in (2026-10-15) -------------------------------------------------------------------
     // phoenix-session starts the desktop without a password (greetd autologin) and sets PHOENIX_LOCK_FIRST=1. Then the

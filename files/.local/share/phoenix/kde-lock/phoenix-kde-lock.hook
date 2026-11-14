@@ -1,0 +1,11 @@
+# Phoenix (phoenix kde-lock): KDE updates put back the stock lock screen files; put Phoenix's look on them again.
+[Trigger]
+Operation = Install
+Operation = Upgrade
+Type = Path
+Target = usr/share/plasma/shells/org.kde.plasma.desktop/contents/lockscreen/LockScreenUi.qml
+
+[Action]
+Description = Putting Phoenix's look on KDE's lock screen...
+When = PostTransaction
+Exec = /usr/share/phoenix-kde-lock/apply

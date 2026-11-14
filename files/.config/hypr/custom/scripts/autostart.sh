@@ -26,6 +26,8 @@ if command -v systemd-detect-virt >/dev/null && systemd-detect-virt -q --vm; the
 fi
 # The login screen (phoenix login-screen install) shows this desktop's wallpaper and colors: refresh its copy
 [ -x "$HOME/.local/bin/phoenix-greeter-theme" ] && "$HOME/.local/bin/phoenix-greeter-theme" >> "$log" 2>&1 &
+# the same look for KDE Plasma's lock screen (phoenix kde-lock), after the login screen's copy above (2026-11-13)
+[ -x "$HOME/.local/bin/phoenix-kde-lock-theme" ] && (sleep 3; "$HOME/.local/bin/phoenix-kde-lock-theme") >> "$log" 2>&1 &
 # Custom-feature switches (Settings › Extras, written by ~/.local/bin/setup-features). Missing = on.
 feature() { ! grep -q "^ *$1 = false" "$HOME/.config/hypr/custom/features.lua" 2>/dev/null; }
 # Wallpaper Engine is off unless switched on in Settings › Extras (missing = off)

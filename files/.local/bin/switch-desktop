@@ -2,8 +2,12 @@
 # Switch between Hyprland and KDE Plasma.
 # Writes the next session to ~/.config/desktop-session, then logs out.
 # tty1 autologin + ~/.bash_profile then starts the chosen session.
+# --prepare TARGET (2026-11-13): only remember the choice, don't log out (the lock screen's "Switch to KDE Plasma" chip
+# then signs out itself, closing apps the way the lock screen's "Switch user" does).
 
 state=~/.config/desktop-session
+prepare=0
+[ "$1" = "--prepare" ] && { prepare=1; shift; }
 
 if [ -n "$1" ]; then
     target="$1"
@@ -15,12 +19,13 @@ fi
 
 case "$target" in
     plasma|hyprland) ;;
-    *) echo "usage: switch-desktop [plasma|hyprland]" >&2; exit 1 ;;
+    *) echo "usage: switch-desktop [--prepare] [plasma|hyprland]" >&2; exit 1 ;;
 esac
 
 echo "$target" > "$state"
 # the login screen (phoenix login-screen) would otherwise preselect the last session it started (QA 2026-10-08)
 [ -d /var/lib/phoenix-greeter/theme ] && [ -w /var/lib/phoenix-greeter/theme ] && echo "$target" > /var/lib/phoenix-greeter/theme/next-session
+[ $prepare -eq 1 ] && exit 0
 
 if [ "$XDG_CURRENT_DESKTOP" = "KDE" ]; then
     qdbus6 org.kde.Shutdown /Shutdown logout

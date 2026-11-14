@@ -9,7 +9,7 @@ import Quickshell.Services.Pam
 Scope {
     id: root
 
-    enum ActionEnum { Unlock, Poweroff, Reboot, SwitchUser }   // SwitchUser: Phoenix 2026-10-15 (sign out to the login screen)
+    enum ActionEnum { Unlock, Poweroff, Reboot, SwitchUser, SwitchDesktop }   // SwitchUser: Phoenix 2026-10-15 (sign out to the login screen); SwitchDesktop: 2026-11-13 (the same, with KDE Plasma picked)
 
     signal shouldReFocus()
     signal unlocked(targetAction: var)

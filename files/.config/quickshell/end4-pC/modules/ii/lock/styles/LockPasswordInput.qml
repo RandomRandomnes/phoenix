@@ -81,6 +81,7 @@ Item {
             : root.context.targetAction === LockContext.ActionEnum.Poweroff ? Translation.tr("Password to shut down")
             : root.context.targetAction === LockContext.ActionEnum.Reboot ? Translation.tr("Password to restart")
             : root.context.targetAction === LockContext.ActionEnum.SwitchUser ? Translation.tr("Password to switch user")
+            : root.context.targetAction === LockContext.ActionEnum.SwitchDesktop ? Translation.tr("Password to switch to KDE Plasma")
             : root.placeholder
     }
 

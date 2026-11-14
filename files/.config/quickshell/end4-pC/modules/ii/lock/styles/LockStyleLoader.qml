@@ -84,50 +84,63 @@ Item {
         command: ["grep", "-q", "phoenix-greeter", "/etc/greetd/config.toml"]
         onExited: code => root.loginScreenOn = code === 0
     }
-    Timer { id: disarm; interval: 5000; onTriggered: root.switchArmed = false }
+    Timer { id: disarm; interval: 5000; onTriggered: { root.switchArmed = false; root.desktopArmed = false; } }
 
-    RippleButton {
-        id: switchUser
-        visible: root.loginScreenOn && root.previewStyle === ""
+    // Phoenix (2026-11-13): "Switch to KDE Plasma", left of "Switch user", in the login screen's desktop-chip look. Same
+    // rules as Switch user (password first when "Require a password to shut down" is on, else a second click); then
+    // KDE Plasma is remembered for the next sign-in and this desktop signs out (LockScreen.qml). Only where Plasma is
+    // installed; this lock screen only runs under Hyprland, so the other desktop is always KDE Plasma.
+    property bool plasmaInstalled: false
+    property bool desktopArmed: false
+    readonly property bool desktopPending: root.context.targetAction === LockContext.ActionEnum.SwitchDesktop
+    Process {
+        running: root.previewStyle === ""
+        command: ["test", "-x", "/usr/bin/startplasma-wayland"]
+        onExited: code => root.plasmaInstalled = code === 0
+    }
+
+    // password first, or two clicks within 5 s; a second click on a waiting chip cancels
+    function chipClicked(action, armedProp) {
+        if (Config.options.lock.security.requirePasswordToPower) {
+            if (root.context.targetAction === action) root.context.resetTargetAction();
+            else { root.context.targetAction = action; root.context.shouldReFocus(); }
+        } else if (root[armedProp]) {
+            root[armedProp] = false;
+            root.context.unlocked(action);
+        } else {
+            root.switchArmed = false;
+            root.desktopArmed = false;
+            root[armedProp] = true;
+            disarm.restart();
+            root.context.shouldReFocus();
+        }
+    }
+
+    Row {
         anchors { top: parent.top; right: parent.right; margins: 24 }
         z: 10
-        implicitHeight: 44
-        implicitWidth: switchRow.implicitWidth + 36
-        buttonRadius: height / 2
-        colBackground: root.switchArmed || root.switchPending ? Appearance.colors.colErrorContainer
-            : ColorUtils.transparentize(Appearance.colors.colLayer0, 0.3)
-        colBackgroundHover: root.switchArmed || root.switchPending ? Appearance.colors.colErrorContainerHover : Appearance.colors.colLayer1Hover
-        onClicked: {
-            if (Config.options.lock.security.requirePasswordToPower) {
-                if (root.switchPending) root.context.resetTargetAction();
-                else { root.context.targetAction = LockContext.ActionEnum.SwitchUser; root.context.shouldReFocus(); }
-            } else if (root.switchArmed) {
-                root.switchArmed = false;
-                root.context.unlocked(LockContext.ActionEnum.SwitchUser);
-            } else {
-                root.switchArmed = true;
-                disarm.restart();
-                root.context.shouldReFocus();
-            }
+        spacing: 8
+        visible: root.previewStyle === ""
+
+        LockChip {
+            id: switchDesktop
+            visible: root.plasmaInstalled
+            symbol: "desktop_windows"
+            warn: root.desktopArmed || root.desktopPending
+            label: root.desktopArmed ? Translation.tr("Click again to switch (apps close)")
+                : root.desktopPending ? Translation.tr("Type your password to switch")
+                : Translation.tr("Switch to KDE Plasma")
+            onClicked: root.chipClicked(LockContext.ActionEnum.SwitchDesktop, "desktopArmed")
         }
-        contentItem: Item {
-            RowLayout {
-                id: switchRow
-                anchors.centerIn: parent
-                spacing: 8
-                MaterialSymbol {
-                    text: "switch_account"
-                    iconSize: 20
-                    color: root.switchArmed || root.switchPending ? Appearance.colors.colOnErrorContainer : Appearance.colors.colOnLayer0
-                }
-                StyledText {
-                    text: root.switchArmed ? Translation.tr("Click again to sign out (apps close)")
-                        : root.switchPending ? Translation.tr("Type your password to switch user")
-                        : Translation.tr("Switch user")
-                    font.pixelSize: Appearance.font.pixelSize.small
-                    color: root.switchArmed || root.switchPending ? Appearance.colors.colOnErrorContainer : Appearance.colors.colOnLayer0
-                }
-            }
+        LockChip {
+            id: switchUser
+            visible: root.loginScreenOn
+            symbol: "switch_account"
+            warn: root.switchArmed || root.switchPending
+            label: root.switchArmed ? Translation.tr("Click again to sign out (apps close)")
+                : root.switchPending ? Translation.tr("Type your password to switch user")
+                : Translation.tr("Switch user")
+            onClicked: root.chipClicked(LockContext.ActionEnum.SwitchUser, "switchArmed")
         }
     }
 }

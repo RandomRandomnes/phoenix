@@ -1,0 +1,70 @@
+#!/usr/bin/env python3
+"""Phoenix's colors, fonts, clock and wallpaper for KDE Plasma's lock screen (2026-11-13, ours).
+
+Writes ~/.local/state/phoenix/kde-lock-theme.qml (personal, never shipped), which PhoenixLock.qml (the Phoenix look over KDE's lock screen,
+`phoenix kde-lock install`) loads. KDE's lock screen can't read JSON files, so the values are written as a QML object.
+Run at each Phoenix sign-in by custom/scripts/autostart.sh, after phoenix-greeter-theme. Does nothing harmful when
+Phoenix's files are missing: the lock screen then falls back to KDE's colors.
+Wallpaper: the login screen's copy (/var/lib/phoenix-greeter/theme/wallpaper, already a still picture) so both screens
+match; else Phoenix's wallpaper when it is a picture; else none (KDE's own lock wallpaper stays).
+"""
+import json
+import mimetypes
+import os
+
+HOME = os.path.expanduser("~")
+OUT = os.path.join(HOME, ".local/state/phoenix/kde-lock-theme.qml")
+COLORS = os.path.join(HOME, ".local/state/quickshell/user/generated/colors.json")
+CONFIG = os.path.join(HOME, ".config/illogical-impulse/config.json")
+LOGIN_WALL = "/var/lib/phoenix-greeter/theme/wallpaper"
+
+
+def load(path):
+    try:
+        with open(path) as f:
+            return json.load(f)
+    except (OSError, ValueError):
+        return {}
+
+
+def main():
+    colors = {k: v for k, v in load(COLORS).items() if isinstance(v, str) and v.startswith("#") and len(v) in (7, 9)}
+    cfg = load(CONFIG)
+    fonts = (cfg.get("appearance") or {}).get("fonts") or {}
+    clock = (cfg.get("time") or {}).get("format") or "hh:mm"
+    locked = ((cfg.get("lock") or {}).get("showLockedText")) is not False
+    wall = ""
+    if os.access(LOGIN_WALL, os.R_OK):
+        wall = LOGIN_WALL
+    else:
+        p = (cfg.get("background") or {}).get("wallpaperPath") or ""
+        if p and os.path.isfile(p) and (mimetypes.guess_type(p)[0] or "").startswith("image/"):
+            wall = p
+    q = json.dumps   # JSON strings are valid QML/JS string literals
+    text = (
+        "// Written by phoenix-kde-lock-theme at Phoenix sign-in; read by KDE's lock screen (PhoenixLock.qml).\n"
+        "import QtQuick\n"
+        "QtObject {\n"
+        f"    readonly property var colors: ({json.dumps(colors, sort_keys=True)})\n"
+        f"    readonly property string fontMain: {q(str(fonts.get('main') or 'Google Sans Flex'))}\n"
+        f"    readonly property string fontExpressive: {q(str(fonts.get('expressive') or fonts.get('main') or 'Google Sans Flex'))}\n"
+        f"    readonly property string clockFormat: {q(str(clock))}\n"
+        f"    readonly property bool showLockedText: {'true' if locked else 'false'}\n"
+        f"    readonly property string wallpaper: {q('file://' + wall if wall else '')}\n"
+        "}\n"
+    )
+    os.makedirs(os.path.dirname(OUT), exist_ok=True)
+    try:
+        with open(OUT) as f:
+            if f.read() == text:
+                return
+    except OSError:
+        pass
+    tmp = OUT + ".tmp"
+    with open(tmp, "w") as f:
+        f.write(text)
+    os.replace(tmp, OUT)
+
+
+if __name__ == "__main__":
+    main()

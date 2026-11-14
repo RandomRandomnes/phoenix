@@ -1,0 +1,35 @@
+#!/bin/bash
+# Puts Phoenix's look on KDE Plasma's lock screen (2026-11-13, ours). Installed root-owned in /usr/share/phoenix-kde-lock
+# by `phoenix kde-lock install`; run by it and by the pacman hook phoenix-kde-lock.hook after every update of KDE's
+# lock screen files (an update puts back KDE's stock files). `apply --remove` takes it off again.
+# Safe by design: the patch only adds a Loader for PhoenixLock.qml and one line before KDE unlocks; KDE's authenticator
+# still checks every password. If a KDE update changed the file so the patch no longer fits, nothing is changed and
+# KDE's own lock screen stays (fail-safe), until Phoenix ships a patch that fits.
+D=${PHOENIX_KDE_LOCK_TARGET:-/usr/share/plasma/shells/org.kde.plasma.desktop/contents/lockscreen}   # TARGET/SRC: only for tests
+S=${PHOENIX_KDE_LOCK_SRC:-/usr/share/phoenix-kde-lock}
+MARK="phoenix kde-lock"
+[ -f "$D/LockScreenUi.qml" ] || { echo "Phoenix: KDE's lock screen isn't installed; nothing to do"; exit 0; }
+unpatch() {   # take off the patch that was applied last time (kept as applied.patch)
+    grep -q "$MARK" "$D/LockScreenUi.qml" || return 0
+    if [ -f "$S/applied.patch" ] && patch -s -R -p1 -d "$D" --dry-run --no-backup-if-mismatch -r - < "$S/applied.patch" >/dev/null 2>&1; then
+        patch -s -R -p1 -d "$D" --no-backup-if-mismatch -r - < "$S/applied.patch" >/dev/null 2>&1
+    else
+        echo "Phoenix: couldn't take the old patch off KDE's lock screen; reinstall plasma-desktop to get KDE's file back"
+        return 1
+    fi
+}
+if [ "${1:-}" = "--remove" ]; then
+    unpatch; rm -f "$D/PhoenixLock.qml" "$S/applied.patch"
+    exit 0
+fi
+unpatch || exit 0
+if patch -s -N -p1 -d "$D" --dry-run --no-backup-if-mismatch -r - < "$S/LockScreenUi.patch" >/dev/null 2>&1; then
+    install -m 644 "$S/PhoenixLock.qml" "$D/PhoenixLock.qml"
+    patch -s -N -p1 -d "$D" --no-backup-if-mismatch -r - < "$S/LockScreenUi.patch" >/dev/null
+    cp "$S/LockScreenUi.patch" "$S/applied.patch"
+    echo "Phoenix: KDE's lock screen has Phoenix's look"
+else
+    rm -f "$D/PhoenixLock.qml" "$S/applied.patch"
+    echo "Phoenix: this KDE version's lock screen doesn't fit Phoenix's patch; KDE's own lock screen stays (update Phoenix later)"
+fi
+exit 0

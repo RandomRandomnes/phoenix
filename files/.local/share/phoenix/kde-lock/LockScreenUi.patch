@@ -1,0 +1,25 @@
+--- a/LockScreenUi.qml
++++ b/LockScreenUi.qml
+@@ -50,6 +50,14 @@
+ 
+     property string pendingPassword
+ 
++    Loader { // Phoenix's look over KDE's lock screen (phoenix kde-lock), outside KDE's fade-in; KDE's UI stays underneath if it fails
++        id: phoenixLock
++        z: 1000
++        anchors.fill: parent
++        source: "PhoenixLock.qml"
++        onLoaded: { item.ui = lockScreenUi; item.rootArea = lockScreenRoot; item.sessions = sessionManagement }
++    }
++
+     Kirigami.Theme.inherit: false
+     Kirigami.Theme.colorSet: Kirigami.Theme.Complementary
+ 
+@@ -70,6 +78,7 @@
+         function onSucceeded() {
+             // This is important. It stops the all pending authentication processes, preventing timeouts etc.
+             authenticator.stopAuthenticating()
++            if (phoenixLock.item && phoenixLock.item.succeeded()) return; // Phoenix: switch / restart / shut down (phoenix kde-lock)
+ 
+             if (!lockScreenUi.expectingPrompt) {
+                 Qt.quit()
