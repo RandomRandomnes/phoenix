@@ -24,13 +24,14 @@ Singleton {
     function anyRunning() { return Object.values(root.jobs).some(j => j.running) }
 
     // start a job (ignored while one with the same id runs). opts: { title, notify (default true), doneText, failText,
-    // askpassMessage }
+    // askpassMessage, doneTitle, icon }. doneTitle (2026-11-13): a short done notification with just that line (and icon)
+    // instead of "<title>: done" + doneText; when the job sent messages (@@msg) the usual notification shows them.
     function run(id, command, opts) {
         if (root.isRunning(id)) return false;
         const o = opts ?? {};
         const j = { id: id, title: o.title ?? id, running: true, step: "", log: [], msgs: [], exitCode: -1, ok: false,
                     relogin: false, reboot: false, flags: [], notify: o.notify !== false,
-                    doneText: o.doneText ?? "", failText: o.failText ?? "" };
+                    doneText: o.doneText ?? "", failText: o.failText ?? "", doneTitle: o.doneTitle ?? "", icon: o.icon ?? "" };
         root.set(id, j);
         // SUDO_ASKPASS + a `sudo` that always uses it (scripts/askpass-bin/sudo, first on PATH)
         const env = { "SUDO_ASKPASS": `${Quickshell.env("HOME")}/.local/bin/phoenix-askpass`,
@@ -91,7 +92,9 @@ Singleton {
             onExited: (code, status) => {
                 let done = null;
                 root.update(proc.jobId, j => { j.running = false; j.exitCode = code; j.ok = code === 0; done = j; });
-                if (done && done.notify && !done.flags.includes("needmode")) {
+                if (done && done.notify && !done.flags.includes("needmode") && done.ok && done.doneTitle && done.msgs.length === 0) {
+                    Quickshell.execDetached(["notify-send", "-a", "Phoenix", ...(done.icon ? ["-i", done.icon] : []), done.doneTitle]);
+                } else if (done && done.notify && !done.flags.includes("needmode")) {
                     const body = done.msgs.length > 0 ? done.msgs.join("\n") : (done.ok ? done.doneText : done.failText);
                     Quickshell.execDetached(["notify-send", "-a", "Phoenix", ...(done.ok ? [] : ["-u", "critical"]),
                         done.ok ? `${done.title}: done` : `${done.title}: needs attention`, body || (done.ok ? "Finished" : "Details in Settings")]);

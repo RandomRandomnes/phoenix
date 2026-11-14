@@ -59,15 +59,15 @@
   "format": "custom-fixes",
   "line": "custom",
   "version": 2.99,
-  "label": "2.504",
+  "label": "2.514",
   "kind": "fix",
   "date": "2026-11-13",
   "publisher": "RandomRandomnes",
   "notes": [
-    "Lock screens: 'Switch to KDE Plasma' on Phoenix's lock screen and Phoenix's look + 'Switch to Phoenix' on KDE's lock screen (phoenix kde-lock install). Both ask for the password first; the login screen asks again after a switch, on purpose."
+    "Super menu: Uninstall works again (the second click only re-armed it). A short 'App uninstalled' notification with the app's icon when it's done; Steam games say Steam asks to confirm."
   ],
   "payload": "fixes.tar.gz",
-  "payloadSha256": "290873f27bc1bf5385f7435477426f5ad98248416cabcec8c41199291a73f22d",
+  "payloadSha256": "1596e2ce096bc8f426f1ecfd98647fd40e5e55f8989b0899c543e6255a1c7021",
   "files": {
     ".config/hypr/custom/env.lua": "b97ee35362ed653cec2880f9adfdf81698e2f55577aef1dffcb321e4d713794f",
     ".config/hypr/custom/execs.lua": "64197ff280790bc529a0dd1938985c42783a1b17f59ec709ff515f8fa0f5d6b2",
@@ -573,7 +573,7 @@
     ".config/quickshell/end4-pC/modules/ii/overlay/recorder/Recorder.qml": "b17c68a27c84f7dfa727dd48a5a3d85ed9c0345cd1404520a87b0dd2b5498fed",
     ".config/quickshell/end4-pC/modules/ii/overlay/resources/Resources.qml": "b867d66387b34662fdf3a13451e7ca751887e0dfa200f23daeae39bb649b9dc0",
     ".config/quickshell/end4-pC/modules/ii/overlay/volumeMixer/VolumeMixer.qml": "509d95eb316b64902399416552f4d364ced55b537303c80739f288bf74745fb5",
-    ".config/quickshell/end4-pC/modules/ii/overview/AppGridWidget.qml": "807a41bb98210cfacc02ef76c7737785f427626b2c2506e59042c9895437bb32",
+    ".config/quickshell/end4-pC/modules/ii/overview/AppGridWidget.qml": "ac5f991c6083469c6cd49d5704872c67b1e445d732e353bd6b735e6a49da1d5c",
     ".config/quickshell/end4-pC/modules/ii/overview/ClipboardPopover.qml": "59dccbbcbcd9034ca31868dd029c74243ee09d8b4dabda761cb3c0c497dfad3b",
     ".config/quickshell/end4-pC/modules/ii/overview/NiriOverview.qml": "3be38247cdf22c6ea1cc55e97d19ddc5e90ab4d586ff36fdfe545e70353ec29b",
     ".config/quickshell/end4-pC/modules/ii/overview/Overview.qml": "a0516a7e5f424b2e94e04afc3ad918d1d4b1dfbd0d79e167cc54aad79440f60b",
@@ -861,7 +861,7 @@
     ".config/quickshell/end4-pC/scripts/wallpapers/stream-wallpapers.py": "bd88e6e39d7a95a751814fb68cff8ad7c3c88368d8ae38fef7158c4528c1b956",
     ".config/quickshell/end4-pC/scripts/wallpapers/we-watch.py": "91aa37d72c3f400c98c56afc2b08e7751d658d9f5083d3cc0d666a3507a81c9e",
     ".config/quickshell/end4-pC/services/Ai.qml": "49b05dc4ae48304a57814f1efa0b450775b5b12393899baa70d5c20f792fde5d",
-    ".config/quickshell/end4-pC/services/AppSearch.qml": "6e254fe511e9d21220a6aa6dbef711e7cd296318135521ea6edd80e01a5a4359",
+    ".config/quickshell/end4-pC/services/AppSearch.qml": "72aacaaf4749fc9942fc5dc2c9c350c5a521c876cd4abca09fde2d4a46d48943",
     ".config/quickshell/end4-pC/services/Audio.qml": "d34b257a74a8fa68990ef2a49f780ec5720e8099a162a3998d9073882eacef90",
     ".config/quickshell/end4-pC/services/Battery.qml": "e6546927ecb97e105455720efbf7ce8e6f486325b7c676045434ee06499383d7",
     ".config/quickshell/end4-pC/services/BluetoothStatus.qml": "2d50ec6329c131f7a7d709792c8481d66b18d38d9525036d292d75cd83497c4c",
@@ -926,7 +926,7 @@
     ".config/quickshell/end4-pC/services/SystemStats.qml": "62e86678d2beec6d44253f70a71b0d502fb9daefaf5886f85f74cb8023126739",
     ".config/quickshell/end4-pC/services/SystemTheming.qml": "f642b7b9db1a0327253e6ce6173719e27c25e79ca2ac11262182d58bb56af9a4",
     ".config/quickshell/end4-pC/services/TaskbarApps.qml": "4dce38638a8f3739768e295de678ce76f9251b43e80a61345980ba4155e39779",
-    ".config/quickshell/end4-pC/services/Tasks.qml": "25507784884e9dc7867d42050abc6ce48ec95a4aaa726f5a5f39344f4084a7ba",
+    ".config/quickshell/end4-pC/services/Tasks.qml": "ce8358f17a093c6e627227092503ab3f306ef220b6dcfa1538bba757a88ed34b",
     ".config/quickshell/end4-pC/services/TimerService.qml": "adf8fd321f660145a9a06ff0d037580e1ce741ca1f581b3d47371cdbd77264e1",
     ".config/quickshell/end4-pC/services/Todo.qml": "044f5ac9d5aba709f7d4b0a5de6388e5ce9fdb3d491834285a374a4399407037",
     ".config/quickshell/end4-pC/services/Translation.qml": "eb6faa824eb7471cd7115e033780640a71b53803ab6ea1decf29d25f83bc56d4",
@@ -1105,20 +1105,9 @@
     ".local/share/setup-profiles/stock-config.json": "5814a18a9aa1038cd74764efc268ca12b0ba8599dd7255799d8729bc5b80a9f8"
   },
   "changed": [
-    ".config/hypr/custom/scripts/autostart.sh",
-    ".config/quickshell/end4-pC/modules/common/panels/lock/LockContext.qml",
-    ".config/quickshell/end4-pC/modules/common/panels/lock/LockScreen.qml",
-    ".config/quickshell/end4-pC/modules/ii/lock/styles/LockChip.qml",
-    ".config/quickshell/end4-pC/modules/ii/lock/styles/LockPasswordInput.qml",
-    ".config/quickshell/end4-pC/modules/ii/lock/styles/LockStyleLoader.qml",
-    ".local/bin/phoenix",
-    ".local/bin/phoenix-kde-lock-theme",
-    ".local/bin/switch-desktop",
-    ".local/share/phoenix/greeter/bundle/modules/common/panels/lock/LockContext.qml",
-    ".local/share/phoenix/kde-lock/LockScreenUi.patch",
-    ".local/share/phoenix/kde-lock/PhoenixLock.qml",
-    ".local/share/phoenix/kde-lock/apply",
-    ".local/share/phoenix/kde-lock/phoenix-kde-lock.hook"
+    ".config/quickshell/end4-pC/modules/ii/overview/AppGridWidget.qml",
+    ".config/quickshell/end4-pC/services/AppSearch.qml",
+    ".config/quickshell/end4-pC/services/Tasks.qml"
   ],
   "test": false
 }

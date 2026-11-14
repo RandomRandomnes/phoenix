@@ -242,12 +242,17 @@ Item {
             GlobalStates.overviewOpen = false;
             Quickshell.execDetached([`${Quickshell.env("HOME")}/.local/bin/phoenix-open`, "settings", "apps", "installed"]);
         } });
-        // two clicks: the first asks, the second uninstalls (a background job with a notification)
-        l.push({ icon: "delete", danger: true, keepOpen: !root.uninstallArmed,
+        // two clicks: the first asks, the second uninstalls (a background job with a notification). The item closes the
+        // menu itself (keepOpen): closing it first cleared uninstallArmed (onMenuAppChanged), so the second click only
+        // armed it again and nothing was uninstalled (bug, fixed 2026-11-13)
+        l.push({ icon: "delete", danger: true, keepOpen: true,
                  text: root.uninstallArmed ? Translation.tr("Click again to uninstall") : Translation.tr("Uninstall"),
                  act: () => {
                      if (!root.uninstallArmed) { root.uninstallArmed = true; return; }
-                     GlobalStates.overviewOpen = false; AppSearch.uninstall(app);
+                     root.uninstallArmed = false;
+                     root.closeMenu();
+                     GlobalStates.overviewOpen = false;
+                     AppSearch.uninstall(app);
                  } });
         return l;
     }

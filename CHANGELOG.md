@@ -1,5 +1,8 @@
 # Changelog
 
+## custom 2.514 (2026-11-13, fix)
+- Super menu: Uninstall works again (the second click only re-armed it). A short 'App uninstalled' notification with the app's icon when it's done; Steam games say Steam asks to confirm.
+
 ## custom 2.504 (2026-11-13, fix)
 - Lock screens: 'Switch to KDE Plasma' on Phoenix's lock screen and Phoenix's look + 'Switch to Phoenix' on KDE's lock screen (phoenix kde-lock install). Both ask for the password first; the login screen asks again after a switch, on purpose.
 

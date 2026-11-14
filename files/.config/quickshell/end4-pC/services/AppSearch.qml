@@ -21,7 +21,7 @@ f=$(find ~/.local/share/applications /usr/share/applications /usr/local/share/ap
 echo "Uninstalling: ${entry.name.replace(/'/g, "")}"; echo "Desktop file: $f"; echo
 if [ -z "$f" ]; then echo "Couldn't find its desktop file."; exit 1; fi
 gid=$(grep -oP 'steam://rungameid/\\K[0-9]+' "$f" | head -1)
-if [ -n "$gid" ]; then echo "A Steam game: Steam asks to confirm."; steam "steam://uninstall/$gid" >/dev/null 2>&1 & disown; exit 0; fi
+if [ -n "$gid" ]; then echo "@@msg Steam asks you to confirm the uninstall in its own window."; steam "steam://uninstall/$gid" >/dev/null 2>&1 & disown; exit 0; fi
 case "$f" in
   *flatpak*) flatpak uninstall -y --noninteractive "$id" ;;
   "$HOME"/*) echo "@@msg This is a user app (not from a package): delete $f to remove it from menus."; exit 1 ;;
@@ -30,7 +30,8 @@ esac`;
         // a background job (2026-10-16; was a terminal window): the caller asks to confirm first; the password in the
         // shell's own dialog; a notification when it's done
         Tasks.run("uninstall", ["bash", "-c", script], { title: `Uninstalling ${entry.name}`,
-            doneText: `${entry.name} was uninstalled.`, askpassMessage: `Enter your password to uninstall ${entry.name}` });
+            doneText: `${entry.name} was uninstalled.`, doneTitle: `${entry.name} uninstalled`, icon: entry.icon || "",
+            askpassMessage: `Enter your password to uninstall ${entry.name}` });
     }
     // ── One app/icon lookup for all of Phoenix (2026-10-16) ──
     // The desktop entry for an id: exact desktop id, then window class (StartupWMClass), then a reverse-domain id
